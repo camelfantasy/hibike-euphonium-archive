@@ -1,0 +1,33 @@
+body {
+    font-family: '游ゴシック',YuGothic,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','メイリオ',Meiryo,sans-serif;
+    background-color: WhiteSmoke
+}
+
+.page-item {
+    border: 0px solid black;
+    border-radius: 10px;
+    background-color: white;
+    padding: 16px;
+}
+
+.tag-link {
+    color:black;
+    transition: color 0.1s linear;
+}
+
+.tag-link:hover {
+    text-decoration: none;
+    color:rgb(0, 172, 198);
+}
+
+.button-submit {
+    background-color:rgb(235, 235, 235)
+}
+
+.nav-link-custom {
+    transition: color 0.1s linear;
+}
+
+.nav-link-custom:hover {
+    text-decoration: none;
+}

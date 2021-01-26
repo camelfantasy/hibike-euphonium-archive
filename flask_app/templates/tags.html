@@ -1,0 +1,54 @@
+{% extends "header.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-12" align="center">
+        <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
+            All tags
+        </div>
+        <br>
+        <div class="page-item">
+            <div class="row" style="font-weight:bold">
+                <div class="col-6" align="center">Characters</div>
+                <div class="col-3" align="center">Media</div>
+                <div class="col-3" align="center">Other</div>
+            </div>
+            <div class="row">
+                <!-- SAMPLE BELOW -->
+                <div class="col-3" align="center">
+                    <a href="{{ url_for('results.search_results', query='Hazuki') }}" class="tag-link">Hazuki</a>
+                    <br>
+                    <a href="{{ url_for('results.search_results', query='Kumiko') }}" class="tag-link">Kumiko</a>
+                    <br>
+                    <a href="{{ url_for('results.search_results', query='Midori') }}" class="tag-link">Midori</a>
+                    <br>
+                    <a href="{{ url_for('results.search_results', query='Reina') }}" class="tag-link">Reina</a>
+                </div>
+                <div class="col-3" align="center">
+                    <a href="{{ url_for('results.search_results', query='Mizore') }}" class="tag-link">Mizore</a>
+                    <br>
+                    <a href="{{ url_for('results.search_results', query='Natsuki') }}" class="tag-link">Natsuki</a>
+                    <br>
+                    <a href="{{ url_for('results.search_results', query='Nozomi') }}" class="tag-link">Nozomi</a>
+                    <br>
+                    <a href="{{ url_for('results.search_results', query='Yuuko') }}" class="tag-link">Yuuko</a>
+                </div>                
+                <div class="col-3" align="center">
+                    <a href="{{ url_for('results.search_results', query='Blu-ray') }}" class="tag-link">Blu-ray</a>
+                    <br>
+                    <a href="{{ url_for('results.search_results', query='CD') }}" class="tag-link">CD</a>
+                    <br>
+                    <a href="{{ url_for('results.search_results', query='Poster') }}" class="tag-link">Poster</a>
+                </div>
+                <div class="col-3" align="center">
+                    <a href="{{ url_for('results.search_results', query='Year 1') }}" class="tag-link">Year 1</a>
+                    <br>
+                    <a href="{{ url_for('results.search_results', query='Year 2') }}" class="tag-link">Year 2</a>
+                    <br>
+                    <a href="{{ url_for('results.search_results', query='Year 3') }}" class="tag-link">Year 3</a>
+                </div>
+                <!-- SAMPLE ABOVE -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
