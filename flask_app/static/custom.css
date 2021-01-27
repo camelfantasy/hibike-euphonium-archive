@@ -31,3 +31,27 @@ body {
 .nav-link-custom:hover {
     text-decoration: none;
 }
+
+.btn-logout {
+    background-color: #c82333;
+    border: 0px;
+    color: white;
+    transition: background-color 0.1s linear;
+}
+
+.btn-logout:hover {
+    text-decoration: none;
+    background-color:#990000;
+}
+
+.btn-sync {
+    background-color: #00acc6;
+    border: 0px;
+    color: white;
+    transition: background-color 0.1s linear;
+}
+
+.btn-sync:hover {
+    text-decoration: none;
+    background-color:#008599;
+}

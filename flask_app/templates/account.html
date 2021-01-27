@@ -3,9 +3,7 @@
 <div class="row">
     <div class="col-2"></div>
     <div class="col-8">
-        <!-- SAMPLE BELOW -->
-        <div style="font-size:32px">Camelfantasy</div>
-        <!-- SAMPLE ABOVE -->
+        <div style="font-size:32px">{{username}}</div>
         <br>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -50,6 +48,23 @@
                     Password must be 8-20 characters long.
                 </div>
             </div>
+        </form>
+    </div>
+    <div class="col-2"></div>
+</div>
+<br>
+<div class="row">
+    <div class="col-2"></div>
+    <div class="col-2">
+        <!-- convert button to ajax GET -->
+        <form action="{{ url_for('users.sync') }}">
+            <input type="submit" class="form-control btn-sync" value="Sync folders" />
+        </form>
+    </div>
+    <div class="col-4"></div>
+    <div class="col-2">
+        <form action="{{ url_for('users.logout') }}">
+            <input type="submit" class="form-control btn-logout" value="Logout" />
         </form>
     </div>
     <div class="col-2"></div>
