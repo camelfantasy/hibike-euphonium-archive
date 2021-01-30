@@ -4,7 +4,7 @@
     <div class="col-2"></div>
     <div class="col-8">
         <div style="font-size:32px">
-            Admin Login
+            User Login
         </div>
         <br>
         {% with messages = get_flashed_messages() %}
@@ -22,7 +22,6 @@
                 <div class="col">
                     {{ form.username.label(class="form-control-label") }}
                     {{ form.username(class="form-control form-control-lg") }}
-
                     {% if form.username.errors %}
                     <div class="alert alert-warning" role="alert">
                         {% for error in form.username.errors %}
@@ -34,7 +33,6 @@
                 <div class="col">
                     {{ form.password.label(class="form-control-label") }}
                     {{ form.password(class="form-control form-control-lg") }}
-
                     {% if form.password.errors %}
                     <div class="alert alert-warning" role="alert">
                         {% for error in form.password.errors %}

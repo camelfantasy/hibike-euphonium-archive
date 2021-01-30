@@ -2,6 +2,44 @@
 {% block content %}
 <div class="row">
     <div class="col-12" align="center">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        {% if current_user.is_authenticated %}
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col-4 page-item">
+                <form method="POST" action="" style="margin:0px">
+                    {{ addtagform.csrf_token }}
+                    <div class="form-group row">
+                        {{ addtagform.tag.label(class="col-sm-4 col-form-label", style="text-align:left") }}
+                        <div class="col-sm-8">
+                            {{ addtagform.tag(class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        {{ addtagform.category.label(class="col-sm-4 col-form-label", style="text-align:left") }}
+                        <div class="col-sm-8">
+                            {{ addtagform.category(class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="form-group row" style="margin:0px">
+                        <div class="col-sm">
+                            {{ addtagform.submit(class="btn btn-sync") }}
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-4"></div>
+        </div>
+        <br>
+        {% endif %}
         <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
             All tags
         </div>
@@ -13,40 +51,110 @@
                 <div class="col-3" align="center">Other</div>
             </div>
             <div class="row">
-                <!-- SAMPLE BELOW -->
                 <div class="col-3" align="center">
-                    <a href="{{ url_for('results.search_results', query='Hazuki') }}" class="tag-link">Hazuki</a>
+                    {% for tag in characters1 %}
+                    {% if current_user.is_authenticated %}
+                    <form method="POST" action="" style="margin:0px">
+                        {{ deletetagform.csrf_token }}
+                        {{ deletetagform.tag(value=tag.tag, hidden=true) }}
+                        <div class="form-group row" style="margin:0px">
+                            <div class="col-sm-3"></div>
+                            <label class="col-sm-6 col-form-label" style="padding:0px">
+                                <a href="{{ url_for('results.search_results', query=tag.tag) }}" class="tag-link">{{ tag.tag }}</a>
+                            </label>
+                            <label class="col-sm-3" style="margin:0px; padding:0px; display:flex; align-items: center;">
+                                {{ deletetagform.submit(hidden=true) }}
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                </svg>
+                            </label>
+                        </div>
+                    </form>
+                    {% else %}
+                    <a href="{{ url_for('results.search_results', query=tag.tag) }}" class="tag-link">{{ tag.tag }}</a>
                     <br>
-                    <a href="{{ url_for('results.search_results', query='Kumiko') }}" class="tag-link">Kumiko</a>
-                    <br>
-                    <a href="{{ url_for('results.search_results', query='Midori') }}" class="tag-link">Midori</a>
-                    <br>
-                    <a href="{{ url_for('results.search_results', query='Reina') }}" class="tag-link">Reina</a>
+                    {% endif %}
+                    {% endfor %}
                 </div>
                 <div class="col-3" align="center">
-                    <a href="{{ url_for('results.search_results', query='Mizore') }}" class="tag-link">Mizore</a>
+                    {% for tag in characters2 %}
+                    {% if current_user.is_authenticated %}
+                    <form method="POST" action="" style="margin:0px">
+                        {{ deletetagform.csrf_token }}
+                        {{ deletetagform.tag(value=tag.tag, hidden=true) }}
+                        <div class="form-group row" style="margin:0px">
+                            <div class="col-sm-3"></div>
+                            <label class="col-sm-6 col-form-label" style="padding:0px">
+                                <a href="{{ url_for('results.search_results', query=tag.tag) }}" class="tag-link">{{ tag.tag }}</a>
+                            </label>
+                            <label class="col-sm-3" style="margin:0px; padding:0px; display:flex; align-items: center;">
+                                {{ deletetagform.submit(hidden=true) }}
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                </svg>
+                            </label>
+                        </div>
+                    </form>
+                    {% else %}
+                    <a href="{{ url_for('results.search_results', query=tag.tag) }}" class="tag-link">{{ tag.tag }}</a>
                     <br>
-                    <a href="{{ url_for('results.search_results', query='Natsuki') }}" class="tag-link">Natsuki</a>
-                    <br>
-                    <a href="{{ url_for('results.search_results', query='Nozomi') }}" class="tag-link">Nozomi</a>
-                    <br>
-                    <a href="{{ url_for('results.search_results', query='Yuuko') }}" class="tag-link">Yuuko</a>
-                </div>                
-                <div class="col-3" align="center">
-                    <a href="{{ url_for('results.search_results', query='Blu-ray') }}" class="tag-link">Blu-ray</a>
-                    <br>
-                    <a href="{{ url_for('results.search_results', query='CD') }}" class="tag-link">CD</a>
-                    <br>
-                    <a href="{{ url_for('results.search_results', query='Poster') }}" class="tag-link">Poster</a>
+                    {% endif %}
+                    {% endfor %}
                 </div>
                 <div class="col-3" align="center">
-                    <a href="{{ url_for('results.search_results', query='Year 1') }}" class="tag-link">Year 1</a>
+                    {% for tag in media %}
+                    {% if current_user.is_authenticated %}
+                    <form method="POST" action="" style="margin:0px">
+                        {{ deletetagform.csrf_token }}
+                        {{ deletetagform.tag(value=tag.tag, hidden=true) }}
+                        <div class="form-group row" style="margin:0px">
+                            <div class="col-sm-3"></div>
+                            <label class="col-sm-6 col-form-label" style="padding:0px">
+                                <a href="{{ url_for('results.search_results', query=tag.tag) }}" class="tag-link">{{ tag.tag }}</a>
+                            </label>
+                            <label class="col-sm-3" style="margin:0px; padding:0px; display:flex; align-items: center;">
+                                {{ deletetagform.submit(hidden=true) }}
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                </svg>
+                            </label>
+                        </div>
+                    </form>
+                    {% else %}
+                    <a href="{{ url_for('results.search_results', query=tag.tag) }}" class="tag-link">{{ tag.tag }}</a>
                     <br>
-                    <a href="{{ url_for('results.search_results', query='Year 2') }}" class="tag-link">Year 2</a>
-                    <br>
-                    <a href="{{ url_for('results.search_results', query='Year 3') }}" class="tag-link">Year 3</a>
+                    {% endif %}
+                    {% endfor %}
                 </div>
-                <!-- SAMPLE ABOVE -->
+                <div class="col-3" align="center">
+                    {% for tag in other %}
+                    {% if current_user.is_authenticated %}
+                    <form method="POST" action="" style="margin:0px">
+                        {{ deletetagform.csrf_token }}
+                        {{ deletetagform.tag(value=tag.tag, hidden=true) }}
+                        <div class="form-group row" style="margin:0px">
+                            <div class="col-sm-3"></div>
+                            <label class="col-sm-6 col-form-label" style="padding:0px">
+                                <a href="{{ url_for('results.search_results', query=tag.tag) }}" class="tag-link">{{ tag.tag }}</a>
+                            </label>
+                            <label class="col-sm-3" style="margin:0px; padding:0px; display:flex; align-items: center;">
+                                {{ deletetagform.submit(hidden=true) }}
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                </svg>
+                            </label>
+                        </div>
+                    </form>
+                    {% else %}
+                    <a href="{{ url_for('results.search_results', query=tag.tag) }}" class="tag-link">{{ tag.tag }}</a>
+                    <br>
+                    {% endif %}
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>

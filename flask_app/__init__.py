@@ -18,33 +18,41 @@ from .forms import SearchForm
 def page_not_found(e):
     return render_template("404.html", searchform=SearchForm()), 404
 
-def initialize_sqlite():
-    db_file = os.getcwd() + r"/flask_app/files/pythonsqlite.db"
+def initialize_sqlite(sqlite_path):
+    db_file = os.getcwd() + sqlite_path
     conn = None
     try:
         conn = sqlite3.connect(db_file)
 
         query_users = """CREATE TABLE IF NOT EXISTS users (
             id integer PRIMARY KEY,
-            username text NOT NULL,
-            password text NOT NULL
+            username text NOT NULL UNIQUE,
+            password text NOT NULL,
+            level integer NOT NULL
         );"""
 
         query_tags = """CREATE TABLE IF NOT EXISTS tags (
             id integer PRIMARY KEY,
-            tags text NOT NULL,
+            tag text NOT NULL,
             category text NOT NULL
         );"""
 
         query_folder_ids = """CREATE TABLE IF NOT EXISTS folder_ids (
             id integer PRIMARY KEY,
-            folder_ids text NOT NULL
+            folder_id text NOT NULL
         );"""
+
+        password = bcrypt.generate_password_hash("password").decode("utf-8")
+        query_create_root = """INSERT OR IGNORE INTO users(username, password, level)
+            VALUES ("root", ?, 0)
+        ;"""
         
         c = conn.cursor()
         c.execute(query_users)
         c.execute(query_tags)
         c.execute(query_folder_ids)
+        c.execute(query_create_root, [password])
+        conn.commit()
     except Error as e:
         print(e)
     finally:
@@ -53,15 +61,19 @@ def initialize_sqlite():
 
 def create_app(test_config=None):
     app = Flask(__name__)
-
+        
     app.config.from_pyfile("config.py", silent=False)
     if test_config is not None:
         app.config.update(test_config)
 
+    env_key = os.getenv("SECRET_KEY")
+    if env_key:
+        app.config["SECRET_KEY"] = env_key.encode('utf_8')
+
     login_manager.init_app(app)
     bcrypt.init_app(app)
 
-    initialize_sqlite()
+    initialize_sqlite(app.config["SQLITE_PATH"])
 
     csp = {
         'default-src': ['\'self\'','stackpath.bootstrapcdn.com','code.jquery.com','cdn.jsdelivr.net','cdnjs.cloudflare.com','\'unsafe-inline\''],

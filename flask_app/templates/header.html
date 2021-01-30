@@ -8,7 +8,6 @@
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-
     <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav ml-auto">
             {% if searchform %}
@@ -36,13 +35,16 @@
             {% endif %}
             <li class="nav-item">
                 <a class="nav-link nav-link-custom" href="{{ url_for('users.login') }}">
-                    Admins
+                    {% if current_user.is_authenticated %}
+                    Account
+                    {% else %}
+                    Login
+                    {% endif %}
                 </a>
             </li>
         </ul>
     </div>
 </nav>
-
 <br>
 <div class="container">
     {% block content %}{% endblock %}

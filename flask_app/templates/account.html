@@ -3,14 +3,35 @@
 <div class="row">
     <div class="col-2"></div>
     <div class="col-8">
-        <div style="font-size:32px">{{username}}</div>
+        <div class="row">
+            <div class="col-6">
+                <div style="font-size:32px">{{ current_user.username }}</div>
+            </div>
+            <div class="col-6">
+                <div style="font-size:32px; text-align:right">
+                    {% if current_user.level == 0 %}
+                    Root
+                    {% elif current_user.level == 1 %}
+                    Admin
+                    {% elif current_user.level == 2 %}
+                    User
+                    {% endif %}
+                </div>
+            </div>
+        </div>
         <br>
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        {% for message in messages %}
+        {% for category, message in messages %}
+        {% if category == "top-info" %}
         <div class="alert alert-info" style="text-align:center">
             {{ message }}
         </div>
+        {% elif category == "top-warning" %}
+        <div class="alert alert-warning" style="text-align:center">
+            {{ message }}
+        </div>
+        {% endif %}
         {% endfor %}
         {% endif %}
         {% endwith %}
@@ -69,4 +90,120 @@
     </div>
     <div class="col-2"></div>
 </div>
-{% endblock %}>
+{% if current_user.level < 2  %}
+<div class="row">
+    <div class="col-2"></div>
+    <div class="col-8">
+        <hr>
+        <div style="font-size:32px">Users</div>
+        <br>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        {% if category == "bottom-info" %}
+        <div class="alert alert-info" style="text-align:center">
+            {{ message }}
+        </div>
+        {% elif category == "bottom-warning" %}
+        <div class="alert alert-warning" style="text-align:center">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        {% if addform.username.errors %}
+        <div class="alert alert-warning" role="alert">
+            {% for error in addform.username.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if addform.password.errors %}
+        <div class="alert alert-warning" role="alert">
+            {% for error in addform.password.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="page-item">
+            {% if current_user.level == 0 %}
+            <form method="POST" action="" style="margin:0px">
+                {{ addform.csrf_token }}
+                <div class="form-group row">
+                    <div class="col-sm-4">
+                        {{ addform.username(class="form-control", placeholder="Username") }}
+                    </div>
+                    <div class="col-sm-4">
+                        {{ addform.password(class="form-control", placeholder="Password") }}
+                    </div>
+                    <div class="col-sm-2">
+                        {{ addform.level(class="form-control") }}
+                    </div>
+                    <div class="col-sm-2" align="right">
+                        {{ addform.submit(class="form-control btn-sync") }}
+                    </div>
+                </div>
+            </form>
+            {% elif current_user.level == 1 %}
+            <form method="POST" action="" style="margin:0px">
+                {{ addform.csrf_token }}
+                {{ addform.level(hidden=true) }}
+                <div class="form-group row">
+                    <div class="col-sm-5">
+                        {{ addform.username(class="form-control", placeholder="Username") }}
+                    </div>
+                    <div class="col-sm-5">
+                        {{ addform.password(class="form-control", placeholder="Password") }}
+                    </div>
+                    <div class="col-sm-2" align="right">
+                        {{ addform.submit(class="form-control btn-sync") }}
+                    </div>
+                </div>
+            </form>
+            {% endif %}
+            <hr style="border-top: 1px solid rgba(0,0,0,.25)">
+            <div class="row" style="margin:0px">
+                <div class="col-sm-9" style="padding:0px; font-weight:bold">Username</div>
+                <div class="col-sm-2" style="padding:0px; font-weight:bold">Level</div>
+                <div class="col-sm-1" style="padding:0px"></div>
+            </div>
+            {% for user in users %}
+            <hr style="margin-top:8px; margin-bottom:8px">
+            <div class="form-group row" style="margin:0px">
+                <label class="col-sm-9 col-form-label" style="padding:0px">
+                    {{ user.username }}
+                </label>
+                <label class="col-sm-2 col-form-label" style="padding:0px">
+                    {% if user.level == 0 %}
+                    Root
+                    {% elif user.level == 1 %}
+                    Admin
+                    {% elif user.level == 2 %}
+                    User
+                    {% endif %}
+                </label>
+                {% if current_user.level < user.level %}
+                <label class="col-sm-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;">
+                    <form method="POST" action="" style="margin:0px">
+                        {{ deleteuserform.submit(hidden=true) }}
+                        {{ deleteuserform.csrf_token }}
+                        {{ deleteuserform.username(value=user.username, hidden=true) }}
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                        </svg>
+                    </form>
+                </label>
+                {% else %}
+                <lable class="col-sm-1" style="padding:0px"></lable>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        <br>
+    </div>
+    <div class="col-2"></div>
+</div>
+{% endif %}
+{% endblock %}
