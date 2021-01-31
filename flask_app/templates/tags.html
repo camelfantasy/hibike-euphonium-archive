@@ -2,25 +2,42 @@
 {% block content %}
 <div class="row">
     <div class="col-12" align="center">
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-info">
+        {% for category, message in messages %}
+        {% if category == "wide-warning" %}
+        <div class="alert alert-warning" style="text-align:center">
             {{ message }}
         </div>
+        {% endif %}
         {% endfor %}
         {% endif %}
         {% endwith %}
         {% if current_user.is_authenticated %}
         <div class="row">
             <div class="col-4"></div>
-            <div class="col-4 page-item">
-                <form method="POST" action="" style="margin:0px">
+            <div class="col-4">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                {% if category == "narrow-warning" %}
+                <div class="alert alert-warning" style="text-align:center">
+                    {{ message }}
+                </div>
+                {% elif category == "narrow-success" %}
+                <div class="alert alert-success" style="text-align:center">
+                    {{ message }}
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+                <form method="POST" action="" style="margin:0px" class="page-item">
                     {{ addtagform.csrf_token }}
                     <div class="form-group row">
                         {{ addtagform.tag.label(class="col-sm-4 col-form-label", style="text-align:left") }}
                         <div class="col-sm-8">
-                            {{ addtagform.tag(class="form-control") }}
+                            {{ addtagform.tag(class="form-control", autocomplete="off") }}
                         </div>
                     </div>
                     <div class="form-group row">

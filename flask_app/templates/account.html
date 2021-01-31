@@ -19,12 +19,12 @@
                 </div>
             </div>
         </div>
-        <br>
+        <hr>
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        {% if category == "top-info" %}
-        <div class="alert alert-info" style="text-align:center">
+        {% if category == "top-success" %}
+        <div class="alert alert-success" style="text-align:center">
             {{ message }}
         </div>
         {% elif category == "top-warning" %}
@@ -35,30 +35,30 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
+        {% if password_form.password.errors %}
+        <div class="alert alert-warning" style="text-align:center">
+            {% for error in password_form.password.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if password_form.confirm_password.errors %}
+        <div class="alert alert-warning" style="text-align:center">
+            {% for error in password_form.confirm_password.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
         <form action="" method="post">
             {{ password_form.csrf_token }}
             <div class="form-group row">
                 <div class="col">
                     {{ password_form.password.label(class="form-control-label") }}
                     {{ password_form.password(class="form-control form-control-lg") }}
-                    {% if password_form.password.errors %}
-                    <div class="alert alert-warning" role="alert">
-                        {% for error in password_form.password.errors %}
-                        <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
                 </div>
                 <div class="col">
                     {{ password_form.confirm_password.label(class="form-control-label") }}
                     {{ password_form.confirm_password(class="form-control form-control-lg") }}
-                    {% if password_form.confirm_password.errors %}
-                    <div class="alert alert-warning" role="alert">
-                        {% for error in password_form.confirm_password.errors %}
-                        <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
                 </div>
             </div>
             <div class="form-group">
@@ -77,14 +77,17 @@
 <div class="row">
     <div class="col-2"></div>
     <div class="col-2">
-        <!-- convert button to ajax GET -->
-        <form action="{{ url_for('users.sync') }}">
-            <input type="submit" class="form-control btn-sync" value="Sync folders" />
-        </form>
+        {% if current_user.level < 2  %}
+        <input type="submit" class="form-control btn-sync" value="Sync Drive"
+            onclick="ajax_sync()" id="sync_button"/>
+        {% endif %}
     </div>
-    <div class="col-4"></div>
+    <div class="col-2" style="display:flex; align-items:center">
+        <div id="sync_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px"></div>
+    </div>
+    <div class="col-2"></div>
     <div class="col-2">
-        <form action="{{ url_for('users.logout') }}">
+        <form action="{{ url_for('users.logout') }}" style="margin:0px">
             <input type="submit" class="form-control btn-logout" value="Logout" />
         </form>
     </div>
@@ -100,8 +103,8 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        {% if category == "bottom-info" %}
-        <div class="alert alert-info" style="text-align:center">
+        {% if category == "bottom-success" %}
+        <div class="alert alert-success" style="text-align:center">
             {{ message }}
         </div>
         {% elif category == "bottom-warning" %}
@@ -113,14 +116,14 @@
         {% endif %}
         {% endwith %}
         {% if addform.username.errors %}
-        <div class="alert alert-warning" role="alert">
+        <div class="alert alert-warning" style="text-align:center">
             {% for error in addform.username.errors %}
             <span>{{ error }}</span>
             {% endfor %}
         </div>
         {% endif %}
         {% if addform.password.errors %}
-        <div class="alert alert-warning" role="alert">
+        <div class="alert alert-warning" style="text-align:center">
             {% for error in addform.password.errors %}
             <span>{{ error }}</span>
             {% endfor %}
@@ -132,7 +135,7 @@
                 {{ addform.csrf_token }}
                 <div class="form-group row">
                     <div class="col-sm-4">
-                        {{ addform.username(class="form-control", placeholder="Username") }}
+                        {{ addform.username(class="form-control", placeholder="Username", autocomplete="off") }}
                     </div>
                     <div class="col-sm-4">
                         {{ addform.password(class="form-control", placeholder="Password") }}
@@ -151,7 +154,7 @@
                 {{ addform.level(hidden=true) }}
                 <div class="form-group row">
                     <div class="col-sm-5">
-                        {{ addform.username(class="form-control", placeholder="Username") }}
+                        {{ addform.username(class="form-control", placeholder="Username", autocomplete="off") }}
                     </div>
                     <div class="col-sm-5">
                         {{ addform.password(class="form-control", placeholder="Password") }}
@@ -205,5 +208,22 @@
     </div>
     <div class="col-2"></div>
 </div>
+<script>
+    function ajax_sync() {
+        document.getElementById("sync_button").disabled = true;
+        document.getElementById("sync_button").setAttribute("class", "form-control btn-sync-disabled");
+        $.ajax({url: "/sync", success: function(result){
+            $("#sync_button").prop("disabled", false);
+            $("#sync_button").attr("class", "form-control btn-sync");
+            if (result == "0") {
+                $("#sync_message").html("Sync success.");
+                $("#sync_message").attr("class", "alert alert-success");
+            } else if (result == "1") {
+                $("#sync_message").html("Sync failed.");
+                $("#sync_message").attr("class", "alert alert-danger");
+            }
+        }});
+    }
+</script>
 {% endif %}
 {% endblock %}

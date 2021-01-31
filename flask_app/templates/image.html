@@ -1,0 +1,46 @@
+{% extends "header.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-2"></div>
+    <div class="col-8">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        {% if category == "warning" %}
+        <div class="alert alert-warning" style="text-align:center">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="page-item">
+            <a href="{{ 'https://drive.google.com/uc?id=' + image.file_id }}">
+                <img src="{{ 'https://drive.google.com/uc?id=' + image.file_id }}" style="max-width:100%; max-height:100%">
+            </a>
+            <br>
+            <br>
+            <div>
+                {% if folder %}
+                Folder:
+                <a href="{{ url_for('results.folder', folder_id=folder) }}" class="tag-link">{{ folder }}</a>
+                {% else %}
+                No folder
+                {% endif %}
+            </div>
+            <div>
+                {% if image.tags %}
+                Tags:
+                {% for tag in image.tags %}
+                <a href="{{ url_for('results.search_results', query=tag) }}" class="tag-link">{{ tag }}</a>{% if not loop.last %},{% endif %}
+                {% endfor %}
+                {% else %}
+                No tags
+                {% endif %}
+            </div>
+        </div>
+        <br>
+    </div>
+    <div class="col-2"></div>
+</div>
+{% endblock %}

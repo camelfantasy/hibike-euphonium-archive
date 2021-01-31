@@ -8,6 +8,9 @@ from ..models import User
 import os, sqlite3
 from sqlite3 import Error
 
+from google.oauth2 import service_account
+import googleapiclient.discovery
+
 users = Blueprint("users", __name__)
 
 @users.route("/login", methods=["GET", "POST"])
@@ -62,9 +65,9 @@ def account():
             c.execute('update users set password=? where username=?', (hashed, current_user.username))
             conn.commit()
 
-            flash("Password changed.", "top-info")
+            flash("Password changed.", "top-success")
         except Error as e:
-            flash("Server error.", "top-alert")
+            flash("Server error.", "top-warning")
         finally:
             if conn:
                 conn.close()
@@ -84,7 +87,7 @@ def account():
             if c.fetchone() is None:
                 c.execute('INSERT INTO users(username, password, level) values(?, ?, ?)', (username, hashed, add_form.level.data))
                 conn.commit()
-                flash("User added.", "bottom-info")
+                flash("User '" + username + "' added.", "bottom-success")
             else:
                 flash("User '" + username + "' already exists.", "bottom-warning")
         except Error as e:
@@ -110,7 +113,7 @@ def account():
             elif current_user.level < user[1]:
                 c.execute('DELETE FROM users where username=?', [username])
                 conn.commit()
-                flash("User deleted.", "bottom-info")
+                flash("User '" + username + "' deleted.", "bottom-success")
         except Error as e:
             flash("Server error.", "bottom-warning")
         finally:
@@ -119,6 +122,8 @@ def account():
 
             return redirect(url_for("users.account"))
 
+    conn = None
+    users = []
     try:
         conn = sqlite3.connect(os.getcwd() + current_app.config['SQLITE_PATH'])
         c = conn.cursor()
@@ -138,5 +143,58 @@ def account():
 @users.route("/sync")
 @login_required
 def sync():
-    # code
-    return "0", 200
+    if current_user.is_authenticated and current_user.level < 2:
+        files, folders = getfiles()
+        if files == None:
+            return "1", 200
+        success = update(files, folders)
+        return success, 200
+    return "1", 200
+
+def getfiles():
+    try:
+        service = googleapiclient.discovery.build('drive', 'v3', developerKey=current_app.config['DRIVE_API_KEY'])
+        ids = [current_app.config['ROOT_ID']]
+        ret_files = []
+        ret_folders = [("\"" + ids[0] + "\"", "\"\"", "\"Hibike! Series\"")]
+        while len(ids) != 0:
+            current_folder = ids.pop(0)
+            param = {"q": "'" + current_folder + "' in parents", "fields":"files(id, mimeType, description, name)"}
+            result = service.files().list(**param).execute()
+            files = result.get('files')
+
+            for afile in files:
+                if afile.get('mimeType') == 'application/vnd.google-apps.folder':
+                    tup = map(lambda x:"\"" + x + "\"",(afile.get('id'), current_folder, afile.get('name')))
+                    ret_folders.append(tup)
+                    ids.append(afile.get('id'))
+                elif 'image' in afile.get('mimeType'):
+                    desc = afile.get('description') if afile.get('description') else ""
+                    tup = map(lambda x:"\"" + x + "\"",(afile.get('id'), current_folder, desc))
+                    ret_files.append(tup)
+        
+        return ret_files, ret_folders
+    except Error as e:
+        return None, None
+
+def update(files, folders):
+    query_files = ",".join(map(lambda x:"(" + ",".join(x) + ")", files))
+    query_folders = ",".join(map(lambda x:"(" + ",".join(x) + ")", folders))
+
+    success = "0"
+    conn = None
+    try:
+        conn = sqlite3.connect(os.getcwd() + current_app.config['SQLITE_PATH'])
+        c = conn.cursor()
+        c.execute("DELETE FROM file_ids")
+        c.execute("INSERT INTO file_ids(file_id, folder_id, tags) values" + query_files)
+        c.execute("DELETE FROM folder_ids")
+        c.execute("INSERT INTO folder_ids(folder_id, parent_id, name) values" + query_folders)
+        conn.commit()
+    except Error as e:
+        success = "1"
+    finally:
+        if conn:
+            conn.close()
+
+    return success

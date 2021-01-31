@@ -37,9 +37,18 @@ def initialize_sqlite(sqlite_path):
             category text NOT NULL
         );"""
 
+        query_file_ids = """CREATE TABLE IF NOT EXISTS file_ids (
+            id integer PRIMARY KEY,
+            file_id text NOT NULL,
+            folder_id text NOT NULL,
+            tags text NOT NULL
+        );"""
+
         query_folder_ids = """CREATE TABLE IF NOT EXISTS folder_ids (
             id integer PRIMARY KEY,
-            folder_id text NOT NULL
+            folder_id text NOT NULL,
+            parent_id text NOT NULL,
+            name text NOT NULL
         );"""
 
         password = bcrypt.generate_password_hash("password").decode("utf-8")
@@ -50,6 +59,7 @@ def initialize_sqlite(sqlite_path):
         c = conn.cursor()
         c.execute(query_users)
         c.execute(query_tags)
+        c.execute(query_file_ids)
         c.execute(query_folder_ids)
         c.execute(query_create_root, [password])
         conn.commit()
@@ -66,9 +76,17 @@ def create_app(test_config=None):
     if test_config is not None:
         app.config.update(test_config)
 
-    env_key = os.getenv("SECRET_KEY")
-    if env_key:
-        app.config["SECRET_KEY"] = env_key.encode('utf_8')
+    secret_key = os.getenv("SECRET_KEY")
+    if secret_key:
+        app.config["SECRET_KEY"] = secret_key.encode('utf_8')
+
+    drive_api_key = os.getenv("DRIVE_API_KEY")
+    if drive_api_key:
+        app.config["DRIVE_API_KEY"] = drive_api_key
+
+    root_id = os.getenv("ROOT_ID")
+    if root_id:
+        app.config["ROOT_ID"] = root_id
 
     login_manager.init_app(app)
     bcrypt.init_app(app)

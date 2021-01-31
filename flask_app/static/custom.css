@@ -57,3 +57,10 @@ body {
     background-color:#008599;
     color: white;
 }
+
+.btn-sync-disabled {
+    background-color: lightblue;
+    border: 0px;
+    color: white;
+    transition: background-color 0.1s linear;
+}

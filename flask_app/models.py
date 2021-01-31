@@ -34,3 +34,9 @@ class Tag():
     def __init__(self, tag, category):
         self.tag = tag
         self.category = category
+
+class File():
+    def __init__(self, file_id, folder_id, tags):
+        self.file_id = file_id
+        self.folder_id = folder_id
+        self.tags = tags

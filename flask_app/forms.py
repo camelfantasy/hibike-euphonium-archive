@@ -26,12 +26,12 @@ class DeleteTagForm(FlaskForm):
     submit = SubmitField("Delete")
 
 class LoginForm(FlaskForm):
-    username = StringField("Username", validators=[InputRequired(), Length(min=1, max=20, message="Must be 1-20 characters.")])
+    username = StringField("Username", validators=[InputRequired(), Length(min=1, max=20, message="Username must be 1-20 characters.")])
     password = PasswordField("Password", validators=[InputRequired(), Length(min=1, max=20)])
     submit = SubmitField("Login")
 
 class UpdatePasswordForm(FlaskForm):
-    password = PasswordField("Password", validators=[InputRequired(), Length(min=8, max=20, message="Must be 8-20 characters.")])
+    password = PasswordField("Password", validators=[InputRequired(), Length(min=8, max=20, message="Password must be 8-20 characters.")])
     confirm_password = PasswordField(
         "Confirm Password", validators=[InputRequired(), EqualTo("password", message="Passwords must match."), Length(min=1, max=20)]
     )
