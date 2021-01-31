@@ -1,6 +1,6 @@
 body {
     font-family: '游ゴシック',YuGothic,'ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','メイリオ',Meiryo,sans-serif;
-    background-color: WhiteSmoke
+    background: linear-gradient(to right, #d3f4f8bf 0%,#ffebf9bf 100%);
 }
 
 .page-item {

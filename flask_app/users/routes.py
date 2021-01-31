@@ -170,7 +170,7 @@ def getfiles():
                     ids.append(afile.get('id'))
                 elif 'image' in afile.get('mimeType'):
                     desc = afile.get('description') if afile.get('description') else ""
-                    tup = map(lambda x:"\"" + x + "\"",(afile.get('id'), current_folder, desc))
+                    tup = map(lambda x:"\"" + x + "\"",(afile.get('id'), current_folder, afile.get('name'), desc))
                     ret_files.append(tup)
         
         return ret_files, ret_folders
@@ -187,11 +187,12 @@ def update(files, folders):
         conn = sqlite3.connect(os.getcwd() + current_app.config['SQLITE_PATH'])
         c = conn.cursor()
         c.execute("DELETE FROM file_ids")
-        c.execute("INSERT INTO file_ids(file_id, folder_id, tags) values" + query_files)
+        c.execute("INSERT INTO file_ids(file_id, folder_id, name, tags) values" + query_files)
         c.execute("DELETE FROM folder_ids")
         c.execute("INSERT INTO folder_ids(folder_id, parent_id, name) values" + query_folders)
         conn.commit()
     except Error as e:
+        print(e)
         success = "1"
     finally:
         if conn:

@@ -41,6 +41,7 @@ def initialize_sqlite(sqlite_path):
             id integer PRIMARY KEY,
             file_id text NOT NULL,
             folder_id text NOT NULL,
+            name text NOT NULL,
             tags text NOT NULL
         );"""
 

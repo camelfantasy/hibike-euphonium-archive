@@ -4,7 +4,7 @@ import os, sqlite3
 from sqlite3 import Error
 
 from ..forms import SearchForm, AddTagForm, DeleteTagForm
-from ..models import User, Tag, File
+from ..models import User, Tag, File, Folder
 
 results = Blueprint("results", __name__)
 
@@ -27,11 +27,11 @@ def search_results(query):
         conn = sqlite3.connect(os.getcwd() + current_app.config['SQLITE_PATH'])
         c = conn.cursor()
         if query.lower() == "all":
-            c.execute("SELECT file_id from file_ids")
+            c.execute("SELECT file_id, name from file_ids")
         elif query.lower() == "untagged":
-            c.execute("SELECT file_id from file_ids where tags=''")
+            c.execute("SELECT file_id, name from file_ids where tags=''")
         else:
-            c.execute("SELECT file_id from file_ids where tags like ?", ["%" + query + "%"])
+            c.execute("SELECT file_id, name from file_ids where tags like ?", ["%" + query + "%"])
         db_result = c.fetchall()
     except Error as e:
         flash("Server error.", "warning")
@@ -39,10 +39,17 @@ def search_results(query):
         if conn:
             conn.close()
     
-    results = list(map(lambda x: x[0], db_result))
+    results = list(map(lambda x: File(x[0], None, x[1], None), db_result))
+    results.sort(key=lambda x:x.name.lower())
     results_matrix = [results[i:i + 5] for i in range(0, len(results), 5)]
 
-    title = "All images" if query == "" else "Search - " + query
+    title = ""
+    if query.lower() == "all":
+        title = "All images"
+    elif query.lower() == "untagged":
+        title = "Untagged images"
+    else:
+        title = "Search - " + query
 
     return render_template("search_results.html", title=title, searchform=SearchForm(), query=query, results=results_matrix)
 
@@ -96,7 +103,7 @@ def tags():
         c.execute("SELECT tag, category from tags")
         result = c.fetchall()
     except Error as e:
-        flash("Server err`or.", "wide-warning")
+        flash("Server error.", "wide-warning")
     finally:
         if conn:
             conn.close()
@@ -123,15 +130,17 @@ def file(file_id):
     try:
         conn = sqlite3.connect(os.getcwd() + current_app.config['SQLITE_PATH'])
         c = conn.cursor()
-        c.execute("SELECT file_id, folder_id, tags from file_ids where file_id=?", [file_id])
+        c.execute("SELECT file_id, folder_id, name, tags from file_ids where file_id=?", [file_id])
         result = c.fetchone()
-        image = File(result[0], result[1], None if result[2] == "" else result[2].split(", "))
+        if result:
+            image = File(result[0], result[1], result[2], None if result[3] == "" else result[3].split(", "))
         
-        c.execute("SELECT name from folder_ids where folder_id=?", [image.folder_id])
-        folder = c.fetchone()[0]
+            c.execute("SELECT folder_id, name from folder_ids where folder_id=?", [image.folder_id])
+            result = c.fetchone()
+            if result:
+                folder = Folder(result[0], result[1])
     except Error as e:
         flash("Server error.", "warning")
-        print(e)
     finally:
         if conn:
             conn.close()
@@ -140,4 +149,48 @@ def file(file_id):
 
 @results.route("/folder/<folder_id>", methods=["GET"])
 def folder(folder_id):
-    return "To be implemented."
+    conn = None
+    folder = None
+    parent = None
+
+    try:
+        conn = sqlite3.connect(os.getcwd() + current_app.config['SQLITE_PATH'])
+        c = conn.cursor()
+        c.execute("SELECT folder_id, name from folder_ids where parent_id=?", [folder_id])
+        result = c.fetchall()
+        children = list(map(lambda x: Folder(x[0], x[1]), result))
+        children.sort(key=lambda x:x.name.lower())
+
+        c.execute("SELECT folder_id, parent_id, name from folder_ids where folder_id=?", [folder_id])
+        result = c.fetchone()
+        if result:
+            folder = Folder(result[0], result[2])
+            c.execute("SELECT folder_id, name from folder_ids where folder_id=?", [result[1]])
+            result = c.fetchone()
+            if result:
+                parent = Folder(result[0], result[1])
+    except Error as e:
+        flash("Server error.", "warning")
+    finally:
+        if conn:
+            conn.close()
+
+    db_result = []
+    try:
+        conn = sqlite3.connect(os.getcwd() + current_app.config['SQLITE_PATH'])
+        c = conn.cursor()
+        c.execute("SELECT file_id, name from file_ids where folder_id=?", [folder_id])
+        db_result = c.fetchall()
+    except Error as e:
+        flash("Server error.", "warning")
+    finally:
+        if conn:
+            conn.close()
+    
+    results = list(map(lambda x: File(x[0], None, x[1], None), db_result))
+    results.sort(key=lambda x:x.name.lower())
+    results_matrix = [results[i:i + 5] for i in range(0, len(results), 5)]
+
+    title = "Folder - " + folder.name if folder else "Folder"
+    return render_template("folder.html", title=title, searchform=SearchForm(),
+        folder=folder, children=children, parent=parent, results=results_matrix)

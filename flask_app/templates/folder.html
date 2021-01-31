@@ -14,6 +14,56 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
+        {% if folder %}
+        <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
+            {{ folder.name }}
+        </div>
+        <br>
+        <div class="page-item">
+            {% if parent %}
+            <div style="font-weight:bold">Parent folder</div>
+            <div>
+                <a href="{{ url_for('results.folder', folder_id=parent.folder_id) }}" class="tag-link">{{ parent.name }}</a>
+            </div>
+            {% else %}
+            Root folder.
+            {% endif %}
+            <hr>
+            {% if children|length == 0 %}
+            No subfolders.
+            {% else %}
+            <div style="font-weight:bold">Subfolders</div>
+            {% for child in children %}
+            <div>
+                <a href="{{ url_for('results.folder', folder_id=child.folder_id) }}" class="tag-link">{{ child.name }}</a>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        <br>
+        <div class="page-item">
+            {% if results|length == 0 %}
+            <div>No images</div>
+            {% else %}
+            <div class="page-item">
+                {% for row in results %}
+                <div class="row" align="center"  style="display:flex; align-items: center;">
+                    {% for item in row %}
+                    <div class="column" style="width:20%; padding:8px">
+                        <a href="{{ url_for('results.file', file_id=item.file_id) }}">
+                            <img src="{{ 'https://drive.google.com/thumbnail?id=' + item.file_id }}" style="max-width:100%; max-height:100%">
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        Folder does not exist.
+        {% endif %}
+        <br>
     </div>
     <div class="col-2"></div>
 </div>

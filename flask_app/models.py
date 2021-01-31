@@ -36,7 +36,13 @@ class Tag():
         self.category = category
 
 class File():
-    def __init__(self, file_id, folder_id, tags):
+    def __init__(self, file_id, folder_id, name, tags):
         self.file_id = file_id
         self.folder_id = folder_id
+        self.name = name
         self.tags = tags
+
+class Folder():
+    def __init__(self, folder_id, name):
+        self.folder_id = folder_id
+        self.name = name

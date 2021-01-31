@@ -14,16 +14,19 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
+        {% if image %}
         <div class="page-item">
             <a href="{{ 'https://drive.google.com/uc?id=' + image.file_id }}">
                 <img src="{{ 'https://drive.google.com/uc?id=' + image.file_id }}" style="max-width:100%; max-height:100%">
             </a>
             <br>
-            <br>
+            <div style="font-size:14px; color:gray">
+                {{ image.name }}
+            </div>
             <div>
                 {% if folder %}
                 Folder:
-                <a href="{{ url_for('results.folder', folder_id=folder) }}" class="tag-link">{{ folder }}</a>
+                <a href="{{ url_for('results.folder', folder_id=folder.folder_id) }}" class="tag-link">{{ folder.name }}</a>
                 {% else %}
                 No folder
                 {% endif %}
@@ -39,6 +42,9 @@
                 {% endif %}
             </div>
         </div>
+        {% else %}
+        <div>Image does not exist.</div>
+        {% endif %}
         <br>
     </div>
     <div class="col-2"></div>
