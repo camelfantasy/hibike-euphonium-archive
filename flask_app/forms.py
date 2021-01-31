@@ -27,19 +27,19 @@ class DeleteTagForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     username = StringField("Username", validators=[InputRequired(), Length(min=1, max=20, message="Username must be 1-20 characters.")])
-    password = PasswordField("Password", validators=[InputRequired(), Length(min=1, max=20)])
+    password = PasswordField("Password", validators=[InputRequired(), Length(min=1, max=50)])
     submit = SubmitField("Login")
 
 class UpdatePasswordForm(FlaskForm):
-    password = PasswordField("Password", validators=[InputRequired(), Length(min=8, max=20, message="Password must be 8-20 characters.")])
+    password = PasswordField("Password", validators=[InputRequired(), Length(min=8, max=50, message="Password must be 8-50 characters.")])
     confirm_password = PasswordField(
-        "Confirm Password", validators=[InputRequired(), EqualTo("password", message="Passwords must match."), Length(min=1, max=20)]
+        "Confirm Password", validators=[InputRequired(), EqualTo("password", message="Passwords must match.")]
     )
     submit = SubmitField("Update Password")
 
 class AddUserForm(FlaskForm):
     username = StringField("Username", validators=[InputRequired(), Length(min=1, max=20, message="Username must be 1-20 characters.")])
-    password = PasswordField("Password", validators=[InputRequired(), Length(min=8, max=20, message="Password must be 8-20 characters.")])
+    password = PasswordField("Password", validators=[InputRequired(), Length(min=8, max=50, message="Password must be 8-50 characters.")])
     level = SelectField("Level", choices=[(2, "User"), (1, "Admin")])
     submit = SubmitField("Add")
 
