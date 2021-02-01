@@ -4,19 +4,44 @@
     <div class="col-2"></div>
     <div class="col-8">
         <div style="font-weight:bold; font-size:20px" align="center">
-            About
+            Hibike! Euphonium Archive project
         </div>
         <br>
         <div class="page-item">
             <div>
-                The Hibike! Euphonium Archive project was created by members of
-                the Liz and the Blue Bird discord server, with the goal of creating
-                a comprehensive archive of all physical and digital visual
-                content that have been created for the Hibike! franchise.  All
-                files are hosted on Google Drive; this website is simply for search purposes.
-                <br>
-                <br>
-                All content belong to their respective owners.
+                Welcome to the website interface of the Hibike! Euphonium Archive project.
+                Read the information below to get started.
+            </div>
+            <hr>
+            <div style="text-align:center">
+                <b>Quick start</b>
+            </div>
+            <div>
+                Use the search bar or click on a tag to find all images containing your query.
+                To see all images, click on the All Images tab.
+            </div>
+            <br>
+            <div>
+                All tags can be found in the Tags tab, and are also listed on each image's page.
+                Untagged images can be found <a href="{{ url_for('results.search_results', query='untagged') }}" class="reverse-link">here</a>.
+            </div>
+            <br>
+            <div>
+                The folder structure can be navigated from each image and folder page,
+                with the Root Folder tab linked to the overall project folder.
+            </div>
+            <hr>
+            <div style="text-align:center">
+                <b>Users</b>
+            </div>
+            <br>
+            <div>
+                All users with accounts have permission to add or remove tags from the tags page.
+            </div>
+            <br>
+            <div>
+                Administrators additionally have the ability to create or delete user accounts,
+                and initiate a sync between Google Drive and the local database.
             </div>
         </div>
     </div>

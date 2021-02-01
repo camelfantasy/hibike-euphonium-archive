@@ -1,6 +1,5 @@
-from flask import current_app
 from flask_login import UserMixin
-from . import db, login_manager, config
+from . import db, login_manager
 
 @login_manager.user_loader
 def load_user(username):

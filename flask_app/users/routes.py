@@ -5,7 +5,6 @@ from .. import bcrypt
 from ..forms import SearchForm, UpdatePasswordForm, LoginForm, AddUserForm, DeleteUserForm
 from ..models import User, File, Folder
 
-from google.oauth2 import service_account
 import googleapiclient.discovery
 
 users = Blueprint("users", __name__)
@@ -28,7 +27,6 @@ def login():
     return render_template("login.html", title="Login", form=form, searchform=SearchForm())
 
 @users.route("/logout")
-@login_required
 def logout():
     logout_user()
     return redirect(url_for("users.login"))
@@ -83,7 +81,6 @@ def account():
         password_form=password_form, addform=add_form, deleteuserform=delete_user_form, users=users)
 
 @users.route("/sync")
-@login_required
 def sync():
     if current_user.is_authenticated and current_user.level < 2:
         files, folders = getfiles()
@@ -91,7 +88,7 @@ def sync():
             return "1", 200
         success = update(files, folders)
         return success, 200
-    return "1", 200
+    return render_template("404.html", searchform=SearchForm()), 404
 
 def getfiles():
     try:

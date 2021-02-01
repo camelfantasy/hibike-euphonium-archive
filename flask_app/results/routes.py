@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, url_for, redirect, request, flash, current_app
-from flask_login import current_user, login_required
+from flask import Blueprint, render_template, url_for, redirect, flash, current_app
+from flask_login import current_user
 import re
 
 from ..forms import SearchForm, AddTagForm, DeleteTagForm
@@ -15,6 +15,10 @@ def index():
         return redirect(url_for("results.search_results", query=searchform.search_query.data))
 
     return render_template("index.html", searchform=searchform)
+
+@results.route("/about", methods=["GET"])
+def about():
+    return render_template("about.html", searchform=SearchForm())
 
 @results.route("/search-results/<query>", methods=["GET"])
 def search_results(query):

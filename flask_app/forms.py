@@ -1,14 +1,6 @@
-from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, SelectField
-from wtforms.validators import (
-    InputRequired,
-    DataRequired,
-    NumberRange,
-    Length,
-    EqualTo,
-    ValidationError,
-)
+from wtforms.validators import InputRequired, Length, EqualTo
 
 class SearchForm(FlaskForm):
     search_query = StringField(

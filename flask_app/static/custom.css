@@ -20,6 +20,16 @@ body {
     color:rgb(0, 172, 198);
 }
 
+.reverse-link {
+    color: rgb(0, 172, 198);
+    transition: color 0.1s linear;
+}
+
+.reverse-link:hover {
+    text-decoration: none;
+    color: black;
+}
+
 .nav-link-custom {
     transition: color 0.1s linear;
 }

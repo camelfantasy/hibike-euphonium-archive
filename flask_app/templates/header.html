@@ -42,7 +42,6 @@
                 </form>
             </li>
             &nbsp
-            {% endif %}
             <li class="nav-item">
                 <a class="nav-link nav-link-custom" href="{{ url_for('users.login') }}">
                     {% if current_user.is_authenticated %}
@@ -52,6 +51,7 @@
                     {% endif %}
                 </a>
             </li>
+            {% endif %}
         </ul>
     </div>
 </nav>
@@ -60,25 +60,24 @@
     {% block content %}{% endblock %}
 </div>
 <footer class="footer">
-    <div style="width:100%; font-size:14px;">
-        <p style="text-align:left; margin:0px; color:rgba(255,255,255,.5);">
-            Website created and maintained by camelfantasy
+    <div class="row" style="width:100%; font-size:14px; color:rgba(255,255,255,.5);">
+        <div class="col-4"></div>
+        <div class="col-4" align="center">
+            <a href="{{ url_for('results.about') }}" class="footer-link">
+                About
+            </a>
             |
-            Discord: camelfantasy#6654
+            <a href="https://github.com/camelfantasy/hibike-euphonium-archive" class="footer-link" target="_blank">
+                Github
+            </a>
             |
-            Twitter:
-            <a href="https://twitter.com/camelfantasy" class="footer-link" target="_blank">@camelfantasy</a>
-            <span style="float:right;">
-                Links: 
-                <a href="https://github.com/camelfantasy/hibike-euphonium-archive" class="footer-link" target="_blank">
-                    Github
-                </a>
-                |
-                <a href="https://drive.google.com/drive/u/2/folders/1lqyNmKZy0LmnjOSv9jr8Um13MjZDhTh_" class="footer-link" target="_blank">
-                    Google Drive
-                </a>
-            </span>
-        </p>
+            <a href="https://drive.google.com/drive/u/2/folders/1lqyNmKZy0LmnjOSv9jr8Um13MjZDhTh_" class="footer-link" target="_blank">
+                Google Drive
+            </a>
+        </div>
+        <div class="col-4" align="right">
+            All content belong to their respective owners.
+        </div>
     </div>
 </footer>
 {% endblock %}
