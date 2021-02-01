@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for, redirect, flash, current_app
+from flask import Blueprint, render_template, url_for, redirect, flash, request, current_app
 from flask_login import current_user
 import re
 
@@ -31,7 +31,7 @@ def search_results(query):
     elif query.lower() == "untagged":
         files = File.objects(tags=[])
     else:
-        regex = re.compile(query, re.IGNORECASE)
+        regex = re.compile("^" + query + "$", re.IGNORECASE)
         tag = Tag.objects(tag=regex).first()
 
         if tag:
@@ -56,9 +56,9 @@ def tags():
     addtagform = AddTagForm()
     deletetagform = DeleteTagForm()
 
-    if addtagform.validate_on_submit() and current_user.is_authenticated:
+    if request.form.get('submit') == 'Add' and addtagform.validate_on_submit() and current_user.is_authenticated:
         tag = addtagform.tag.data
-        regex = re.compile(tag, re.IGNORECASE)
+        regex = re.compile("^" + tag + "$", re.IGNORECASE)
 
         if Tag.objects(tag=regex).first():
             flash("Tag '" + tag + "' already exists.", "narrow-warning")
@@ -69,7 +69,7 @@ def tags():
 
         return redirect(url_for("results.tags"))
     
-    if deletetagform.validate_on_submit() and current_user.is_authenticated:
+    if request.form.get('submit') == 'Delete' and deletetagform.validate_on_submit() and current_user.is_authenticated:
         delete_tag = Tag.objects(tag=deletetagform.tag.data)
         delete_tag.delete()
         flash("Tag '" + deletetagform.tag.data + "' deleted.", "narrow-success")
@@ -89,20 +89,85 @@ def tags():
         addtagform=addtagform, deletetagform=deletetagform, media=media, other=other,
         characters1=characters1, characters2=characters2)
 
-@results.route("/file/<file_id>", methods=["GET"])
+@results.route("/file/<file_id>", methods=["GET", "POST"])
 def file(file_id):
+    addtagform = AddTagForm()
+    deletetagform = DeleteTagForm()
     image = File.objects(file_id=file_id).first()
+
+    if request.form.get('submit') == 'Add' and addtagform.validate_on_submit() and current_user.is_authenticated and image:
+        tag = addtagform.tag.data
+        regex = re.compile("^" + tag + "$", re.IGNORECASE)
+        existing_tag = Tag.objects(tag=regex).first()
+
+        if existing_tag:
+            if not any(x.tag.lower() == existing_tag.tag.lower() for x in image.tags):
+                image.tags.append(existing_tag)
+        else:
+            new_tag = Tag(tag=tag, category="Other")
+            new_tag.save()
+            image.tags.append(new_tag)
+        
+        image.save()
+        return redirect(url_for("results.file", file_id=file_id))
+
+    if request.form.get('submit') == 'Delete' and deletetagform.validate_on_submit() and current_user.is_authenticated and image:
+        tag = deletetagform.tag.data
+        if any(x.tag.lower() == tag.lower() for x in image.tags):
+            image.tags = list(filter(lambda x: x.tag.lower() != tag.lower(), image.tags))
+            image.save()
+        
+        return redirect(url_for("results.file", file_id=file_id))
+
     folder = None
     if image:
         folder = Folder.objects(folder_id=image.folder_id).first()
+        if image.tags:
+            image.tags.sort(key=lambda x:x.tag.lower())
 
-    return render_template("image.html", title="Image", searchform=SearchForm(), image=image, folder=folder)
+    return render_template("image.html", title="Image", searchform=SearchForm(),
+        addtagform=addtagform, deletetagform=deletetagform, image=image, folder=folder)
 
-@results.route("/folder/<folder_id>", methods=["GET"])
+@results.route("/folder/<folder_id>", methods=["GET", "POST"])
 def folder(folder_id):
+    addtagform = AddTagForm()
+    deletetagform = DeleteTagForm()
+
     if folder_id == "root":
         folder_id = current_app.config['ROOT_ID']
     folder = Folder.objects(folder_id=folder_id).first()
+
+
+    if request.form.get('submit') == 'Add' and addtagform.validate_on_submit() and current_user.is_authenticated and folder:
+        files = list(File.objects(folder_id=folder.folder_id))
+        tag = addtagform.tag.data
+        regex = re.compile("^" + tag + "$", re.IGNORECASE)
+        existing_tag = Tag.objects(tag=regex).first()
+
+        if not existing_tag:
+            new_tag = Tag(tag=tag, category="Other")
+            new_tag.save()
+            existing_tag = new_tag
+            
+        for image in files:
+            if not any(x.tag.lower() == existing_tag.tag.lower() for x in image.tags):
+                image.tags.append(existing_tag)
+                image.save()
+
+        return redirect(url_for("results.folder", folder_id=folder_id))
+
+    if request.form.get('submit') == 'Delete' and deletetagform.validate_on_submit() and current_user.is_authenticated and folder:
+        files = list(File.objects(folder_id=folder.folder_id))
+        tag = deletetagform.tag.data
+
+        for image in files:
+            if any(x.tag.lower() == tag.lower() for x in image.tags):
+                image.tags = list(filter(lambda x: x.tag.lower() != tag.lower(), image.tags))
+                image.save()
+        
+        return redirect(url_for("results.folder", folder_id=folder_id))
+
+
     parent = None
     children = []
     files = []
@@ -117,4 +182,5 @@ def folder(folder_id):
 
     title = "Folder - " + folder.name if folder else "Folder"
     return render_template("folder.html", title=title, searchform=SearchForm(),
-        folder=folder, children=children, parent=parent, results=results_matrix)
+        addtagform=addtagform, deletetagform=deletetagform, folder=folder, children=children,
+        parent=parent, results=results_matrix)

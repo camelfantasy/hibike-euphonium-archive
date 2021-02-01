@@ -10,6 +10,14 @@ body {
     padding: 16px;
 }
 
+.addtag-small {
+    border-color:rgb(206, 212, 218);
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    width: 100%;
+}
+
 .tag-link {
     color:black;
     transition: color 0.1s linear;

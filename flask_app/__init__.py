@@ -65,7 +65,8 @@ def create_app(test_config=None):
         return None
 
     csp = {
-        'default-src': ['\'self\'','stackpath.bootstrapcdn.com','code.jquery.com','cdn.jsdelivr.net','cdnjs.cloudflare.com','\'unsafe-inline\''],
+        'default-src': ['\'self\'','stackpath.bootstrapcdn.com','code.jquery.com','cdn.jsdelivr.net',
+            'cdnjs.cloudflare.com','drive.google.com','*.googleusercontent.com','\'unsafe-inline\''],
         'img-src': ['\'self\' data: *']
     }
     print("Initializing Talisman")

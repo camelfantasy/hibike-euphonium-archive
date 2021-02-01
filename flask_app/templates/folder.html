@@ -53,6 +53,27 @@
             {% endfor %}
             {% endif %}
         </div>
+        {% if current_user.is_authenticated %}
+        <br>
+        <div class="page-item" style="word-wrap: break-word;">
+            <div>
+                <form method="POST" action="" style="margin:0px">
+                    {{ addtagform.csrf_token }}
+                    {{ addtagform.category(hidden="true", value="") }}
+                    {{ addtagform.tag(class="addtag-small", autocomplete="off", placeholder="Add tag to all files") }}
+                    {{ addtagform.submit(hidden="true") }}
+                </form>
+            </div>
+            <br>
+            <div>
+                <form method="POST" action="" style="margin:0px">
+                    {{ deletetagform.csrf_token }}
+                    {{ deletetagform.tag(class="addtag-small", autocomplete="off", placeholder="Delete tag from all files") }}
+                    {{ deletetagform.submit(hidden="true") }}
+                </form>
+            </div>
+        </div>
+        {% endif %}
         {% endif %}
     </div>
 </div>

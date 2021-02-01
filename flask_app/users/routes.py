@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for, render_template, flash, request, session, current_app
+from flask import Blueprint, redirect, url_for, render_template, flash, request, current_app
 from flask_login import current_user, login_required, login_user, logout_user
 
 from .. import bcrypt
@@ -71,7 +71,6 @@ def account():
             user.delete()
             flash("User '" + username + "' deleted.", "bottom-success")
             
-
         return redirect(url_for("users.account"))
 
     users = list(User.objects())
@@ -113,6 +112,8 @@ def getfiles():
                 elif 'image' in afile.get('mimeType'):
                     tags = file_dict[afile.get('id')] if afile.get('id') in file_dict else None
                     ret_files.append(File(file_id=afile.get('id'), folder_id=current_folder, name=afile.get('name'), tags=tags))
+                else:
+                    print(afile)
         
         return ret_files, ret_folders
     except:
