@@ -24,11 +24,7 @@
         {% if messages %}
         {% for category, message in messages %}
         {% if category == "top-success" %}
-        <div class="alert alert-success" style="text-align:center">
-            {{ message }}
-        </div>
-        {% elif category == "top-warning" %}
-        <div class="alert alert-warning" style="text-align:center">
+        <div id="fadeout" class="alert alert-success" style="text-align:center">
             {{ message }}
         </div>
         {% endif %}
@@ -36,14 +32,14 @@
         {% endif %}
         {% endwith %}
         {% if password_form.password.errors %}
-        <div class="alert alert-warning" style="text-align:center">
+        <div id="fadeout" class="alert alert-warning" style="text-align:center">
             {% for error in password_form.password.errors %}
             <span>{{ error }}</span>
             {% endfor %}
         </div>
         {% endif %}
         {% if password_form.confirm_password.errors %}
-        <div class="alert alert-warning" style="text-align:center">
+        <div id="fadeout" class="alert alert-warning" style="text-align:center">
             {% for error in password_form.confirm_password.errors %}
             <span>{{ error }}</span>
             {% endfor %}
@@ -62,11 +58,11 @@
                 </div>
             </div>
             <div class="form-group">
-                {{ password_form.submit(class="form-control form-control-lg button-submit") }}
+                {{ password_form.submit(class="form-control form-control-lg btn-submit") }}
             </div>
             <div class="row">
                 <div class="col" style="font-size:14">
-                    Password must be 8-20 characters long.
+                    Password must be 8-50 characters long.
                 </div>
             </div>
         </form>
@@ -78,12 +74,12 @@
     <div class="col-2"></div>
     <div class="col-2">
         {% if current_user.level < 2  %}
-        <input type="submit" class="form-control btn-sync" value="Sync Drive"
+        <input type="submit" class="form-control btn-submit" value="Sync Drive"
             onclick="ajax_sync()" id="sync_button"/>
         {% endif %}
     </div>
     <div class="col-2" style="display:flex; align-items:center">
-        <div id="sync_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px"></div>
+        <div id="sync_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%"></div>
     </div>
     <div class="col-2"></div>
     <div class="col-2">
@@ -104,11 +100,11 @@
         {% if messages %}
         {% for category, message in messages %}
         {% if category == "bottom-success" %}
-        <div class="alert alert-success" style="text-align:center">
+        <div id="fadeout" class="alert alert-success" style="text-align:center">
             {{ message }}
         </div>
         {% elif category == "bottom-warning" %}
-        <div class="alert alert-warning" style="text-align:center">
+        <div id="fadeout" class="alert alert-warning" style="text-align:center">
             {{ message }}
         </div>
         {% endif %}
@@ -116,14 +112,14 @@
         {% endif %}
         {% endwith %}
         {% if addform.username.errors %}
-        <div class="alert alert-warning" style="text-align:center">
+        <div id="fadeout" class="alert alert-warning" style="text-align:center">
             {% for error in addform.username.errors %}
             <span>{{ error }}</span>
             {% endfor %}
         </div>
         {% endif %}
         {% if addform.password.errors %}
-        <div class="alert alert-warning" style="text-align:center">
+        <div id="fadeout" class="alert alert-warning" style="text-align:center">
             {% for error in addform.password.errors %}
             <span>{{ error }}</span>
             {% endfor %}
@@ -144,7 +140,7 @@
                         {{ addform.level(class="form-control") }}
                     </div>
                     <div class="col-sm-2" align="right">
-                        {{ addform.submit(class="form-control btn-sync") }}
+                        {{ addform.submit(class="form-control btn-submit") }}
                     </div>
                 </div>
             </form>
@@ -160,7 +156,7 @@
                         {{ addform.password(class="form-control", placeholder="Password") }}
                     </div>
                     <div class="col-sm-2" align="right">
-                        {{ addform.submit(class="form-control btn-sync") }}
+                        {{ addform.submit(class="form-control btn-submit") }}
                     </div>
                 </div>
             </form>
@@ -204,17 +200,19 @@
             </div>
             {% endfor %}
         </div>
-        <br>
     </div>
     <div class="col-2"></div>
 </div>
 <script>
     function ajax_sync() {
         document.getElementById("sync_button").disabled = true;
-        document.getElementById("sync_button").setAttribute("class", "form-control btn-sync-disabled");
+        document.getElementById("sync_button").setAttribute("class", "form-control btn-submit-disabled");
+        dots = '<span class="dot dot1">.</span><span class="dot dot2">.</span><span class="dot dot3">.</span>';
+        document.getElementById("sync_message").innerHTML = "Syncing" + dots;
+        document.getElementById("sync_message").setAttribute("class", "alert alert-secondary");
         $.ajax({url: "/sync", success: function(result){
             $("#sync_button").prop("disabled", false);
-            $("#sync_button").attr("class", "form-control btn-sync");
+            $("#sync_button").attr("class", "form-control btn-submit");
             if (result == "0") {
                 $("#sync_message").html("Sync success.");
                 $("#sync_message").attr("class", "alert alert-success");

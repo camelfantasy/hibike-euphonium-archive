@@ -1,48 +1,30 @@
 from flask import current_app
 from flask_login import UserMixin
-from . import login_manager
-from . import config
-
-import os, sqlite3
-from sqlite3 import Error
+from . import db, login_manager, config
 
 @login_manager.user_loader
 def load_user(username):
-    conn = None
-    try:
-        conn = sqlite3.connect(os.getcwd() + current_app.config['SQLITE_PATH'])
-        c = conn.cursor()
-        c.execute("SELECT username, password, level from users where username = (?)", [username])
-        user = c.fetchone()
-        conn.close()
-        return User(user[0], user[1], user[2])
-    except Error as e:
-        if conn:
-            conn.close()
-        return None
+    return User.objects(username=username).first()
 
-class User(UserMixin):
-    def __init__(self, username, password, level):
-        self.username = username
-        self.password = password
-        self.level = level
+class User(db.Document, UserMixin):
+    username = db.StringField(required=True, unique=True)
+    password = db.StringField(required=True)
+    level = db.IntField(required=True)
 
     def get_id(self):
         return self.username
 
-class Tag():
-    def __init__(self, tag, category):
-        self.tag = tag
-        self.category = category
+class Tag(db.Document):
+    tag = db.StringField(required=True, unique=True)
+    category = db.StringField(required=True)
 
-class File():
-    def __init__(self, file_id, folder_id, name, tags):
-        self.file_id = file_id
-        self.folder_id = folder_id
-        self.name = name
-        self.tags = tags
+class File(db.Document):
+    file_id = db.StringField(required=True)
+    folder_id = db.StringField(required=True)
+    name = db.StringField(required=True)
+    tags = db.ListField(db.ReferenceField(Tag, required=True))
 
-class Folder():
-    def __init__(self, folder_id, name):
-        self.folder_id = folder_id
-        self.name = name
+class Folder(db.Document):
+    folder_id = db.StringField(required=True)
+    parent_id = db.StringField()
+    name = db.StringField(required=True)

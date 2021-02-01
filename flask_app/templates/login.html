@@ -4,27 +4,27 @@
     <div class="col-2"></div>
     <div class="col-8">
         <div style="font-size:32px">
-            User Login
+            Login
         </div>
         <hr>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         {% for message in messages %}
-        <div class="alert alert-warning" style="text-align:center">
+        <div id="fadeout" class="alert alert-warning" style="text-align:center">
             {{ message }}
         </div>
         {% endfor %}
         {% endif %}
         {% endwith %}
         {% if form.username.errors %}
-        <div class="alert alert-warning" style="text-align:center">
+        <div id="fadeout" class="alert alert-warning" style="text-align:center">
             {% for error in form.username.errors %}
             <span>{{ error }}</span>
             {% endfor %}
         </div>
         {% endif %}
         {% if form.password.errors %}
-        <div class="alert alert-warning" style="text-align:center">
+        <div id="fadeout" class="alert alert-warning" style="text-align:center">
             {% for error in form.password.errors %}
             <span>{{ error }}</span>
             {% endfor %}
@@ -43,7 +43,7 @@
                 </div>
             </div>
             <div class="form-group">
-                {{ form.submit(class="form-control form-control-lg button-submit") }}
+                {{ form.submit(class="form-control form-control-lg btn-submit") }}
             </div>
         </form>
         <div style="font-size:14px">

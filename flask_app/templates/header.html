@@ -17,6 +17,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link nav-link-custom" href="{{ url_for('results.folder', folder_id='root') }}">
+                    Root Folder
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link nav-link-custom" href="{{ url_for('results.tags') }}">
                     Tags
                 </a>
@@ -54,4 +59,26 @@
 <div class="container">
     {% block content %}{% endblock %}
 </div>
+<footer class="footer">
+    <div style="width:100%; font-size:14px;">
+        <p style="text-align:left; margin:0px; color:rgba(255,255,255,.5);">
+            Website created and maintained by camelfantasy
+            |
+            Discord: camelfantasy#6654
+            |
+            Twitter:
+            <a href="https://twitter.com/camelfantasy" class="footer-link" target="_blank">@camelfantasy</a>
+            <span style="float:right;">
+                Links: 
+                <a href="https://github.com/camelfantasy/hibike-euphonium-archive" class="footer-link" target="_blank">
+                    Github
+                </a>
+                |
+                <a href="https://drive.google.com/drive/u/2/folders/1lqyNmKZy0LmnjOSv9jr8Um13MjZDhTh_" class="footer-link" target="_blank">
+                    Google Drive
+                </a>
+            </span>
+        </p>
+    </div>
+</footer>
 {% endblock %}

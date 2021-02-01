@@ -1,46 +1,8 @@
 {% extends "header.html" %}
 {% block content %}
 <div class="row">
-    <div class="col-2"></div>
-    <div class="col-8">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        {% if category == "warning" %}
-        <div class="alert alert-warning" style="text-align:center">
-            {{ message }}
-        </div>
-        {% endif %}
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
+    <div class="col-9">
         {% if folder %}
-        <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
-            {{ folder.name }}
-        </div>
-        <br>
-        <div class="page-item">
-            {% if parent %}
-            <div style="font-weight:bold">Parent folder</div>
-            <div>
-                <a href="{{ url_for('results.folder', folder_id=parent.folder_id) }}" class="tag-link">{{ parent.name }}</a>
-            </div>
-            {% else %}
-            Root folder.
-            {% endif %}
-            <hr>
-            {% if children|length == 0 %}
-            No subfolders.
-            {% else %}
-            <div style="font-weight:bold">Subfolders</div>
-            {% for child in children %}
-            <div>
-                <a href="{{ url_for('results.folder', folder_id=child.folder_id) }}" class="tag-link">{{ child.name }}</a>
-            </div>
-            {% endfor %}
-            {% endif %}
-        </div>
-        <br>
         <div class="page-item">
             {% if results|length == 0 %}
             <div>No images</div>
@@ -63,8 +25,35 @@
         {% else %}
         Folder does not exist.
         {% endif %}
-        <br>
     </div>
-    <div class="col-2"></div>
+    <div class="col-3">
+        {% if folder %}
+        <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
+            {{ folder.name }}
+        </div>
+        <br>
+        <div class="page-item" style="word-wrap: break-word;">
+            {% if parent %}
+            <div style="font-weight:bold">Parent folder</div>
+            <div>
+                <a href="{{ url_for('results.folder', folder_id=parent.folder_id) }}" class="tag-link">{{ parent.name }}</a>
+            </div>
+            {% else %}
+            Root folder.
+            {% endif %}
+            <hr>
+            {% if children|length == 0 %}
+            No subfolders.
+            {% else %}
+            <div style="font-weight:bold">Subfolders</div>
+            {% for child in children %}
+            <div>
+                <a href="{{ url_for('results.folder', folder_id=child.folder_id) }}" class="tag-link">{{ child.name }}</a>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

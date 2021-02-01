@@ -26,7 +26,7 @@ class DeleteTagForm(FlaskForm):
     submit = SubmitField("Delete")
 
 class LoginForm(FlaskForm):
-    username = StringField("Username", validators=[InputRequired(), Length(min=1, max=20, message="Username must be 1-20 characters.")])
+    username = StringField("Username", validators=[InputRequired(), Length(min=1, max=20, message="Login failed. Check your username and/or password")])
     password = PasswordField("Password", validators=[InputRequired(), Length(min=1, max=50)])
     submit = SubmitField("Login")
 

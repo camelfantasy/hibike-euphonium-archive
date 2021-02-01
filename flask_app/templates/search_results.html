@@ -2,15 +2,6 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-warning" style="text-align:center">
-            {{ message }}
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
         <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
             {% if query.lower() == "all" %}
             All images
@@ -38,7 +29,6 @@
             {% endfor %}
         </div>
         {% endif %}
-        <br>
     </div>
 </div>
 {% endblock %}
