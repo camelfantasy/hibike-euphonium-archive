@@ -102,3 +102,18 @@ Add/delete Administrator accounts
 <td>N</td><td>N</td><td>Y</td>
 </tr>
 </table>
+
+## Future development
+
+The next version will include several more features and improvements that will improve user experience.  These include:
+* Popup suggestions when searching or adding tags.
+* Advanced searching (i.e. with booleans).
+* An API.
+* Directly editing tags, usernames, and user permission levels.
+* Allowing users to favorite images, which will require implementing a fourth level of user permissions for the general public.
+* Increasing the efficiency of certain functions related to retrieving database information due to MongoEngine limitations.
+* Embedding other file types
+
+Other proposed features that are not prioritized include:
+* Creating a mobile version.
+* Improving appearances when zooming in or out.
