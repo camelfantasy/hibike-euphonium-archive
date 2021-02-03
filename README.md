@@ -52,7 +52,7 @@ This guide assumes little programming or server management knowledge.
 * Create a new application on Heroku (a free tier exists and is sufficient), and connect the repository under `Deploy`.
 * Set environmental variables in `Config Vars` under `Settings`.
 * Click `More` and `Restart all dynos` for the changes to take effect, and click `Open app` to access the application.
-* If the application does not start up, check for erros in `View logs` under `More`.
+* If the application does not start up, check for errors in `View logs` under `More`.
 
 ## Permissions
 
