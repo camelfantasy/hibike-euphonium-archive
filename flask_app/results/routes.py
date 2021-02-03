@@ -147,7 +147,7 @@ def file(file_id):
                 new_tag = Tag(tag=tag, category="Other")
                 new_tag.save()
                 image.tags.append(new_tag)
-                flash("Tag '" + tag + "' added to image.", "success")
+                flash("Tag '" + tag + "' created and added to image.", "success")
             else:
                 flash("New tag '" + tag + "' can only be added by an admin.", "warning")
         
@@ -196,10 +196,14 @@ def folder(folder_id):
                     new_tag = Tag(tag=tag, category="Other")
                     new_tag.save()
                     existing_tag = new_tag
+                    flash("Tag '" + tag + "' created and added to images.", "success")
                 else:
                     flash("No images to update.", "warning")
             else:
                 flash("New tag '" + tag + "' can only be added by an admin.", "warning")
+        else:
+            if len(files) != 0:
+                flash("Tag '" + tag + "' added to images.", "success")
         
         # checks against user with no permission to add a new tag
         if existing_tag:
@@ -207,9 +211,6 @@ def folder(folder_id):
                 if not any(x.tag.lower() == existing_tag.tag.lower() for x in image.tags):
                     image.tags.append(existing_tag)
                     image.save()
-
-            if len(files) != 0:
-                flash("Tag '" + tag + "' added to images.", "success")
 
         return redirect(url_for("results.folder", folder_id=folder_id))
 
