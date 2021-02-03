@@ -169,9 +169,10 @@ def file(file_id):
         if image.tags:
             image.tags.sort(key=lambda x:x.tag.lower())
 
+    tags = list(map(lambda x: x.tag, Tag.objects()))
     title = "Image - " + image.name if image else "Error"
-    return render_template("image.html", title=title, searchform=SearchForm(),
-        addtagform=addtagform, deletetagform=deletetagform, image=image, folder=folder)
+    return render_template("image.html", title=title, searchform=SearchForm(), addtagform=addtagform,
+        deletetagform=deletetagform, image=image, folder=folder, tags=tags)
 
 @results.route("/folder/<folder_id>", methods=["GET", "POST"])
 def folder(folder_id):
@@ -253,7 +254,8 @@ def folder(folder_id):
     initial_results = results_matrix[:10]
     remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
 
+    tags = list(map(lambda x: x.tag, Tag.objects()))
     title = "Folder - " + folder.name if folder else "Error"
     return render_template("folder.html", title=title, searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, folder=folder, children=children,
-        parent=parent, results=initial_results, remaining_results=remaining_results)
+        parent=parent, results=initial_results, remaining_results=remaining_results, tags=tags)

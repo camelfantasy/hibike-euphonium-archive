@@ -14,11 +14,11 @@ This guide assumes little programming or server management knowledge.
 
 3. [Install](https://www.mongodb.com/try/download/community) MongoDB or [set up](https://www.mongodb.com/cloud/atlas) a cloud server.  Free tiers exist for both and are sufficient for this application.  This application was developed with version v4.4.x.
 
-4. Set configuration values.  These **must** be set for the application to work properly.  Configuration values can be set either as environmental variables or in `config.py`, with nonempty values in the config file taking precedence.
+4. Set configuration values.  These **must** be set for the application to work properly.  Configuration values can be set either as environmental variables (in a file usually found in the home directory) or in `config.py`, with nonempty values in the application config file taking precedence.
 
     On Mac/Linux, environmental variables are set with `export [VARIABLE_NAME]=[VARIABLE_VALUE]`.  Config file values are placed between the existing quotation or apostrophe marks.
 
-    **`SECRET_KEY`**: In a command-line interface, generate with:
+    **`SECRET_KEY`**: In Terminal, generate with:
     ```
     python -c 'import os; print(os.urandom(16))'
     ```
@@ -45,7 +45,9 @@ This guide assumes little programming or server management knowledge.
     
     On the `Clusters` page, select `Connect`, `Connect your application`, `Python` and `3.6 or later`, and copy the connection string.  Paste this into your environmental variable or `config.py`, substituting `<password>` for the one set earlier and `<db_name>` for a name of your choice.
 
-5. Using a command-line interface, navigate to the root folder of the application.  Do `flask run` and wait for the `Startup successful` message.  If it does not show or errors appear, something was set up incorrectly.
+5. Using Terminal, navigate to the root folder of the application.  Do `flask run` and wait for the `Startup successful` message.  If it does not show or errors appear, something was set up incorrectly.
+
+    The link to access the application will appear among the messages, and look similar to `http://127.0.0.1:5000/`.  To stop the application, do `CTRL+C` in Terminal.
 
 6. (Optional) Deployment to Heroku:
 * Upload the code to a GitHub repository
@@ -108,14 +110,15 @@ Add/delete Administrator accounts
 
 ## Future development
 
-The next version will include several more features and improvements that will improve user experience.  These include:
-* Popup suggestions when searching or adding tags.
+The next version will include several more features and improvements that will improve user experience.  These are likely to include:
+* Popup suggestions when searching.
 * Advanced searching (i.e. with booleans).
 * An API.
 * Directly editing tags, usernames, and user permission levels.
 * Allowing users to favorite images, which will require implementing a fourth level of user permissions for the general public.
 * Increasing the efficiency of certain functions related to retrieving database information due to MongoEngine limitations.
 * Embedding other file types
+* Changing some requests to GET instead of POST
 
 Other proposed features that are not prioritized include:
 * Creating a mobile version.
