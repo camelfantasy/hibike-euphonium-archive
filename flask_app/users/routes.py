@@ -95,10 +95,15 @@ def getfiles():
         file_dict = { i.file_id : i.tags for i in File.objects() }
 
         service = googleapiclient.discovery.build('drive', 'v3', developerKey=current_app.config['DRIVE_API_KEY'])
-
         ids = [current_app.config['ROOT_ID']]
         ret_files = []
-        ret_folders = [Folder(folder_id=ids[0], parent_id="", name="Hibike! Series")]
+        ret_folders = []
+
+        # get root folder name
+        param = {"fileId": ids[0], "fields":"name"}
+        result = service.files().get(**param).execute()
+        root_name = result.get('name')
+        ret_folders.append(Folder(folder_id=ids[0], parent_id="", name=root_name))
 
         # traverses folder structure breadth-first
         while len(ids) != 0:
@@ -117,6 +122,7 @@ def getfiles():
         
         return ret_files, ret_folders
     except:
+        import sys
         return None, None
 
 def update(files, folders):
