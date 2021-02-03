@@ -14,6 +14,7 @@ from flask_app.results.routes import results
 from .forms import SearchForm
 from .models import User
 
+# sets root user if not in database
 def initialize_root_user():
     try:
         if not User.objects(username="root").first():
@@ -26,7 +27,7 @@ def initialize_root_user():
         return 1
 
 def page_not_found(e):
-    return render_template("404.html", searchform=SearchForm()), 404
+    return render_template("404.html", title="404", searchform=SearchForm()), 404
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -66,7 +67,7 @@ def create_app(test_config=None):
 
     csp = {
         'default-src': ['\'self\'','stackpath.bootstrapcdn.com','code.jquery.com','cdn.jsdelivr.net',
-            'cdnjs.cloudflare.com','drive.google.com','*.googleusercontent.com','\'unsafe-inline\''],
+            'cdnjs.cloudflare.com','drive.google.com','*.googleusercontent.com','ajax.googleapis.com','\'unsafe-inline\''],
         'img-src': ['\'self\' data: *']
     }
     print("Initializing Talisman")

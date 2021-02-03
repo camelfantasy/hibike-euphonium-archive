@@ -1,29 +1,29 @@
 {% extends "header.html" %}
 {% block content %}
 <div class="row">
+    {% if folder %}
     <div class="col-9">
-        {% if folder %}
+        {% if results|length == 0 %}
+        <div align="center">No images</div>
+        {% else %}
         <div class="page-item">
-            {% if results|length == 0 %}
-            <div>No images</div>
-            {% else %}
-            <div class="page-item">
-                {% for row in results %}
-                <div class="row" align="center"  style="display:flex; align-items: center;">
-                    {% for item in row %}
-                    <div class="column" style="width:20%; padding:8px">
-                        <a href="{{ url_for('results.file', file_id=item.file_id) }}">
-                            <img src="{{ 'https://drive.google.com/thumbnail?id=' + item.file_id }}" style="max-width:100%; max-height:100%">
-                        </a>
-                    </div>
-                    {% endfor %}
+            {% for row in results %}
+            <div class="row" align="center"  style="display:flex; align-items: center;">
+                {% for item in row %}
+                <div class="column" style="width:20%; padding:1.5%; height:3%">
+                    <a href="{{ url_for('results.file', file_id=item.file_id) }}" target="_blank">
+                        <img src="{{ 'https://drive.google.com/thumbnail?id=' + item.file_id }}" style="max-width:100%; max-height:100%">
+                    </a>
                 </div>
                 {% endfor %}
             </div>
-            {% endif %}
+            {% endfor %}
+            <div id="scroller">
+                <template id="new_row">
+                    <div class="row" align="center" style="display:flex; align-items: center;" id="row"></div>
+                </template>
+            </div>
         </div>
-        {% else %}
-        Folder does not exist.
         {% endif %}
     </div>
     <div class="col-3">
@@ -73,8 +73,94 @@
                 </form>
             </div>
         </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        {% if category == "success" %}
+        <div id="fadeout" class="alert alert-success" style="text-align:center; margin-bottom:0px; margin-top:16px">
+            {{ message }}
+        </div>
+        {% elif category == "warning" %}
+        <div id="fadeout" class="alert alert-warning" style="text-align:center; margin-bottom:0px; margin-top:16px">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
         {% endif %}
         {% endif %}
     </div>
+    {% else %}
+    <div class="col" align="center">Folder does not exist.</div>
+    {% endif %}
 </div>
+<div class="d-flex justify-content-center row" id="sentinel">
+    <div class="col-9" align="center">
+        <div class="spinner-border" style="animation:spinner-border 1s linear infinite; color:rgb(0, 172, 198); margin-top:16px" role="status"></div>
+    </div>
+    <div class="col-3"></div>
+</div>
+<script>
+    // extract server response
+    var dict = { "ids" : {{ remaining_results|tojson }} };
+    var remaining_results = dict.ids;
+
+    var results_url = {{ url_for('results.file', file_id="") }};
+    var scroller = document.querySelector("#scroller");
+    var template_row = document.querySelector('#new_row');
+    var loaded = document.querySelector("#loaded");
+    var sentinel = document.querySelector('#sentinel');
+
+    // disable sentinel if unnecessary
+    if (remaining_results.length <= 10) {
+        sentinel.innerHTML = "";
+    }
+
+    // loads more images
+    function loadItems() {
+        if (remaining_results.length > 0) {
+            new_section = [];
+            if (remaining_results.length < 10) {
+                new_section = remaining_results.slice(0,remaining_results.length);
+                remaining_results = [];
+            } else {
+                new_section = remaining_results.slice(0, 10);
+                remaining_results = remaining_results.slice(10,remaining_results.length);
+            }
+            
+            new_section.forEach(function(new_row) {
+                let template_clone = template_row.content.cloneNode(true);
+                var innerhtml = "";
+                new_row.forEach(function(file_id) {
+                    var href = results_url + file_id;
+                    var src = 'https://drive.google.com/thumbnail?id=' + file_id;
+                    innerhtml += `<div class="column" style="width:20%; padding:1%; height:3%">
+                                <a href="` + href + `" id="link" target="_blank">
+                                    <img src="` + src + `" style="max-width:100%; max-height:100%" id="image">
+                                </a>
+                            </div>`;
+                })
+                template_clone.querySelector("#row").innerHTML = innerhtml;
+                scroller.appendChild(template_clone);
+            })
+        } else {
+            sentinel.innerHTML = "";
+        }
+    }
+
+    // time used to prevent function being called more than once at the same time
+    var time = Date.now()
+
+    // detects if end of page is reached
+    var intersectionObserver = new IntersectionObserver(entries => {
+        if (entries[0].intersectionRatio <= 0 || Date.now() - time < 100) {
+            return;
+        }
+        loadItems();
+        time = Date.now()
+    });
+
+intersectionObserver.observe(sentinel);
+</script>
 {% endblock %}

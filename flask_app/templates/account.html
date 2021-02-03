@@ -1,5 +1,28 @@
 {% extends "header.html" %}
 {% block content %}
+<div class="delete-confirmation" id="confirm-background">
+    <div class="row" align="center" style="margin-left: -15px; margin-right: -15px;">
+        <div class="col-4" id="confirm-col1"></div>
+        <div class="col-4 page-item" align="center" id="confirm-box">
+            <div id="confirm-text" style="font-weight:bold"></div>
+            <br>
+            <div class="row">
+                <div class="col-5">
+                    <label class="btn btn-submit" style="margin:0px; width:100%" onclick="cancel()">Cancel</label>
+                </div>
+                <div class="col-2"></div>
+                <div class="col-5">
+                    <form method="POST" action="" style="margin:0px">
+                        {{ deleteuserform.submit(class="btn btn-logout", style="margin:0px; width:100%") }}
+                        {{ deleteuserform.csrf_token }}
+                        {{ deleteuserform.username(value="", hidden=true, id="confirm-user") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-4" id="confirm-col2"></div>
+    </div>
+</div>
 <div class="row">
     <div class="col-2"></div>
     <div class="col-8">
@@ -183,16 +206,11 @@
                     {% endif %}
                 </label>
                 {% if current_user.level < user.level %}
-                <label class="col-sm-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;">
-                    <form method="POST" action="" style="margin:0px">
-                        {{ deleteuserform.submit(hidden=true) }}
-                        {{ deleteuserform.csrf_token }}
-                        {{ deleteuserform.username(value=user.username, hidden=true) }}
-                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer">
-                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                        </svg>
-                    </form>
+                <label class="col-sm-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;" onclick="confirm_delete('{{ user.username }}')">
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                    </svg>
                 </label>
                 {% else %}
                 <lable class="col-sm-1" style="padding:0px"></lable>
@@ -231,6 +249,33 @@
                 });
             }, 5000);
         }});
+    }
+
+    background = document.getElementById('confirm-background');
+    box = document.getElementById('confirm-box');
+    col1 = document.getElementById('confirm-col1');
+    col2 = document.getElementById('confirm-col2');
+    confirm_text = document.getElementById('confirm-text');
+    confirm_user = document.getElementById('confirm-user');
+
+    function confirm_delete(user) {
+        background.style.display = 'block';
+        box.style.display = 'block';
+        confirm_text.innerHTML = "Delete user '" + user + "'?";
+        confirm_user.value = user
+    }
+
+    function cancel() {
+        background.style.display = "none";
+        box.style.display = "none";
+    }
+
+    // also allow closing popup by clicking outside of it
+    window.onclick = function(event) {
+        if (event.target == background || event.target == col1 || event.target == col2) {
+            background.style.display = "none";
+            box.style.display = "none";
+        }
     }
 </script>
 {% endif %}

@@ -13,9 +13,10 @@
                 Read the information below to get started.
             </div>
             <hr>
-            <div style="text-align:center">
+            <div style="text-align:center; font-size:18px">
                 <b>Quick start</b>
             </div>
+            <br>
             <div>
                 Use the search bar or click on a tag to find all images containing your query.
                 To see all images, click on the All Images tab.
@@ -28,20 +29,46 @@
             <br>
             <div>
                 The folder structure can be navigated from each image and folder page,
-                with the Root Folder tab linked to the overall project folder.
+                with the Root Folder tab linked to the topmost folder.
             </div>
             <hr>
-            <div style="text-align:center">
-                <b>Users</b>
+            <div style="text-align:center; font-size:18px">
+                <b>Permissions</b>
             </div>
             <br>
             <div>
-                All users with accounts have permission to add or remove tags from the tags page.
+                All users with accounts have permission to add or remove existing tags from individual images,
+                as well as all images in a folder at once (will not affect subfolders).
             </div>
             <br>
             <div>
-                Administrators additionally have the ability to create or delete user accounts,
-                and initiate a sync between Google Drive and the local database.
+                Administrators additionally have the ability to add or remove tags, create or delete user accounts,
+                and sync data from Google Drive to the local database.
+                Tags' categories can be changed by adding a tag as usual but selecting a different category.
+                Database access is currently required for directly renaming tags.
+            </div>
+            <br>
+            <div>
+                The Root user is the sole person able to add or remove administrator accounts.
+            </div>
+            <hr>
+            <div style="text-align:center; font-size:18px">
+                <b>List of users and admins</b>
+            </div>
+            <br>
+            <div class="row" align="center">
+                <div class="col-6">
+                    <div><b>Users</b></div>
+                    {% for user in users %}
+                    <div>{{ user.username }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-6">
+                    <div><b>Admins</b></div>
+                    {% for admin in admins %}
+                    <div>{{ admin.username }}</div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>

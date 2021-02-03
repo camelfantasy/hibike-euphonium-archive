@@ -1,16 +1,13 @@
 {% extends "header.html" %}
 {% block content %}
 <div class="row">
+    {% if image %}
     <div class="col-9">
-        {% if image %}
-        <div class="page-item">
+        <div class="page-item" align="center">
             <a href="{{ 'https://drive.google.com/uc?id=' + image.file_id }}">
                 <img src="{{ 'https://drive.google.com/uc?id=' + image.file_id }}" style="max-width:100%; max-height:100%">
             </a>
         </div>
-        {% else %}
-        <div>Image does not exist.</div>
-        {% endif %}
     </div>
     <div class="col-3">
         {% if image %}
@@ -68,7 +65,25 @@
             </div>
             {% endif %}
         </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        {% if category == "success" %}
+        <div id="fadeout" class="alert alert-success" style="text-align:center; margin-bottom:0px; margin-top:16px">
+            {{ message }}
+        </div>
+        {% elif category == "warning" %}
+        <div id="fadeout" class="alert alert-warning" style="text-align:center; margin-bottom:0px; margin-top:16px">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
         {% endif %}
     </div>
+    {% else %}
+    <div class="col" align="center">Image does not exist.</div>
+    {% endif %}
 </div>
 {% endblock %}

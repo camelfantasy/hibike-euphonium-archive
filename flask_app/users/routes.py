@@ -83,25 +83,27 @@ def account():
 def sync():
     if current_user.is_authenticated and current_user.level < 2:
         files, folders = getfiles()
-        if files == None:
-            return "1", 200
-        success = update(files, folders)
-        return success, 200
+        if files:
+            success = update(files, folders)
+            return success, 200
+        return "1", 200
     return render_template("404.html", searchform=SearchForm()), 404
 
 def getfiles():
     try:
+        # preserve tags through file deletion
         file_dict = { i.file_id : i.tags for i in File.objects() }
-        current_folders = Folder.objects()
 
         service = googleapiclient.discovery.build('drive', 'v3', developerKey=current_app.config['DRIVE_API_KEY'])
+
         ids = [current_app.config['ROOT_ID']]
         ret_files = []
         ret_folders = [Folder(folder_id=ids[0], parent_id="", name="Hibike! Series")]
 
+        # traverses folder structure breadth-first
         while len(ids) != 0:
             current_folder = ids.pop(0)
-            param = {"q": "'" + current_folder + "' in parents", "fields":"files(id, mimeType, name)"}
+            param = {"q": "'" + current_folder + "' in parents", "fields":"files(id, mimeType, name)", "pageSize":"1000"}
             result = service.files().list(**param).execute()
             files = result.get('files')
 
@@ -112,8 +114,6 @@ def getfiles():
                 elif 'image' in afile.get('mimeType'):
                     tags = file_dict[afile.get('id')] if afile.get('id') in file_dict else None
                     ret_files.append(File(file_id=afile.get('id'), folder_id=current_folder, name=afile.get('name'), tags=tags))
-                else:
-                    print(afile)
         
         return ret_files, ret_folders
     except:
