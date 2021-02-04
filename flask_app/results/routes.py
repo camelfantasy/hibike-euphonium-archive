@@ -51,10 +51,10 @@ def search_results(query):
     results = list(files)
     results.sort(key=lambda x:(x.folder_id, x.name.lower()))
 
-    # arranges results into rows of 5 results each
-    results_matrix = [results[i:i + 5] for i in range(0, len(results), 5)]
+    # arranges results into rows of 4 results each
+    results_matrix = [results[i:i + 4] for i in range(0, len(results), 4)]
 
-    # loads first 10 rows (50 images), stores any remaining files to be loaded dynamically
+    # loads first 10 rows (40 images), stores any remaining files to be loaded dynamically
     initial_results = results_matrix[:10]
     remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
 
@@ -116,10 +116,15 @@ def tags():
     other = list(filter(lambda x: x.category == "Other", result))
     characters = list(filter(lambda x: x.category == "Characters", result))
 
-    # splits characters into three columns, going left-right then top-bottom
-    characters1 = characters[::3]
-    characters2 = characters[1::3]
-    characters3 = characters[2::3]
+    # splits characters into three columns, going top-bottom then left-right
+    mod = len(characters) % 3
+    div = len(characters) // 3
+    split1 = div if mod == 0 else div + 1
+    split2 = 2*split1 if mod != 1 else 2*div+1
+
+    characters1 = characters[:split1]
+    characters2 = characters[split1:split2]
+    characters3 = characters[split2:]
     
     return render_template("tags.html", title="Tags", searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, media=media, other=other,
@@ -247,10 +252,10 @@ def folder(folder_id):
         files = list(File.objects(folder_id=folder.folder_id))
         files.sort(key=lambda x:x.name.lower())
 
-    # arranges results into rows of 5 results each
-    results_matrix = [files[i:i + 5] for i in range(0, len(files), 5)]
+    # arranges results into rows of 4 results each
+    results_matrix = [files[i:i + 4] for i in range(0, len(files), 4)]
 
-    # loads first 10 rows (50 images), stores any remaining files to be loaded dynamically
+    # loads first 10 rows (40 images), stores any remaining files to be loaded dynamically
     initial_results = results_matrix[:10]
     remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
 

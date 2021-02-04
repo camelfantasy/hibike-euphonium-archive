@@ -1,9 +1,8 @@
 {% extends "header.html" %}
 {% block content %}
 <div class="delete-confirmation" id="confirm-background">
-    <div class="row" align="center" style="margin-left: -15px; margin-right: -15px;">
-        <div class="col-4" id="confirm-col1"></div>
-        <div class="col-4 page-item" align="center" id="confirm-box">
+    <div class="row justify-content-center" style="padding-left:32px;padding-right:32px" align="center" id="confirm-row">
+        <div class="col-lg-4 page-item" align="center" id="confirm-box">
             <div id="confirm-text" style="font-weight:bold"></div>
             <br>
             <div class="row">
@@ -20,18 +19,16 @@
                 </div>
             </div>
         </div>
-        <div class="col-4" id="confirm-col2"></div>
     </div>
 </div>
-<div class="row">
-    <div class="col-2"></div>
-    <div class="col-8">
+<div class="row justify-content-center">
+    <div class="col-lg-8">
         <div class="row">
-            <div class="col-6">
-                <div style="font-size:32px">{{ current_user.username }}</div>
+            <div class="col-8">
+                <div style="font-size:32px; overflow:hidden; white-space:nowrap; text-overflow: 'ellipsis'">{{ current_user.username }}</div>
             </div>
-            <div class="col-6">
-                <div style="font-size:32px; text-align:right">
+            <div class="col-4">
+                <div style="font-size:32px; text-align:right; overflow:hidden; white-space:nowrap; text-overflow: ellipsis">
                     {% if current_user.level == 0 %}
                     Root
                     {% elif current_user.level == 1 %}
@@ -70,12 +67,12 @@
         {% endif %}
         <form action="" method="post">
             {{ password_form.csrf_token }}
-            <div class="form-group row">
-                <div class="col">
+            <div class="form-group row justify-content-center">
+                <div class="col-lg">
                     {{ password_form.password.label(class="form-control-label") }}
                     {{ password_form.password(class="form-control form-control-lg") }}
                 </div>
-                <div class="col">
+                <div class="col-lg mt-2 mt-lg-0">
                     {{ password_form.confirm_password.label(class="form-control-label") }}
                     {{ password_form.confirm_password(class="form-control form-control-lg") }}
                 </div>
@@ -90,32 +87,27 @@
             </div>
         </form>
     </div>
-    <div class="col-2"></div>
 </div>
 <br>
-<div class="row">
-    <div class="col-2"></div>
-    <div class="col-2">
+<div class="row justify-content-center">
+    <div class="col-lg-2 order-lg-1">
         {% if current_user.level < 2  %}
         <input type="submit" class="form-control btn-submit" value="Sync Drive"
             onclick="ajax_sync()" id="sync_button"/>
         {% endif %}
     </div>
-    <div class="col-2" style="display:flex; align-items:center">
-        <div id="sync_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%"></div>
-    </div>
-    <div class="col-2"></div>
-    <div class="col-2">
+    <div class="col-lg-2 order-lg-3 offset-lg-2 mt-2 mt-lg-0">
         <form action="{{ url_for('users.logout') }}" style="margin:0px">
             <input type="submit" class="form-control btn-logout" value="Logout" />
         </form>
     </div>
-    <div class="col-2"></div>
+    <div class="col-lg-2 order-lg-2" id="sync_col">
+        <div id="sync_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%; display:none"></div>
+    </div>
 </div>
 {% if current_user.level < 2  %}
-<div class="row">
-    <div class="col-2"></div>
-    <div class="col-8">
+<div class="row justify-content-center">
+    <div class="col-lg-8">
         <hr>
         <div style="font-size:32px">Users</div>
         <br>
@@ -153,16 +145,16 @@
             <form method="POST" action="" style="margin:0px">
                 {{ addform.csrf_token }}
                 <div class="form-group row">
-                    <div class="col-sm-4">
+                    <div class="col-lg-4 mb-4 mb-lg-0">
                         {{ addform.username(class="form-control", placeholder="Username", autocomplete="off") }}
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-lg-4 mb-4 mb-lg-0">
                         {{ addform.password(class="form-control", placeholder="Password") }}
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-lg-2 mb-4 mb-lg-0">
                         {{ addform.level(class="form-control") }}
                     </div>
-                    <div class="col-sm-2" align="right">
+                    <div class="col-lg-2" align="right">
                         {{ addform.submit(class="form-control btn-submit") }}
                     </div>
                 </div>
@@ -171,32 +163,32 @@
             <form method="POST" action="" style="margin:0px">
                 {{ addform.csrf_token }}
                 {{ addform.level(hidden=true) }}
-                <div class="form-group row">
-                    <div class="col-sm-5">
+                <div class="form-group row justify-content-center">
+                    <div class="col-lg-5">
                         {{ addform.username(class="form-control", placeholder="Username", autocomplete="off") }}
                     </div>
-                    <div class="col-sm-5">
+                    <div class="col-lg-5">
                         {{ addform.password(class="form-control", placeholder="Password") }}
                     </div>
-                    <div class="col-sm-2" align="right">
+                    <div class="col-lg-2" align="right">
                         {{ addform.submit(class="form-control btn-submit") }}
                     </div>
                 </div>
             </form>
             {% endif %}
             <hr style="border-top: 1px solid rgba(0,0,0,.25)">
-            <div class="row" style="margin:0px">
-                <div class="col-sm-9" style="padding:0px; font-weight:bold">Username</div>
-                <div class="col-sm-2" style="padding:0px; font-weight:bold">Level</div>
-                <div class="col-sm-1" style="padding:0px"></div>
+            <div class="row justify-content-center" style="margin:0px">
+                <div class="col-9" style="padding:0px; font-weight:bold">Username</div>
+                <div class="col-2" style="padding:0px; font-weight:bold">Level</div>
+                <div class="col-1" style="padding:0px"></div>
             </div>
             {% for user in users %}
             <hr style="margin-top:8px; margin-bottom:8px">
-            <div class="form-group row" style="margin:0px">
-                <label class="col-sm-9 col-form-label" style="padding:0px">
+            <div class="form-group row justify-content-center" style="margin:0px">
+                <label class="col-9 col-form-label" style="padding:0px">
                     {{ user.username }}
                 </label>
-                <label class="col-sm-2 col-form-label" style="padding:0px">
+                <label class="col-2 col-form-label" style="padding:0px">
                     {% if user.level == 0 %}
                     Root
                     {% elif user.level == 1 %}
@@ -206,20 +198,19 @@
                     {% endif %}
                 </label>
                 {% if current_user.level < user.level %}
-                <label class="col-sm-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;" onclick="confirm_delete('{{ user.username }}')">
+                <label class="col-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;" onclick="confirm_delete('{{ user.username }}')">
                     <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer">
                         <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
                         <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
                     </svg>
                 </label>
                 {% else %}
-                <lable class="col-sm-1" style="padding:0px"></lable>
+                <lable class="col-1" style="padding:0px"></lable>
                 {% endif %}
             </div>
             {% endfor %}
         </div>
     </div>
-    <div class="col-2"></div>
 </div>
 <script>
     function ajax_sync() {
@@ -229,6 +220,7 @@
         document.getElementById("sync_message").setAttribute("class", "alert alert-secondary");
         document.getElementById("sync_message").style.visibility = "visible";
         document.getElementById("sync_message").style.display = "block";
+        document.getElementById("sync_col").className = "col-lg-2 order-lg-2 mt-4 mt-lg-0";
         
         dots = '<span class="dot dot1">.</span><span class="dot dot2">.</span><span class="dot dot3">.</span>';
         document.getElementById("sync_message").innerHTML = "Syncing" + dots;
@@ -245,7 +237,9 @@
             }
             setTimeout(function() {
                 $('[id=sync_message]').fadeOut(500,function(){
-                    $('[id=sync_message]').css({"visibility":"hidden",display:'block'});
+                    $("#sync_col").removeClass("mt-4")
+                    $("#sync_col").removeClass("mt-lg-0")
+                    $('[id=sync_message]').css({"visibility":"hidden",display:'block'}).slideUp();
                 });
             }, 5000);
         }});
@@ -253,8 +247,7 @@
 
     background = document.getElementById('confirm-background');
     box = document.getElementById('confirm-box');
-    col1 = document.getElementById('confirm-col1');
-    col2 = document.getElementById('confirm-col2');
+    row = document.getElementById('confirm-row');
     confirm_text = document.getElementById('confirm-text');
     confirm_user = document.getElementById('confirm-user');
 
@@ -272,7 +265,7 @@
 
     // also allow closing popup by clicking outside of it
     window.onclick = function(event) {
-        if (event.target == background || event.target == col1 || event.target == col2) {
+        if (event.target == background || event.target == row) {
             background.style.display = "none";
             box.style.display = "none";
         }

@@ -1,8 +1,7 @@
 {% extends "header.html" %}
 {% block content %}
-<div class="row">
-    <div class="col-2"></div>
-    <div class="col-8">
+<div class="row justify-content-center">
+    <div class="col-lg-8">
         <div style="font-weight:bold; font-size:20px" align="center">
             About
         </div>
@@ -31,9 +30,20 @@
         <br>
         <div class="page-item">
             <div align="center"><b>Changelog</b></div>
-            <div align="center">Any notable changes will be listed here.</div>
+            <br>
             <div>
-                <b>0.1</b>
+                Any notable changes will be listed here.
+                This site is currently in beta.
+            </div>
+            <br>
+            <div>
+                <b>0.1.0</b>
+                <br>
+                Improved mobile experience.
+            </div>
+            <br>
+            <div>
+                <b>0.0.1</b>
                 <br>
                 Fixed header and footer overflow issues.
                 <br>
@@ -41,12 +51,11 @@
             </div>
             <br>
             <div>
-                <b>0.0</b>
+                <b>0.0.0</b>
                 <br>
-                Initial release
+                Initial release.
             </div>
         </div>
     </div>
-    <div class="col-2"></div>
 </div>
 {% endblock %}

@@ -2,14 +2,14 @@
 {% block content %}
 <div class="row">
     {% if image %}
-    <div class="col-9">
+    <div class="col-lg-9">
         <div class="page-item" align="center">
             <a href="{{ 'https://drive.google.com/uc?id=' + image.file_id }}">
                 <img src="{{ 'https://drive.google.com/uc?id=' + image.file_id }}" style="max-width:100%; max-height:100%">
             </a>
         </div>
     </div>
-    <div class="col-3">
+    <div class="col-lg-3 mt-4 mt-lg-0">
         {% if image %}
         <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
             {{ image.name }}
@@ -32,10 +32,10 @@
                 <br>
                 {% for tag in image.tags %}
                 <div class="form-group row" style="margin:0px">
-                    <label class="col-sm-11 col-form-label" style="padding:0px">
+                    <label class="col-11 col-form-label" style="padding:0px">
                         <a href="{{ url_for('results.search_results', query=tag.tag) }}" class="tag-link">{{ tag.tag }}</a>
                     </label>
-                    <label class="col-sm-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;">
+                    <label class="col-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;">
                         {% if current_user.is_authenticated %}
                         <form method="POST" action="" style="margin:0px">
                             {{ deletetagform.submit(hidden=true) }}

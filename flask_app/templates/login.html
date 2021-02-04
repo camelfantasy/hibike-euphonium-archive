@@ -1,8 +1,7 @@
 {% extends "header.html" %}
 {% block content %}
-<div class="row">
-    <div class="col-2"></div>
-    <div class="col-8">
+<div class="row justify-content-center">
+    <div class="col-lg-8">
         <div style="font-size:32px">
             Login
         </div>
@@ -32,12 +31,12 @@
         {% endif %}
         <form action="" method="post">
             {{ form.csrf_token }}
-            <div class="form-group row">
-                <div class="col">
+            <div class="form-group row justify-content-center">
+                <div class="col-lg">
                     {{ form.username.label(class="form-control-label") }}
                     {{ form.username(class="form-control form-control-lg", autocomplete="off") }}
                 </div>
-                <div class="col">
+                <div class="col-lg offset-lg-2 mt-2 mt-lg-0">
                     {{ form.password.label(class="form-control-label") }}
                     {{ form.password(class="form-control form-control-lg") }}
                 </div>
@@ -50,6 +49,5 @@
             Account creation is restricted to the site owner and administrators.
         </div>
     </div>
-    <div class="col-2"></div>
 </div>
 {% endblock %}
