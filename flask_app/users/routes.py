@@ -79,7 +79,7 @@ def account():
     return render_template("account.html", title="Account", searchform=SearchForm(),
         password_form=password_form, addform=add_form, deleteuserform=delete_user_form, users=users)
 
-@users.route("/sync")
+@users.route("/sync", methods=["GET"])
 def sync():
     if current_user.is_authenticated and current_user.level < 2:
         files, folders = getfiles()
@@ -87,7 +87,7 @@ def sync():
             success = update(files, folders)
             return success, 200
         return "1", 200
-    return render_template("404.html", searchform=SearchForm()), 404
+    return render_template("404.html", title="404", searchform=SearchForm())
 
 def getfiles():
     try:

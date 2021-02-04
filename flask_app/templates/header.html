@@ -1,14 +1,11 @@
 {% extends "base.html" %}
 {% block header %}
-<nav class="navbar navbar-expand-lg navbar-dark" style="background-color:rgb(0, 172, 198)">
-    <a href="{{ url_for('results.index') }}">
-        <div class="navbar-brand" href="{{ url_for('results.index') }}">Hibike! Euphonium Archive</div>
-    </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
-        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+<nav class="navbar navbar-expand-md navbar-dark" style="background-color:rgb(0, 172, 198)">
+    <a class="navbar-brand" href="{{ url_for('results.index') }}">Hibike! Euphonium Archive</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
         <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarCollapse">
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
         <ul class="navbar-nav ml-auto">
             {% if searchform %}
             <li class="nav-item">
@@ -21,27 +18,17 @@
                     Root Folder
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" style="padding-right:8px">
                 <a class="nav-link nav-link-custom" href="{{ url_for('results.tags') }}">
                     Tags
                 </a>
             </li>
-            &nbsp
-            &nbsp
             <li class="nav-item">
-                <form action="/" class="form-inline my-2 my-lg-0" method="POST">
+                <form action="/" class="form-inline" style="margin:0px; display:inline-block; padding-right:8px" method="POST">
                     {{ searchform.csrf_token }}
                     {{ searchform.search_query(class="form-control", placeholder="Search", autocomplete="off") }}
-
-                    <button class="btn btn-outline-light" type="submit" style="border: 0 none; background: none;" name="isubmit" value="x">
-                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-search" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z"/>
-                            <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/>
-                        </svg>
-                    </button>
                 </form>
             </li>
-            &nbsp
             <li class="nav-item">
                 <a class="nav-link nav-link-custom" href="{{ url_for('users.login') }}">
                     {% if current_user.is_authenticated %}
@@ -50,34 +37,28 @@
                     Login
                     {% endif %}
                 </a>
-            </li>
-            {% endif %}
+            </li>   
+            {% endif %} 
         </ul>
-    </div>
+    </div>  
 </nav>
 <br>
 <div class="container">
     {% block content %}{% endblock %}
 </div>
 <footer class="footer">
-    <div class="row" style="width:100%; font-size:14px; color:rgba(255,255,255,.5);">
-        <div class="col-4"></div>
-        <div class="col-4" align="center">
-            <a href="{{ url_for('results.about') }}" class="footer-link">
-                About
-            </a>
-            |
-            <a href="https://github.com/camelfantasy/hibike-euphonium-archive" class="footer-link" target="_blank">
-                GitHub
-            </a>
-            |
-            <a href="https://drive.google.com/drive/u/2/folders/1lqyNmKZy0LmnjOSv9jr8Um13MjZDhTh_" class="footer-link" target="_blank">
-                Google Drive
-            </a>
-        </div>
-        <div class="col-4" align="right">
-            All content belong to their respective owners.
-        </div>
+    <div class="d-flex justify-content-center" style="width:100%; font-size:14px; color:rgba(255,255,255,.5);">
+        <a href="{{ url_for('results.about') }}" class="footer-link">
+            About
+        </a>
+        &nbsp;|&nbsp;
+        <a href="https://github.com/camelfantasy/hibike-euphonium-archive" class="footer-link" target="_blank">
+            GitHub
+        </a>
+        &nbsp;|&nbsp;
+        <a href="https://drive.google.com/drive/u/2/folders/1lqyNmKZy0LmnjOSv9jr8Um13MjZDhTh_" class="footer-link" target="_blank">
+            Google Drive
+        </a>
     </div>
 </footer>
 {% endblock %}

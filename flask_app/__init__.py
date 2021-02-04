@@ -27,7 +27,7 @@ def initialize_root_user():
         return 1
 
 def page_not_found(e):
-    return render_template("404.html", title="404", searchform=SearchForm()), 404
+    return render_template("404.html", title="404", searchform=SearchForm())
 
 def create_app(test_config=None):
     app = Flask(__name__)

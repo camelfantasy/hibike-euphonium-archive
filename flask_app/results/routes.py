@@ -23,7 +23,7 @@ def index():
 
 @results.route("/about", methods=["GET"])
 def about():
-    return render_template("about.html", searchform=SearchForm())
+    return render_template("about.html", title="About", searchform=SearchForm())
 
 @results.route("/search-results/<query>", methods=["GET"])
 def search_results(query):
