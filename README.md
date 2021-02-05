@@ -110,7 +110,7 @@ Add/delete Administrator accounts
 
 ## Future development
 
-The next version will include several more features and improvements that will improve user experience.  These are likely to include:
+Development is currently still in beta.  The full release at an undetermined point in the future will include more features and improvements that will improve user experience.  These are likely (but not guaranteed) to include:
 * Popup suggestions when searching.
 * Advanced searching (i.e. with booleans).
 * An API.
@@ -119,7 +119,4 @@ The next version will include several more features and improvements that will i
 * Increasing the efficiency of certain functions related to retrieving database information due to MongoEngine limitations.
 * Embedding other file types
 * Changing some requests to GET instead of POST
-
-Other proposed features that are not prioritized include:
-* Creating a mobile version.
-* Improving appearances when zooming in or out.
+* Adding an album view for folders.
