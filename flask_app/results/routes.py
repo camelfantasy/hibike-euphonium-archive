@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, url_for, redirect, flash, request,
 from flask_login import current_user
 import re, json
 
-from ..forms import SearchForm, AddTagForm, DeleteTagForm
+from ..forms import SearchForm, AddTagForm, DeleteTagForm, UpdateDescriptionForm
 from ..models import User, Tag, File, Folder
 
 results = Blueprint("results", __name__)
@@ -134,6 +134,7 @@ def tags():
 def file(file_id):
     addtagform = AddTagForm()
     deletetagform = DeleteTagForm()
+    updatedescriptionform = UpdateDescriptionForm()
     image = File.objects(file_id=file_id).first()
 
     if request.form.get('submit') == 'Add' and addtagform.validate_on_submit() and current_user.is_authenticated and image:
@@ -168,6 +169,12 @@ def file(file_id):
         
         return redirect(url_for("results.file", file_id=file_id))
 
+    if request.form.get('submit') == 'Save' and updatedescriptionform.validate_on_submit() and current_user.is_authenticated and image:
+        description = updatedescriptionform.description.data.strip()
+        image.description = None if description == "" else description
+        image.save()
+        return redirect(url_for("results.file", file_id=file_id))
+
     folder = None
     if image:
         folder = Folder.objects(folder_id=image.folder_id).first()
@@ -176,13 +183,15 @@ def file(file_id):
 
     tags = list(map(lambda x: x.tag, Tag.objects()))
     title = "Image - " + image.name if image else "Error"
+    updatedescriptionform.description.data = image.description
     return render_template("image.html", title=title, searchform=SearchForm(), addtagform=addtagform,
-        deletetagform=deletetagform, image=image, folder=folder, tags=tags)
+        deletetagform=deletetagform, updatedescriptionform=updatedescriptionform, image=image, folder=folder, tags=tags)
 
 @results.route("/folder/<folder_id>", methods=["GET", "POST"])
 def folder(folder_id):
     addtagform = AddTagForm()
     deletetagform = DeleteTagForm()
+    updatedescriptionform = UpdateDescriptionForm()
 
     if folder_id == "root":
         folder_id = current_app.config['ROOT_ID']
@@ -241,6 +250,11 @@ def folder(folder_id):
 
         return redirect(url_for("results.folder", folder_id=folder_id))
 
+    if request.form.get('submit') == 'Save' and updatedescriptionform.validate_on_submit() and current_user.is_authenticated and folder:
+        description = updatedescriptionform.description.data.strip()
+        folder.description = None if description == "" else description
+        folder.save()
+        return redirect(url_for("results.folder", folder_id=folder_id))
 
     parent = None
     children = []
@@ -261,6 +275,8 @@ def folder(folder_id):
 
     tags = list(map(lambda x: x.tag, Tag.objects()))
     title = "Folder - " + folder.name if folder else "Error"
+    updatedescriptionform.description.data = folder.description
     return render_template("folder.html", title=title, searchform=SearchForm(),
-        addtagform=addtagform, deletetagform=deletetagform, folder=folder, children=children,
-        parent=parent, results=initial_results, remaining_results=remaining_results, tags=tags)
+        addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
+        folder=folder, children=children, parent=parent, results=initial_results,
+        remaining_results=remaining_results, tags=tags)

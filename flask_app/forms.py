@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, SelectField
+from wtforms import StringField, SubmitField, PasswordField, SelectField, TextAreaField
 from wtforms.validators import InputRequired, Length, EqualTo
 
 class SearchForm(FlaskForm):
@@ -9,8 +9,8 @@ class SearchForm(FlaskForm):
     submit = SubmitField("Search")
 
 class AddTagForm(FlaskForm):
-    tag = StringField("Add tag:", validators=[InputRequired()])
-    category = SelectField("Category:", choices=[("Characters", "Characters"), ("Media", "Media"), ("Other", "Other")])
+    tag = StringField("Add tag", validators=[InputRequired()])
+    category = SelectField("Category", choices=[("Characters", "Characters"), ("Media", "Media"), ("Other", "Other")])
     submit = SubmitField("Add")
 
 class DeleteTagForm(FlaskForm):
@@ -38,3 +38,7 @@ class AddUserForm(FlaskForm):
 class DeleteUserForm(FlaskForm):
     username = StringField("Username", validators=[InputRequired()])
     submit = SubmitField("Delete")
+
+class UpdateDescriptionForm(FlaskForm):
+    description = TextAreaField("Description")
+    submit = SubmitField("Save")

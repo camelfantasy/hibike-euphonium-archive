@@ -22,7 +22,7 @@
                 <br>
                 <a href="{{ url_for('results.folder', folder_id=folder.folder_id) }}" class="tag-link">{{ folder.name }}</a>
                 {% else %}
-                No folder
+                <div>>No folder</div>
                 {% endif %}
             </div>
             <br>
@@ -51,7 +51,7 @@
                 </div>
                 {% endfor %}
                 {% else %}
-                No tags
+                <div>No tags</div>
                 {% endif %}
             </div>
             {% if current_user.is_authenticated %}
@@ -80,6 +80,24 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
+        <br>
+        <div class="page-item" style="font-size:14px">
+            {% if current_user.is_authenticated %}
+            <div><b>Notes:</b></div>
+            <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete">
+                {{ updatedescriptionform.csrf_token }}
+                {{ updatedescriptionform.description(class="form-control my-3", style="resize:none; font-size:14px; height:100px;") }}
+                {{ updatedescriptionform.submit(class="btn btn-submit float-right") }}
+            </form>
+            {% else %}
+            {% if image.description %}
+            <div><b>Notes:</b></div>
+            <pre>{{ image.description }}</pre>
+            {% else %}
+            <div>No notes.</div>
+            {% endif %}
+            {% endif %}
+        </div>
         {% endif %}
     </div>
     {% else %}
@@ -122,6 +140,14 @@
                     });
                 a.appendChild(b);
                 }
+            }
+
+            // selects first item
+            if (numItems > 0) {
+                var x = document.getElementById(this.id + "autocomplete-list");
+                if (x) x = x.getElementsByTagName("div");
+                currentFocus++;
+                addActive(x);
             }
         });
 

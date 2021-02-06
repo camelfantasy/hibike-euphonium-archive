@@ -8,18 +8,18 @@
             {{ folder.name }}
         </div>
         <br>
-        <div class="page-item" style="word-wrap: break-word;">
+        <div class="page-item" style="word-wrap: break-word; font-size:14px">
             {% if parent %}
             <div style="font-weight:bold">Parent folder</div>
             <div>
                 <a href="{{ url_for('results.folder', folder_id=parent.folder_id) }}" class="tag-link">{{ parent.name }}</a>
             </div>
             {% else %}
-            Root folder.
+            <div>Root folder.</div>
             {% endif %}
             <hr>
             {% if children|length == 0 %}
-            No subfolders.
+            <div>No subfolders.</div>
             {% else %}
             <div style="font-weight:bold">Subfolders</div>
             {% for child in children %}
@@ -31,7 +31,7 @@
         </div>
         {% if current_user.is_authenticated %}
         <br>
-        <div class="page-item" style="word-wrap: break-word;">
+        <div class="page-item" style="word-wrap: break-word; font-size:14px">
             <div>
                 <form method="POST" action="" style="margin:0px; width:100%; max-height:100%" class="autocomplete">
                     {{ addtagform.csrf_token }}
@@ -65,6 +65,24 @@
         {% endif %}
         {% endwith %}
         {% endif %}
+        <br>
+        <div class="page-item" style="font-size:14px">
+            {% if current_user.is_authenticated %}
+            <div><b>Notes:</b></div>
+            <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete">
+                {{ updatedescriptionform.csrf_token }}
+                {{ updatedescriptionform.description(class="form-control my-3", style="resize:none; font-size:14px; height:100px;") }}
+                {{ updatedescriptionform.submit(class="btn btn-submit float-right") }}
+            </form>
+            {% else %}
+            {% if folder.description %}
+            <div><b>Notes:</b></div>
+            <pre>{{ folder.description }}</pre>
+            {% else %}
+            <div>No notes.</div>
+            {% endif %}
+            {% endif %}
+        </div>
         {% endif %}
     </div>
     <div class="col-lg-9 order-lg-1 mt-4 mt-lg-0">
@@ -199,6 +217,14 @@
                     });
                 a.appendChild(b);
                 }
+            }
+
+            // selects first item
+            if (numItems > 0) {
+                var x = document.getElementById(this.id + "autocomplete-list");
+                if (x) x = x.getElementsByTagName("div");
+                currentFocus++;
+                addActive(x);
             }
         });
 

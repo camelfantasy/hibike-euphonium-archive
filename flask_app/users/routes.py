@@ -92,7 +92,8 @@ def sync():
 def getfiles():
     try:
         # preserve tags through file deletion
-        file_dict = { i.file_id : i.tags for i in File.objects() }
+        file_dict = { i.file_id : [i.tags, i.description] for i in File.objects() }
+        folder_dict = { i.folder_id : i.description for i in Folder.objects() }
 
         service = googleapiclient.discovery.build('drive', 'v3', developerKey=current_app.config['DRIVE_API_KEY'])
         ids = [current_app.config['ROOT_ID']]
@@ -114,15 +115,16 @@ def getfiles():
 
             for afile in files:
                 if afile.get('mimeType') == 'application/vnd.google-apps.folder':
-                    ret_folders.append(Folder(folder_id=afile.get('id'), parent_id=current_folder, name=afile.get('name')))
+                    description = folder_dict[afile.get('id')] if afile.get('id') in folder_dict else None
+                    ret_folders.append(Folder(folder_id=afile.get('id'), parent_id=current_folder, name=afile.get('name'), description=description))
                     ids.append(afile.get('id'))
                 elif 'image' in afile.get('mimeType'):
-                    tags = file_dict[afile.get('id')] if afile.get('id') in file_dict else None
-                    ret_files.append(File(file_id=afile.get('id'), folder_id=current_folder, name=afile.get('name'), tags=tags))
+                    tags = file_dict[afile.get('id')][0] if afile.get('id') in file_dict else None
+                    description = file_dict[afile.get('id')][1] if afile.get('id') in file_dict else None
+                    ret_files.append(File(file_id=afile.get('id'), folder_id=current_folder, name=afile.get('name'), tags=tags, description=description))
         
         return ret_files, ret_folders
     except:
-        import sys
         return None, None
 
 def update(files, folders):

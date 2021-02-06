@@ -3,6 +3,15 @@ body {
     background: linear-gradient(to right, #d3f4f8bf 0%,#ffebf9bf 100%);
 }
 
+pre {
+    font-size: inherit;
+    color: inherit;
+    border: initial;
+    padding: initial;
+    font-family: inherit;
+    margin: 0px;
+}
+
 .page-item {
     border: 0px solid black;
     border-radius: 10px;
@@ -222,5 +231,17 @@ body {
     }
     100% {
         opacity: 0;
+    }
+}
+
+@media (min-width: 0px) {
+    .character3-col {
+        border-right: 0px;
+    }
+}
+
+@media (min-width: 992px) {
+    .character3-col {
+        border-right: 1px solid lightgray;
     }
 }

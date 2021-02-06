@@ -3,7 +3,7 @@
 This application syncs the structure of a Google Drive folder and all image files to a MongoDB database, and renders it as a user-friendly viewing experience with search and image tag functions.  More details are on the `/flask_app/templates/index.html` page.
 
 ## Installation
-This guide assumes little programming or server management knowledge.
+This guide assumes little programming or server management knowledge.  Further customization will require some knowledge in programming and web design.
 
 1. Ensure Python is installed and relatively up-to-date.  This application was developed in version 3.8.
 
@@ -26,7 +26,7 @@ This guide assumes little programming or server management knowledge.
 
     **`DRIVE_API_KEY`**: Generate one by following the instructions [here](https://support.google.com/googleapi/answer/6158862).
 
-    **`ROOT_ID`**: This is the folder ID of your root Google Drive folder.  The folder link will look similar to:
+    **`ROOT_ID`**: This is the folder ID of the root Google Drive folder.  The folder link will look similar to:
     ```
     https://drive.google.com/drive/folders/[FOLDER_ID]
     ```
@@ -49,7 +49,10 @@ This guide assumes little programming or server management knowledge.
 
     The link to access the application will appear among the messages, and look similar to `http://127.0.0.1:5000/`.  To stop the application, do `CTRL+C` in Terminal.
 
-6. (Optional) Deployment to Heroku:
+### Optional Steps:
+1. Google Analytics: Set up using the instructions [here](https://support.google.com/analytics/answer/1008015?hl=en), then substitute in the Tracking ID into `/flask_app/templates/base.html` at this line near the middle of the page: `ga('create', '[TRACKING ID]', 'auto');`.
+
+2. Deployment to Heroku:
 * Upload the code to a GitHub repository
 * Create a new application on Heroku (a free tier exists and is sufficient), and connect the repository under `Deploy`.
 * Set environmental variables in `Config Vars` under `Settings`.
@@ -120,3 +123,4 @@ Development is currently still in beta.  The full release at an undetermined poi
 * Embedding other file types
 * Changing some requests to GET instead of POST
 * Adding an album view for folders.
+* Some support for Japanese.

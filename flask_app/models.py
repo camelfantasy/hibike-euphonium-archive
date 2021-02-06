@@ -22,8 +22,10 @@ class File(db.Document):
     folder_id = db.StringField(required=True)
     name = db.StringField(required=True)
     tags = db.ListField(db.ReferenceField(Tag, required=True))
+    description = db.StringField()
 
 class Folder(db.Document):
     folder_id = db.StringField(required=True)
     parent_id = db.StringField()
     name = db.StringField(required=True)
+    description = db.StringField()
