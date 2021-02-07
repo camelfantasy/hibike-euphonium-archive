@@ -27,7 +27,7 @@ def login():
         
         return redirect(url_for("users.login"))
 
-    metadata = Metadata(title="Tags", url=None, description="", image=None)
+    metadata = Metadata(title="Login", url=None, description="", image=None)
     return render_template("login.html", title="Login", form=form, searchform=SearchForm(), searchtags=getSearchTags(), metadata=metadata)
 
 @users.route("/logout")
