@@ -3,9 +3,10 @@ from flask_login import current_user
 import re, json
 
 from ..forms import SearchForm, AddTagForm, DeleteTagForm, UpdateDescriptionForm
-from ..models import User, Tag, File, Folder
+from ..models import User, Tag, File, Folder, Metadata
 
 results = Blueprint("results", __name__)
+baseurl = "https://hibike-euphonium-archive.herokuapp.com"
 
 def getSearchTags():
     return list(map(lambda x: x.tag, Tag.objects()))
@@ -74,8 +75,9 @@ def search_results(query):
     else:
         title = "Search - " + query
 
-    return render_template("search_results.html", title=title, searchform=SearchForm(),
-        query=query, results=initial_results, remaining_results=remaining_results, searchtags=getSearchTags())
+    metadata = Metadata(url=baseurl + url_for('results.search_results', query=query), description="Search results for: " + query, image=None)
+    return render_template("search_results.html", title=title, searchform=SearchForm(), query=query,
+        results=initial_results, remaining_results=remaining_results, searchtags=getSearchTags(), metadata=metadata)
 
 @results.route("/tags", methods=["GET", "POST"])
 def tags():
@@ -197,8 +199,9 @@ def file(file_id):
 
     title = "Image - " + image.name if image else "Error"
     updatedescriptionform.description.data = image.description if image else None
+    metadata = Metadata(url=baseurl + url_for('results.file', file_id=file_id), description="Image: " + image.name, image='https://drive.google.com/uc?id=' + image.file_id)
     return render_template("image.html", title=title, searchform=SearchForm(), addtagform=addtagform, deletetagform=deletetagform,
-    updatedescriptionform=updatedescriptionform, image=image, folder=folder, tags=suggestion_tags, searchtags=getSearchTags())
+    updatedescriptionform=updatedescriptionform, image=image, folder=folder, tags=suggestion_tags, searchtags=getSearchTags(), metadata=metadata)
 
 @results.route("/folder/<folder_id>", methods=["GET", "POST"])
 def folder(folder_id):
@@ -292,7 +295,8 @@ def folder(folder_id):
     tags = list(map(lambda x: x.tag, Tag.objects()))
     title = "Folder - " + folder.name if folder else "Error"
     updatedescriptionform.description.data = folder.description if folder else None
+    metadata = Metadata(url=baseurl + url_for('results.folder', folder_id=folder_id), description="Folder: " + folder.name, image=None)
     return render_template("folder.html", title=title, searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
-        folder=folder, children=children, parent=parent, results=initial_results,
-        remaining_results=remaining_results, tags=tags, searchtags=getSearchTags())
+        folder=folder, children=children, parent=parent, results=initial_results, remaining_results=remaining_results,
+        tags=tags, searchtags=getSearchTags(), metadata=metadata)

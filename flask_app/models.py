@@ -29,3 +29,9 @@ class Folder(db.Document):
     parent_id = db.StringField()
     name = db.StringField(required=True)
     description = db.StringField()
+
+class Metadata():
+    def __init__(self, url, description, image):
+        self.url = url
+        self.description = description
+        self.image = image

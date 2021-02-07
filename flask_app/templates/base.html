@@ -3,12 +3,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A website interface for the Hibike! Euphonium Archive project.">
-
-    <meta property="og:url" content="https://hibike-euphonium-archive.herokuapp.com/">
-    <meta property="og:type" content="website">
+    
     <meta property="og:title" content="Hibike! Euphonium Archive">
+    <meta property="og:type" content="website">
+    <!-- check here -->
+    {% if metadata and metadata.url %}
+    <meta property="og:url" content="{{ metadata.url }}">
+    {% else %}
+    <meta property="og:url" content="https://hibike-euphonium-archive.herokuapp.com/">
+    {% endif %}
+    {% if metadata and metadata.description %}
+    <meta property="og:description" content="{{ metadata.description }}">
+    {% else %}
     <meta property="og:description" content="A website interface for the Hibike! Euphonium Archive project.">
+    {% endif %}
+    {% if metadata and metadata.image %}
+    <meta property="og:image" content="{{ metadata.image }}">
+    {% else %}
     <meta property="og:image" content="https://hibike-euphonium-archive.herokuapp.com/static/images/lizicon.png">
+    {% endif %}
+    <!-- end here -->
     
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}">
