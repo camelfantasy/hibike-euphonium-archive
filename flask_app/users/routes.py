@@ -3,7 +3,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 
 from .. import bcrypt
 from ..forms import SearchForm, UpdatePasswordForm, LoginForm, AddUserForm, DeleteUserForm
-from ..models import User, File, Folder, Tag
+from ..models import User, File, Folder, Tag, Metadata
 
 import googleapiclient.discovery
 
@@ -27,7 +27,8 @@ def login():
         
         return redirect(url_for("users.login"))
 
-    return render_template("login.html", title="Login", form=form, searchform=SearchForm(), searchtags=getSearchTags())
+    metadata = Metadata(title="Tags", url=None, description="", image=None)
+    return render_template("login.html", title="Login", form=form, searchform=SearchForm(), searchtags=getSearchTags(), metadata=metadata)
 
 @users.route("/logout")
 def logout():
@@ -79,8 +80,9 @@ def account():
     users = list(User.objects())
     users.sort(key=lambda x: (x.level, x.username.lower()))
 
+    metadata = Metadata(title="Account", url=None, description="", image=None)
     return render_template("account.html", title="Account", searchform=SearchForm(), password_form=password_form,
-        addform=add_form, deleteuserform=delete_user_form, users=users, searchtags=getSearchTags())
+        addform=add_form, deleteuserform=delete_user_form, users=users, searchtags=getSearchTags(), metadata=metadata)
 
 @users.route("/sync", methods=["GET"])
 def sync():

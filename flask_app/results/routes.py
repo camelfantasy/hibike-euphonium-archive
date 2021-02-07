@@ -27,7 +27,8 @@ def index():
 
 @results.route("/about", methods=["GET"])
 def about():
-    return render_template("about.html", title="About", searchform=SearchForm(), searchtags=getSearchTags())
+    metadata = Metadata(title="About", url=None, description=None, image=None)
+    return render_template("about.html", title="About", searchform=SearchForm(), searchtags=getSearchTags(), metadata=metadata)
 
 @results.route("/search-results/<query>", methods=["GET"])
 def search_results(query):
@@ -137,9 +138,10 @@ def tags():
     characters2 = characters[split1:split2]
     characters3 = characters[split2:]
     
+    metadata = Metadata(title="Tags", url=None, description="", image=None)
     return render_template("tags.html", title="Tags", searchform=SearchForm(), addtagform=addtagform,
         deletetagform=deletetagform, media=media, other=other, unsorted=unsorted, characters1=characters1,
-        characters2=characters2, characters3=characters3, searchtags=getSearchTags())
+        characters2=characters2, characters3=characters3, searchtags=getSearchTags(), metadata=metadata)
 
 @results.route("/file/<file_id>", methods=["GET", "POST"])
 def file(file_id):
