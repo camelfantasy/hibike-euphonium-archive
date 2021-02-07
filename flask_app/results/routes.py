@@ -199,7 +199,7 @@ def file(file_id):
 
     title = "Image - " + image.name if image else "Error"
     updatedescriptionform.description.data = image.description if image else None
-    metadata = Metadata(title=image.name, url=baseurl + url_for('results.file', file_id=file_id), description="Image", image='https://drive.google.com/uc?id=' + image.file_id)
+    metadata = Metadata(title=image.name, url=baseurl + url_for('results.file', file_id=file_id), description=", ".join(existing_tags), image='https://drive.google.com/uc?id=' + image.file_id)
     return render_template("image.html", title=title, searchform=SearchForm(), addtagform=addtagform, deletetagform=deletetagform,
     updatedescriptionform=updatedescriptionform, image=image, folder=folder, tags=suggestion_tags, searchtags=getSearchTags(), metadata=metadata)
 
