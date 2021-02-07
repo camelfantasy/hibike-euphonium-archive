@@ -114,7 +114,6 @@ Add/delete Administrator accounts
 ## Future development
 
 Development is currently still in beta.  The full release at an undetermined point in the future will include more features and improvements that will improve user experience.  These are likely (but not guaranteed) to include:
-* Popup suggestions when searching.
 * Advanced searching (i.e. with booleans).
 * An API.
 * Directly editing tags, usernames, and user permission levels.

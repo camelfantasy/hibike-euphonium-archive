@@ -3,11 +3,14 @@ from flask_login import current_user, login_required, login_user, logout_user
 
 from .. import bcrypt
 from ..forms import SearchForm, UpdatePasswordForm, LoginForm, AddUserForm, DeleteUserForm
-from ..models import User, File, Folder
+from ..models import User, File, Folder, Tag
 
 import googleapiclient.discovery
 
 users = Blueprint("users", __name__)
+
+def getSearchTags():
+    return list(map(lambda x: x.tag, Tag.objects()))
 
 @users.route("/login", methods=["GET", "POST"])
 def login():
@@ -24,7 +27,7 @@ def login():
         
         return redirect(url_for("users.login"))
 
-    return render_template("login.html", title="Login", form=form, searchform=SearchForm())
+    return render_template("login.html", title="Login", form=form, searchform=SearchForm(), searchtags=getSearchTags())
 
 @users.route("/logout")
 def logout():
@@ -76,8 +79,8 @@ def account():
     users = list(User.objects())
     users.sort(key=lambda x: (x.level, x.username.lower()))
 
-    return render_template("account.html", title="Account", searchform=SearchForm(),
-        password_form=password_form, addform=add_form, deleteuserform=delete_user_form, users=users)
+    return render_template("account.html", title="Account", searchform=SearchForm(), password_form=password_form,
+        addform=add_form, deleteuserform=delete_user_form, users=users, searchtags=getSearchTags())
 
 @users.route("/sync", methods=["GET"])
 def sync():
@@ -87,7 +90,7 @@ def sync():
             success = update(files, folders)
             return success, 200
         return "1", 200
-    return render_template("404.html", title="404", searchform=SearchForm())
+    return render_template("404.html", title="404", searchform=SearchForm(), searchtags=getSearchTags())
 
 def getfiles():
     try:

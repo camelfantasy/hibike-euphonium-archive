@@ -7,6 +7,9 @@ from ..models import User, Tag, File, Folder
 
 results = Blueprint("results", __name__)
 
+def getSearchTags():
+    return list(map(lambda x: x.tag, Tag.objects()))
+
 @results.route("/", methods=["GET", "POST"])
 def index():
     searchform = SearchForm()
@@ -19,11 +22,11 @@ def index():
     users = list(filter(lambda x: x.level == 2, all_users))
     admins = list(filter(lambda x: x.level == 1, all_users))
 
-    return render_template("index.html", searchform=searchform, users=users, admins=admins)
+    return render_template("index.html", searchform=searchform, users=users, admins=admins, searchtags=getSearchTags())
 
 @results.route("/about", methods=["GET"])
 def about():
-    return render_template("about.html", title="About", searchform=SearchForm())
+    return render_template("about.html", title="About", searchform=SearchForm(), searchtags=getSearchTags())
 
 @results.route("/search-results/<query>", methods=["GET"])
 def search_results(query):
@@ -36,17 +39,22 @@ def search_results(query):
     elif query.lower() == "untagged":
         files = File.objects(tags=[])
     else:
-        # regex will match for individual words in phrases but not substrings
-        regex = re.compile("^([a-z0-9 ]+ )?" + query + "( [a-z0-9 ]+)?$", re.IGNORECASE)
-        tags = Tag.objects(tag=regex)
+        regex = re.compile("^" + query + "$", re.IGNORECASE)
+        tag = Tag.objects(tag=regex).first()
+        files = File.objects().filter(tags__contains=tag.id)
 
-        # multiple tags may be valid based on the query
-        for tag in tags:
-            tag_files = File.objects().filter(tags__contains=tag.id)
-            # ensure no duplication in returned results
-            for tag_file in tag_files:
-                if not any(x.file_id == tag_file.file_id for x in files):
-                    files.append(tag_file)
+        # saving below code for potential future use
+        # regex will match for individual words in phrases but not substrings
+        # regex = re.compile("^([a-z0-9 ]+ )?" + query + "( [a-z0-9 ]+)?$", re.IGNORECASE)
+        # tags = Tag.objects(tag=regex)
+        #
+        # # multiple tags may be valid based on the query
+        # for tag in tags:
+        #     tag_files = File.objects().filter(tags__contains=tag.id)
+        #     # ensure no duplication in returned results
+        #     for tag_file in tag_files:
+        #         if not any(x.file_id == tag_file.file_id for x in files):
+        #             files.append(tag_file)
 
     results = list(files)
     results.sort(key=lambda x:(x.folder_id, x.name.lower()))
@@ -67,7 +75,7 @@ def search_results(query):
         title = "Search - " + query
 
     return render_template("search_results.html", title=title, searchform=SearchForm(),
-        query=query, results=initial_results, remaining_results=remaining_results)
+        query=query, results=initial_results, remaining_results=remaining_results, searchtags=getSearchTags())
 
 @results.route("/tags", methods=["GET", "POST"])
 def tags():
@@ -127,9 +135,9 @@ def tags():
     characters2 = characters[split1:split2]
     characters3 = characters[split2:]
     
-    return render_template("tags.html", title="Tags", searchform=SearchForm(),
-        addtagform=addtagform, deletetagform=deletetagform, media=media, other=other,
-        unsorted=unsorted, characters1=characters1, characters2=characters2, characters3=characters3)
+    return render_template("tags.html", title="Tags", searchform=SearchForm(), addtagform=addtagform,
+        deletetagform=deletetagform, media=media, other=other, unsorted=unsorted, characters1=characters1,
+        characters2=characters2, characters3=characters3, searchtags=getSearchTags())
 
 @results.route("/file/<file_id>", methods=["GET", "POST"])
 def file(file_id):
@@ -189,8 +197,8 @@ def file(file_id):
 
     title = "Image - " + image.name if image else "Error"
     updatedescriptionform.description.data = image.description if image else None
-    return render_template("image.html", title=title, searchform=SearchForm(), addtagform=addtagform,
-        deletetagform=deletetagform, updatedescriptionform=updatedescriptionform, image=image, folder=folder, tags=suggestion_tags)
+    return render_template("image.html", title=title, searchform=SearchForm(), addtagform=addtagform, deletetagform=deletetagform,
+    updatedescriptionform=updatedescriptionform, image=image, folder=folder, tags=suggestion_tags, searchtags=getSearchTags())
 
 @results.route("/folder/<folder_id>", methods=["GET", "POST"])
 def folder(folder_id):
@@ -287,4 +295,4 @@ def folder(folder_id):
     return render_template("folder.html", title=title, searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
         folder=folder, children=children, parent=parent, results=initial_results,
-        remaining_results=remaining_results, tags=tags)
+        remaining_results=remaining_results, tags=tags, searchtags=getSearchTags())
