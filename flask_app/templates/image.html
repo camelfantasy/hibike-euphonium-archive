@@ -10,7 +10,6 @@
         </div>
     </div>
     <div class="col-lg-3 mt-4 mt-lg-0">
-        {% if image %}
         <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
             {{ image.name }}
         </div>
@@ -86,7 +85,7 @@
             <div><b>Notes:</b></div>
             <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete">
                 {{ updatedescriptionform.csrf_token }}
-                {{ updatedescriptionform.description(class="form-control my-3", style="resize:none; font-size:14px; height:100px;") }}
+                {{ updatedescriptionform.description(class="form-control my-3", style="resize:none; font-size:14px", id="descriptionbox") }}
                 {{ updatedescriptionform.submit(class="btn btn-submit float-right") }}
             </form>
             {% else %}
@@ -98,7 +97,17 @@
             {% endif %}
             {% endif %}
         </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        {% if category == "notes" %}
+        <div id="fadeout" class="alert alert-success" style="text-align:center; margin-bottom:0px; margin-top:16px">
+            {{ message }}
+        </div>
         {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
     </div>
     {% else %}
     <div class="col" align="center">Image does not exist.</div>
@@ -205,6 +214,15 @@
     var tags = dict.tags;
 
     autocomplete(document.getElementById("myInput"), tags);
+
+    // resize description box below
+    var descriptionbox = document.getElementById("descriptionbox");
+    function resizeDescriptionBox() {
+        descriptionbox.style.height = "";
+        descriptionbox.style.height = Math.max(descriptionbox.scrollHeight, 55) + 2 + "px";
+    }
+    resizeDescriptionBox(); // onload call
+    descriptionbox.oninput = resizeDescriptionBox;
 </script>
 {% endif %}
 {% endblock %}

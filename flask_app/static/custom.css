@@ -10,6 +10,8 @@ pre {
     padding: initial;
     font-family: inherit;
     margin: 0px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 .page-item {

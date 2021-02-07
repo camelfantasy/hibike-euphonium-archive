@@ -114,6 +114,7 @@ def tags():
         
     media = list(filter(lambda x: x.category == "Media", result))
     other = list(filter(lambda x: x.category == "Other", result))
+    unsorted = list(filter(lambda x: x.category == "Unsorted", result))
     characters = list(filter(lambda x: x.category == "Characters", result))
 
     # splits characters into three columns, going top-bottom then left-right
@@ -128,7 +129,7 @@ def tags():
     
     return render_template("tags.html", title="Tags", searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, media=media, other=other,
-        characters1=characters1, characters2=characters2, characters3=characters3)
+        unsorted=unsorted, characters1=characters1, characters2=characters2, characters3=characters3)
 
 @results.route("/file/<file_id>", methods=["GET", "POST"])
 def file(file_id):
@@ -150,7 +151,7 @@ def file(file_id):
                 flash("Tag '" + tag + "' already added.", "warning")
         else:
             if current_user.level < 2:
-                new_tag = Tag(tag=tag, category="Other")
+                new_tag = Tag(tag=tag, category="Unsorted")
                 new_tag.save()
                 image.tags.append(new_tag)
                 flash("Tag '" + tag + "' created and added to image.", "success")
@@ -173,6 +174,7 @@ def file(file_id):
         description = updatedescriptionform.description.data.strip()
         image.description = None if description == "" else description
         image.save()
+        flash("Notes updated.", "notes")
         return redirect(url_for("results.file", file_id=file_id))
 
     folder = None
@@ -181,11 +183,14 @@ def file(file_id):
         if image.tags:
             image.tags.sort(key=lambda x:x.tag.lower())
 
-    tags = list(map(lambda x: x.tag, Tag.objects()))
+    existing_tags = list(map(lambda x: x.tag, image.tags))
+    all_tags = list(map(lambda x: x.tag, Tag.objects()))
+    suggestion_tags = list(filter(lambda x: x not in existing_tags, all_tags))
+
     title = "Image - " + image.name if image else "Error"
-    updatedescriptionform.description.data = image.description
+    updatedescriptionform.description.data = image.description if image else None
     return render_template("image.html", title=title, searchform=SearchForm(), addtagform=addtagform,
-        deletetagform=deletetagform, updatedescriptionform=updatedescriptionform, image=image, folder=folder, tags=tags)
+        deletetagform=deletetagform, updatedescriptionform=updatedescriptionform, image=image, folder=folder, tags=suggestion_tags)
 
 @results.route("/folder/<folder_id>", methods=["GET", "POST"])
 def folder(folder_id):
@@ -208,7 +213,7 @@ def folder(folder_id):
         if not existing_tag:
             if current_user.level < 2:
                 if len(files) != 0:
-                    new_tag = Tag(tag=tag, category="Other")
+                    new_tag = Tag(tag=tag, category="Unsorted")
                     new_tag.save()
                     existing_tag = new_tag
                     flash("Tag '" + tag + "' created and added to images.", "success")
@@ -219,6 +224,8 @@ def folder(folder_id):
         else:
             if len(files) != 0:
                 flash("Tag '" + tag + "' added to images.", "success")
+            else:
+                flash("No images to update.", "warning")
         
         # checks against user with no permission to add a new tag
         if existing_tag:
@@ -254,6 +261,7 @@ def folder(folder_id):
         description = updatedescriptionform.description.data.strip()
         folder.description = None if description == "" else description
         folder.save()
+        flash("Notes updated.", "notes")
         return redirect(url_for("results.folder", folder_id=folder_id))
 
     parent = None
@@ -275,7 +283,7 @@ def folder(folder_id):
 
     tags = list(map(lambda x: x.tag, Tag.objects()))
     title = "Folder - " + folder.name if folder else "Error"
-    updatedescriptionform.description.data = folder.description
+    updatedescriptionform.description.data = folder.description if folder else None
     return render_template("folder.html", title=title, searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
         folder=folder, children=children, parent=parent, results=initial_results,
