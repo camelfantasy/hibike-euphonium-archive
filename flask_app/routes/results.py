@@ -212,7 +212,8 @@ def file(file_id):
     updatedescriptionform.description.data = image.description if image else None
     metadata = Metadata(title=image.name if image else None,
         url=current_app.config["SITE_URL"] + url_for('results.file', file_id=file_id),
-        description=", ".join(existing_tags),
+        description=", ".join(existing_tags) if len(existing_tags) <= 10
+            else ", ".join(existing_tags[:10]) + "...",
         image='https://drive.google.com/uc?id=' + image.file_id if image else None)
     return render_template("image.html", title=title, searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
