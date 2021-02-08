@@ -23,11 +23,11 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 class UpdatePasswordForm(FlaskForm):
-    password = PasswordField("Password", validators=[InputRequired(), Length(min=8, max=50, message="Password must be 8-50 characters.")])
+    password = PasswordField("New Password", validators=[InputRequired(), Length(min=8, max=50, message="Password must be 8-50 characters.")])
     confirm_password = PasswordField(
         "Confirm Password", validators=[InputRequired(), EqualTo("password", message="Passwords must match.")]
     )
-    submit = SubmitField("Update Password")
+    submit = SubmitField("Change Password")
 
 class AddUserForm(FlaskForm):
     username = StringField("Username", validators=[InputRequired(), Length(min=1, max=20, message="Username must be 1-20 characters.")])

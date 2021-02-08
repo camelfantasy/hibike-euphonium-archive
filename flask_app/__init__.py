@@ -9,8 +9,8 @@ db = MongoEngine()
 login_manager = LoginManager()
 bcrypt = Bcrypt()
 
-from flask_app.users.routes import users
-from flask_app.results.routes import results
+from flask_app.routes.users import users
+from flask_app.routes.results import results
 from .forms import SearchForm
 from .models import User
 
@@ -53,6 +53,10 @@ def create_app(test_config=None):
     mongodb_host = os.getenv("MONGODB_HOST")
     if mongodb_host and not app.config["MONGODB_HOST"]:
         app.config["MONGODB_HOST"] = mongodb_host
+
+    site_url = os.getenv("SITE_URL")
+    if site_url and not app.config["SITE_URL"]:
+        app.config["SITE_URL"] = site_url
 
     print("Initializing login manager")
     login_manager.init_app(app)

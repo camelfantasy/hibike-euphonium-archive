@@ -2,3 +2,4 @@ SECRET_KEY = b''
 DRIVE_API_KEY = ""
 ROOT_ID = ""
 MONGODB_HOST = ""
+SITE_URL = ""

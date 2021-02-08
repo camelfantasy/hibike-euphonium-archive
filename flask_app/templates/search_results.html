@@ -1,7 +1,7 @@
 {% extends "header.html" %}
 {% block content %}
-<div class="row">
-    <div class="col">
+<div class="row justify-content-center">
+    <div class="col-11 col-lg-12">
         <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
             {% if query.lower() == "all" %}
             All images
@@ -13,13 +13,13 @@
         </div>
         <br>
         {% if results|length == 0 %}
-        <div>No Results</div>
+        <div>No Results.</div>
         {% else %}
         <div class="page-item">
             {% for row in results %}
             <div class="row" style="display:flex; align-items: center;">
                 {% for item in row %}
-                <div class="col-lg-3 col-md-6 col-sm-12 d-flex justify-content-center" style="height:250px; display:flex; align-items: center;">
+                <div class="col-lg-3 col-md-6 col-sm-12 d-flex justify-content-center" style="height:235px; display:flex; align-items: center;">
                     <a href="{{ url_for('results.file', file_id=item.file_id) }}" target="_blank">
                         <img src="{{ 'https://drive.google.com/thumbnail?id=' + item.file_id }}" style="max-width:100%; max-height:100%">
                     </a>
@@ -40,65 +40,11 @@
     <div class="spinner-border" style="animation:spinner-border 1s linear infinite; color:rgb(0, 172, 198); margin-top:16px" role="status"></div>
 </div>
 <script>
-    // extract server response
+    // extract server response - used as part of image loader in image_loader.js
     var dict = { "ids" : {{ remaining_results|tojson }} };
     var remaining_results = dict.ids;
-
-    var results_url = {{ url_for('results.file', file_id="") }};
-    var scroller = document.querySelector("#scroller");
-    var template_row = document.querySelector('#new_row');
-    var loaded = document.querySelector("#loaded");
-    var sentinel = document.querySelector('#sentinel');
-
-    // disable sentinel if unnecessary
-    if (remaining_results.length <= 10) {
-        sentinel.innerHTML = "";
-    }
     
-    // loads more images
-    function loadItems() {
-        if (remaining_results.length > 0) {
-            new_section = [];
-            if (remaining_results.length < 10) {
-                new_section = remaining_results.slice(0,remaining_results.length);
-                remaining_results = [];
-            } else {
-                new_section = remaining_results.slice(0, 10);
-                remaining_results = remaining_results.slice(10,remaining_results.length);
-            }
-            
-            new_section.forEach(function(new_row) {
-                let template_clone = template_row.content.cloneNode(true);
-                var innerhtml = "";
-                new_row.forEach(function(file_id) {
-                    var href = results_url + file_id;
-                    var src = 'https://drive.google.com/thumbnail?id=' + file_id;
-                    innerhtml += `  <div class="col-lg-3 col-md-6 col-sm-12 d-flex justify-content-center" style="height:250px; display:flex; align-items: center;">
-                                        <a href="` + href + `" id="link" target="_blank">
-                                            <img src="` + src + `" style="max-width:100%; max-height:100%" id="image">
-                                        </a>
-                                    </div>`
-                })
-                template_clone.querySelector("#row").innerHTML = innerhtml;
-                scroller.appendChild(template_clone);
-            })
-        } else {
-            sentinel.innerHTML = "";
-        }
-    }
-
-    // time used to prevent function being called more than once at the same time
-    var time = Date.now()
-
-    // detects if end of page is reached
-    var intersectionObserver = new IntersectionObserver(entries => {
-        if (entries[0].intersectionRatio <= 0 || Date.now() - time < 10) {
-            return;
-        }
-        loadItems();
-        time = Date.now()
-    });
-
-intersectionObserver.observe(sentinel);
+    var results_url = {{ url_for('results.file', file_id="") }};
 </script>
+<script type="text/javascript" src="{{ url_for('static', filename='/scripts/image_loader.js') }}"></script>
 {% endblock %}

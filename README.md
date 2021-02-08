@@ -2,6 +2,8 @@
 
 This application syncs the structure of a Google Drive folder and all image files to a MongoDB database, and renders it as a user-friendly viewing experience with search and image tag functions.  More details are on the `/flask_app/templates/index.html` page.
 
+Note that this project is still in beta and will see frequent updates and ocassional bugs.
+
 ## Installation
 This guide assumes little programming or server management knowledge.  Further customization will require some knowledge in programming and web design.
 
@@ -55,7 +57,7 @@ This guide assumes little programming or server management knowledge.  Further c
 2. Deployment to Heroku:
 * Upload the code to a GitHub repository
 * Create a new application on Heroku (a free tier exists and is sufficient), and connect the repository under `Deploy`.
-* Set environmental variables in `Config Vars` under `Settings`.
+* Set the above environmental variables in `Config Vars` under `Settings`.  Additionally, set `SITE_URL` to your site URL.
 * Click `More` and `Restart all dynos` for the changes to take effect, and click `Open app` to access the application.
 * If the application does not start up, check for errors in `View logs` under `More`.
 

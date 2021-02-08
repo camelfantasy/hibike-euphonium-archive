@@ -6,7 +6,6 @@ from ..forms import SearchForm, AddTagForm, DeleteTagForm, UpdateDescriptionForm
 from ..models import User, Tag, File, Folder, Metadata
 
 results = Blueprint("results", __name__)
-baseurl = "https://hibike-euphonium-archive.herokuapp.com"
 
 def getSearchTags():
     return list(map(lambda x: x.tag, Tag.objects()))
@@ -23,12 +22,14 @@ def index():
     users = list(filter(lambda x: x.level == 2, all_users))
     admins = list(filter(lambda x: x.level == 1, all_users))
 
-    return render_template("index.html", searchform=searchform, users=users, admins=admins, searchtags=getSearchTags())
+    return render_template("index.html", searchform=searchform, users=users,
+        admins=admins, searchtags=getSearchTags())
 
 @results.route("/about", methods=["GET"])
 def about():
     metadata = Metadata(title="About", url=None, description=None, image=None)
-    return render_template("about.html", title="About", searchform=SearchForm(), searchtags=getSearchTags(), metadata=metadata)
+    return render_template("about.html", title="About", searchform=SearchForm(),
+        searchtags=getSearchTags(), metadata=metadata)
 
 @results.route("/search-results/<query>", methods=["GET"])
 def search_results(query):
@@ -43,7 +44,8 @@ def search_results(query):
     else:
         regex = re.compile("^" + query + "$", re.IGNORECASE)
         tag = Tag.objects(tag=regex).first()
-        files = File.objects().filter(tags__contains=tag.id)
+        if tag:
+            files = File.objects().filter(tags__contains=tag.id)
 
         # saving below code for potential future use
         # regex will match for individual words in phrases but not substrings
@@ -76,9 +78,12 @@ def search_results(query):
     else:
         title = "Search - " + query
 
-    metadata = Metadata(title="Search results for: " + query, url=baseurl + url_for('results.search_results', query=query), description="", image=None)
-    return render_template("search_results.html", title=title, searchform=SearchForm(), query=query,
-        results=initial_results, remaining_results=remaining_results, searchtags=getSearchTags(), metadata=metadata)
+    metadata = Metadata(title="Search results for: " + query,
+        url=current_app.config["SITE_URL"] + url_for('results.search_results', query=query),
+        description="", image=None)
+    return render_template("search_results.html", title=title, searchform=SearchForm(),
+        query=query, results=initial_results, remaining_results=remaining_results,
+        searchtags=getSearchTags(), metadata=metadata)
 
 @results.route("/tags", methods=["GET", "POST"])
 def tags():
@@ -139,9 +144,10 @@ def tags():
     characters3 = characters[split2:]
     
     metadata = Metadata(title="Tags", url=None, description="", image=None)
-    return render_template("tags.html", title="Tags", searchform=SearchForm(), addtagform=addtagform,
-        deletetagform=deletetagform, media=media, other=other, unsorted=unsorted, characters1=characters1,
-        characters2=characters2, characters3=characters3, searchtags=getSearchTags(), metadata=metadata)
+    return render_template("tags.html", title="Tags", searchform=SearchForm(),
+        addtagform=addtagform, deletetagform=deletetagform, media=media, other=other,
+        unsorted=unsorted, characters1=characters1, characters2=characters2,
+        characters3=characters3, searchtags=getSearchTags(), metadata=metadata)
 
 @results.route("/file/<file_id>", methods=["GET", "POST"])
 def file(file_id):
@@ -150,7 +156,8 @@ def file(file_id):
     updatedescriptionform = UpdateDescriptionForm()
     image = File.objects(file_id=file_id).first()
 
-    if request.form.get('submit') == 'Add' and addtagform.validate_on_submit() and current_user.is_authenticated and image:
+    if request.form.get('submit') == 'Add' and addtagform.validate_on_submit() \
+        and current_user.is_authenticated and image:
         tag = addtagform.tag.data
         regex = re.compile("^" + tag + "$", re.IGNORECASE)
         existing_tag = Tag.objects(tag=regex).first()
@@ -173,16 +180,18 @@ def file(file_id):
         image.save()
         return redirect(url_for("results.file", file_id=file_id))
 
-    if request.form.get('submit') == 'Delete' and deletetagform.validate_on_submit() and current_user.is_authenticated and image:
+    if request.form.get('submit') == 'Delete' and deletetagform.validate_on_submit() \
+        and current_user.is_authenticated and image:
         tag = deletetagform.tag.data
         if any(x.tag.lower() == tag.lower() for x in image.tags):
             image.tags = list(filter(lambda x: x.tag.lower() != tag.lower(), image.tags))
             image.save()
-            flash("Tag '" + tag + "' deleted from image.", "success")
+            flash("Tag '" + tag + "' removed from image.", "success")
         
         return redirect(url_for("results.file", file_id=file_id))
 
-    if request.form.get('submit') == 'Save' and updatedescriptionform.validate_on_submit() and current_user.is_authenticated and image:
+    if request.form.get('submit') == 'Save' and updatedescriptionform.validate_on_submit() \
+        and current_user.is_authenticated and image:
         description = updatedescriptionform.description.data.strip()
         image.description = None if description == "" else description
         image.save()
@@ -195,15 +204,19 @@ def file(file_id):
         if image.tags:
             image.tags.sort(key=lambda x:x.tag.lower())
 
-    existing_tags = list(map(lambda x: x.tag, image.tags))
+    existing_tags = list(map(lambda x: x.tag, image.tags)) if image else []
     all_tags = list(map(lambda x: x.tag, Tag.objects()))
     suggestion_tags = list(filter(lambda x: x not in existing_tags, all_tags))
 
     title = "Image - " + image.name if image else "Error"
     updatedescriptionform.description.data = image.description if image else None
-    metadata = Metadata(title=image.name, url=baseurl + url_for('results.file', file_id=file_id), description=", ".join(existing_tags), image='https://drive.google.com/uc?id=' + image.file_id)
-    return render_template("image.html", title=title, searchform=SearchForm(), addtagform=addtagform, deletetagform=deletetagform,
-    updatedescriptionform=updatedescriptionform, image=image, folder=folder, tags=suggestion_tags, searchtags=getSearchTags(), metadata=metadata)
+    metadata = Metadata(title=image.name if image else None,
+        url=current_app.config["SITE_URL"] + url_for('results.file', file_id=file_id),
+        description=", ".join(existing_tags),
+        image='https://drive.google.com/uc?id=' + image.file_id if image else None)
+    return render_template("image.html", title=title, searchform=SearchForm(),
+        addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
+        image=image, folder=folder, tags=suggestion_tags, searchtags=getSearchTags(), metadata=metadata)
 
 @results.route("/folder/<folder_id>", methods=["GET", "POST"])
 def folder(folder_id):
@@ -216,7 +229,8 @@ def folder(folder_id):
     folder = Folder.objects(folder_id=folder_id).first()
 
 
-    if request.form.get('submit') == 'Add' and addtagform.validate_on_submit() and current_user.is_authenticated and folder:
+    if request.form.get('submit') == 'Add' and addtagform.validate_on_submit() \
+        and current_user.is_authenticated and folder:
         files = list(File.objects(folder_id=folder.folder_id))
         tag = addtagform.tag.data
         regex = re.compile("^" + tag + "$", re.IGNORECASE)
@@ -249,7 +263,8 @@ def folder(folder_id):
 
         return redirect(url_for("results.folder", folder_id=folder_id))
 
-    if request.form.get('submit') == 'Delete' and deletetagform.validate_on_submit() and current_user.is_authenticated and folder:
+    if request.form.get('submit') == 'Delete' and deletetagform.validate_on_submit() \
+        and current_user.is_authenticated and folder:
         files = list(File.objects(folder_id=folder.folder_id))
         tag = deletetagform.tag.data
         regex = re.compile("^" + tag + "$", re.IGNORECASE)
@@ -264,13 +279,14 @@ def folder(folder_id):
             if len(files) == 0:
                 flash("No images to update.", "warning")
             else:
-                flash("Tag '" + tag + "' deleted from images.", "success")
+                flash("Tag '" + tag + "' removed from images.", "success")
         else:
             flash("Tag '" + tag + "' does not exist.", "warning")
 
         return redirect(url_for("results.folder", folder_id=folder_id))
 
-    if request.form.get('submit') == 'Save' and updatedescriptionform.validate_on_submit() and current_user.is_authenticated and folder:
+    if request.form.get('submit') == 'Save' and updatedescriptionform.validate_on_submit() \
+        and current_user.is_authenticated and folder:
         description = updatedescriptionform.description.data.strip()
         folder.description = None if description == "" else description
         folder.save()
@@ -297,8 +313,10 @@ def folder(folder_id):
     tags = list(map(lambda x: x.tag, Tag.objects()))
     title = "Folder - " + folder.name if folder else "Error"
     updatedescriptionform.description.data = folder.description if folder else None
-    metadata = Metadata(title=folder.name, url=baseurl + url_for('results.folder', folder_id=folder_id), description="Folder", image=None)
+    metadata = Metadata(title=folder.name if folder else None,
+        url=current_app.config["SITE_URL"] + url_for('results.folder',
+        folder_id=folder_id), description="Folder", image=None)
     return render_template("folder.html", title=title, searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
-        folder=folder, children=children, parent=parent, results=initial_results, remaining_results=remaining_results,
-        tags=tags, searchtags=getSearchTags(), metadata=metadata)
+        folder=folder, children=children, parent=parent, results=initial_results,
+        remaining_results=remaining_results, tags=tags, searchtags=getSearchTags(), metadata=metadata)

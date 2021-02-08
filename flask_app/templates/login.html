@@ -1,7 +1,7 @@
 {% extends "header.html" %}
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-lg-8">
+    <div class="col-11 col-lg-8">
         <div style="font-size:32px">
             Login
         </div>
@@ -36,7 +36,7 @@
                     {{ form.username.label(class="form-control-label") }}
                     {{ form.username(class="form-control form-control-lg", autocomplete="off") }}
                 </div>
-                <div class="col-lg offset-lg-2 mt-2 mt-lg-0">
+                <div class="col-lg mt-2 mt-lg-0">
                     {{ form.password.label(class="form-control-label") }}
                     {{ form.password(class="form-control form-control-lg") }}
                 </div>

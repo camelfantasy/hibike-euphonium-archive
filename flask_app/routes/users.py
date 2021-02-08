@@ -28,7 +28,8 @@ def login():
         return redirect(url_for("users.login"))
 
     metadata = Metadata(title="Login", url=None, description="", image=None)
-    return render_template("login.html", title="Login", form=form, searchform=SearchForm(), searchtags=getSearchTags(), metadata=metadata)
+    return render_template("login.html", title="Login", form=form, searchform=SearchForm(),
+        searchtags=getSearchTags(), metadata=metadata)
 
 @users.route("/logout")
 def logout():
@@ -42,7 +43,8 @@ def account():
     add_form = AddUserForm()
     delete_user_form = DeleteUserForm()
 
-    if request.form.get('submit') == 'Update Password' and password_form.validate_on_submit() and current_user.is_authenticated:
+    if request.form.get('submit') == 'Change Password' and password_form.validate_on_submit() \
+        and current_user.is_authenticated:
         hashed = bcrypt.generate_password_hash(password_form.password.data).decode("utf-8")
         current_user.modify(password=hashed)
         current_user.save()
@@ -64,8 +66,8 @@ def account():
 
         return redirect(url_for("users.account"))
 
-    if request.form.get('submit') == 'Delete' and delete_user_form.validate_on_submit() and current_user.is_authenticated \
-        and current_user.level < 2:
+    if request.form.get('submit') == 'Delete' and delete_user_form.validate_on_submit() \
+        and current_user.is_authenticated and current_user.level < 2:
 
         username = delete_user_form.username.data
         user = User.objects(username=delete_user_form.username.data).first()
@@ -81,8 +83,9 @@ def account():
     users.sort(key=lambda x: (x.level, x.username.lower()))
 
     metadata = Metadata(title="Account", url=None, description="", image=None)
-    return render_template("account.html", title="Account", searchform=SearchForm(), password_form=password_form,
-        addform=add_form, deleteuserform=delete_user_form, users=users, searchtags=getSearchTags(), metadata=metadata)
+    return render_template("account.html", title="Account", searchform=SearchForm(),
+        password_form=password_form, addform=add_form, deleteuserform=delete_user_form,
+        users=users, searchtags=getSearchTags(), metadata=metadata)
 
 @users.route("/sync", methods=["GET"])
 def sync():
@@ -121,12 +124,14 @@ def getfiles():
             for afile in files:
                 if afile.get('mimeType') == 'application/vnd.google-apps.folder':
                     description = folder_dict[afile.get('id')] if afile.get('id') in folder_dict else None
-                    ret_folders.append(Folder(folder_id=afile.get('id'), parent_id=current_folder, name=afile.get('name'), description=description))
+                    ret_folders.append(Folder(folder_id=afile.get('id'), parent_id=current_folder,
+                        name=afile.get('name'), description=description))
                     ids.append(afile.get('id'))
                 elif 'image' in afile.get('mimeType'):
                     tags = file_dict[afile.get('id')][0] if afile.get('id') in file_dict else None
                     description = file_dict[afile.get('id')][1] if afile.get('id') in file_dict else None
-                    ret_files.append(File(file_id=afile.get('id'), folder_id=current_folder, name=afile.get('name'), tags=tags, description=description))
+                    ret_files.append(File(file_id=afile.get('id'), folder_id=current_folder,
+                        name=afile.get('name'), tags=tags, description=description))
         
         return ret_files, ret_folders
     except:

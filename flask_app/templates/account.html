@@ -22,7 +22,7 @@
     </div>
 </div>
 <div class="row justify-content-center">
-    <div class="col-lg-8">
+    <div class="col-11 col-lg-8">
         <div class="row">
             <div class="col-8">
                 <div style="font-size:32px; overflow:hidden; white-space:nowrap; text-overflow: 'ellipsis'">{{ current_user.username }}</div>
@@ -90,24 +90,24 @@
 </div>
 <br>
 <div class="row justify-content-center">
-    <div class="col-lg-2 order-lg-1">
+    <div class="col-11 col-lg-2 order-lg-1">
         {% if current_user.level < 2  %}
         <input type="submit" class="form-control btn-submit" value="Sync Drive"
             onclick="ajax_sync()" id="sync_button"/>
         {% endif %}
     </div>
-    <div class="col-lg-2 order-lg-3 offset-lg-2 mt-2 mt-lg-0">
+    <div class="col-11 col-lg-2 order-lg-3 offset-lg-2 mt-2 mt-lg-0">
         <form action="{{ url_for('users.logout') }}" style="margin:0px">
             <input type="submit" class="form-control btn-logout" value="Logout" />
         </form>
     </div>
-    <div class="col-lg-2 order-lg-2" id="sync_col">
+    <div class="col-11 col-lg-2 order-lg-2" id="sync_col">
         <div id="sync_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%; display:none"></div>
     </div>
 </div>
 {% if current_user.level < 2  %}
 <div class="row justify-content-center">
-    <div class="col-lg-8">
+    <div class="col-11 col-lg-8">
         <hr>
         <div style="font-size:32px">Users</div>
         <br>
@@ -212,64 +212,6 @@
         </div>
     </div>
 </div>
-<script>
-    function ajax_sync() {
-        document.getElementById("sync_button").disabled = true;
-        document.getElementById("sync_button").setAttribute("class", "form-control btn-submit-disabled");
-
-        document.getElementById("sync_message").setAttribute("class", "alert alert-secondary");
-        document.getElementById("sync_message").style.visibility = "visible";
-        document.getElementById("sync_message").style.display = "block";
-        document.getElementById("sync_col").className = "col-lg-2 order-lg-2 mt-4 mt-lg-0";
-        
-        dots = '<span class="dot dot1">.</span><span class="dot dot2">.</span><span class="dot dot3">.</span>';
-        document.getElementById("sync_message").innerHTML = "Syncing" + dots;
-
-        $.ajax({url: "/sync", success: function(result){
-            $("#sync_button").prop("disabled", false);
-            $("#sync_button").attr("class", "form-control btn-submit");
-            if (result == "0") {
-                $("#sync_message").html("Sync success.");
-                $("#sync_message").attr("class", "alert alert-success fade-message");
-            } else if (result == "1") {
-                $("#sync_message").html("Sync failed.");
-                $("#sync_message").attr("class", "alert alert-danger fade-message");
-            }
-            setTimeout(function() {
-                $('[id=sync_message]').fadeOut(500,function(){
-                    $("#sync_col").removeClass("mt-4")
-                    $("#sync_col").removeClass("mt-lg-0")
-                    $('[id=sync_message]').css({"visibility":"hidden",display:'block'}).slideUp();
-                });
-            }, 5000);
-        }});
-    }
-
-    background = document.getElementById('confirm-background');
-    box = document.getElementById('confirm-box');
-    row = document.getElementById('confirm-row');
-    confirm_text = document.getElementById('confirm-text');
-    confirm_user = document.getElementById('confirm-user');
-
-    function confirm_delete(user) {
-        background.style.display = 'block';
-        box.style.display = 'block';
-        confirm_text.innerHTML = "Delete user '" + user + "'?";
-        confirm_user.value = user
-    }
-
-    function cancel() {
-        background.style.display = "none";
-        box.style.display = "none";
-    }
-
-    // also allow closing popup by clicking outside of it
-    window.onclick = function(event) {
-        if (event.target == background || event.target == row) {
-            background.style.display = "none";
-            box.style.display = "none";
-        }
-    }
-</script>
+<script type="text/javascript" src="{{ url_for('static', filename='/scripts/account.js') }}"></script>
 {% endif %}
 {% endblock %}
