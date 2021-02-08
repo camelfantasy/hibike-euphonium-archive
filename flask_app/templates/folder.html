@@ -32,11 +32,12 @@
         <br>
         <div class="page-item" style="word-wrap: break-word; font-size:14px">
             <div>
-                <form method="POST" action="" style="margin:0px; width:100%; max-height:100%" class="autocomplete">
+                <form method="POST" action="" style="margin:0px; width:100%; max-height:100%" class="autocomplete" id="tagForm">
                     {{ addtagform.csrf_token }}
                     {{ addtagform.category(hidden="true", value="") }}
                     {{ addtagform.tag(class="addtag-small", autocomplete="off", id="myInput", placeholder="Add tag to all files") }}
-                    {{ addtagform.submit(hidden="true") }}
+                    {{ addtagform.form(hidden="true", value="Add") }}
+                    {{ addtagform.submit_btn(hidden="true") }}
                 </form>
             </div>
             <br>
@@ -44,7 +45,7 @@
                 <form method="POST" action="" style="margin:0px">
                     {{ deletetagform.csrf_token }}
                     {{ deletetagform.tag(class="addtag-small", autocomplete="off", placeholder="Delete tag from all files") }}
-                    {{ deletetagform.submit(hidden="true") }}
+                    {{ deletetagform.submit_btn(hidden="true") }}
                 </form>
             </div>
         </div>
@@ -71,7 +72,7 @@
             <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete">
                 {{ updatedescriptionform.csrf_token }}
                 {{ updatedescriptionform.description(class="form-control my-3", style="resize:none; font-size:14px", id="descriptionbox") }}
-                {{ updatedescriptionform.submit(class="btn btn-submit float-right") }}
+                {{ updatedescriptionform.submit_btn(class="btn btn-submit float-right") }}
             </form>
             {% else %}
             {% if folder.description %}
@@ -143,7 +144,7 @@
     var dict = { "tags" : {{ tags|tojson }} };
     var tags = dict.tags;
 
-    autocomplete(document.getElementById("myInput"), tags);
+    autocomplete(document.getElementById("myInput"), tags, document.getElementById("tagForm"));
     // end tag suggestions
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='/scripts/resize_description.js') }}"></script>

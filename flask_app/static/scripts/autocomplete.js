@@ -1,5 +1,5 @@
 // tag autocomplete below
-function autocomplete(inp, arr) {
+function autocomplete(inp, arr, form) {
     var currentFocus;
 
     // checks for new input
@@ -58,7 +58,12 @@ function autocomplete(inp, arr) {
             if (currentFocus > -1) {
                 if (x) x[currentFocus].click();
             }
+            form.submit();
         }
+    });
+
+    inp.addEventListener("click", function(e) {
+        closeAllLists();
     });
 
     // select tag

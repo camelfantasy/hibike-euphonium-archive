@@ -43,7 +43,7 @@ def account():
     add_form = AddUserForm()
     delete_user_form = DeleteUserForm()
 
-    if request.form.get('submit') == 'Change Password' and password_form.validate_on_submit() \
+    if request.form.get('submit_btn') == 'Change Password' and password_form.validate_on_submit() \
         and current_user.is_authenticated:
         hashed = bcrypt.generate_password_hash(password_form.password.data).decode("utf-8")
         current_user.modify(password=hashed)
@@ -51,7 +51,7 @@ def account():
         flash("Password changed.", "top-success")
         return redirect(url_for("users.account"))
 
-    if request.form.get('submit') == 'Add' and add_form.validate_on_submit() and current_user.is_authenticated \
+    if request.form.get('submit_btn') == 'Add' and add_form.validate_on_submit() and current_user.is_authenticated \
         and current_user.level < 2 and current_user.level < int(add_form.level.data):
 
         hashed = bcrypt.generate_password_hash(add_form.password.data).decode("utf-8")
@@ -66,7 +66,7 @@ def account():
 
         return redirect(url_for("users.account"))
 
-    if request.form.get('submit') == 'Delete' and delete_user_form.validate_on_submit() \
+    if request.form.get('submit_btn') == 'Delete' and delete_user_form.validate_on_submit() \
         and current_user.is_authenticated and current_user.level < 2:
 
         username = delete_user_form.username.data

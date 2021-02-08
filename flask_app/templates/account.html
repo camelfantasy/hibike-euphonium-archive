@@ -12,7 +12,7 @@
                 <div class="col-2"></div>
                 <div class="col-5">
                     <form method="POST" action="" style="margin:0px">
-                        {{ deleteuserform.submit(class="btn btn-logout", style="margin:0px; width:100%") }}
+                        {{ deleteuserform.submit_btn(class="btn btn-logout", style="margin:0px; width:100%") }}
                         {{ deleteuserform.csrf_token }}
                         {{ deleteuserform.username(value="", hidden=true, id="confirm-user") }}
                     </form>
@@ -78,7 +78,7 @@
                 </div>
             </div>
             <div class="form-group">
-                {{ password_form.submit(class="form-control form-control-lg btn-submit") }}
+                {{ password_form.submit_btn(class="form-control form-control-lg btn-submit") }}
             </div>
             <div class="row">
                 <div class="col" style="font-size:14">
@@ -155,7 +155,7 @@
                         {{ addform.level(class="form-control") }}
                     </div>
                     <div class="col-lg-2" align="right">
-                        {{ addform.submit(class="form-control btn-submit") }}
+                        {{ addform.submit_btn(class="form-control btn-submit") }}
                     </div>
                 </div>
             </form>
@@ -171,7 +171,7 @@
                         {{ addform.password(class="form-control", placeholder="Password") }}
                     </div>
                     <div class="col-lg-2" align="right">
-                        {{ addform.submit(class="form-control btn-submit") }}
+                        {{ addform.submit_btn(class="form-control btn-submit") }}
                     </div>
                 </div>
             </form>

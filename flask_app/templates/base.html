@@ -64,7 +64,7 @@
         var search_dict = { "search_tags" : {{ searchtags|tojson }} };
         var search_tags = search_dict.search_tags;
 
-        autocomplete(document.getElementById("searchInput"), search_tags);
+        autocomplete(document.getElementById("searchInput"), search_tags, document.getElementById("searchForm"));
         // end search suggestions
     </script>
     <script type="text/javascript" src="{{ url_for('static', filename='/scripts/base.js') }}"></script>

@@ -14,7 +14,7 @@
                 <div class="col-2"></div>
                 <div class="col-5">
                     <form method="POST" action="" style="margin:0px">
-                        {{ deletetagform.submit(class="btn btn-logout", style="margin:0px; width:100%") }}
+                        {{ deletetagform.submit_btn(class="btn btn-logout", style="margin:0px; width:100%") }}
                         {{ deletetagform.csrf_token }}
                         {{ deletetagform.tag(value="", hidden=true, id="confirm-tag") }}
                     </form>
@@ -60,7 +60,7 @@
                     </div>
                     <div class="form-group row" style="margin:0px">
                         <div class="col-lg">
-                            {{ addtagform.submit(class="btn btn-submit") }}
+                            {{ addtagform.submit_btn(class="btn btn-submit") }}
                         </div>
                     </div>
                 </form>

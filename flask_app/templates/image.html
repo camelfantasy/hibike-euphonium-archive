@@ -37,7 +37,7 @@
                     <label class="col-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;">
                         {% if current_user.is_authenticated %}
                         <form method="POST" action="" style="margin:0px">
-                            {{ deletetagform.submit(hidden=true) }}
+                            {{ deletetagform.submit_btn(hidden=true) }}
                             {{ deletetagform.csrf_token }}
                             {{ deletetagform.tag(value=tag.tag, hidden=true) }}
                             <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer">
@@ -55,11 +55,12 @@
             </div>
             {% if current_user.is_authenticated %}
             <div>
-                <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete">
+                <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete" id="tagForm">
                     {{ addtagform.csrf_token }}
                     {{ addtagform.category(hidden="true", value="") }}
                     {{ addtagform.tag(class="addtag-small", autocomplete="off", placeholder="Add tag", id="myInput") }}
-                    {{ addtagform.submit(hidden="true") }}
+                    {{ addtagform.form(hidden="true", value="Add") }}
+                    {{ addtagform.submit_btn(hidden="true") }}
                 </form>
             </div>
             {% endif %}
@@ -86,7 +87,7 @@
             <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete">
                 {{ updatedescriptionform.csrf_token }}
                 {{ updatedescriptionform.description(class="form-control my-3", style="resize:none; font-size:14px", id="descriptionbox") }}
-                {{ updatedescriptionform.submit(class="btn btn-submit float-right") }}
+                {{ updatedescriptionform.submit_btn(class="btn btn-submit float-right") }}
             </form>
             {% else %}
             {% if image.description %}
@@ -127,8 +128,8 @@
     // extract server response
     var dict = { "tags" : {{ tags|tojson }} };
     var tags = dict.tags;
-
-    autocomplete(document.getElementById("myInput"), tags);
+    console.log(document.getElementById("tagForm"))
+    autocomplete(document.getElementById("myInput"), tags, document.getElementById("tagForm"));
     // end tag suggestions
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='/scripts/resize_description.js') }}"></script>

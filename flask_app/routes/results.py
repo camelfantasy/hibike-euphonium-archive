@@ -90,7 +90,7 @@ def tags():
     addtagform = AddTagForm()
     deletetagform = DeleteTagForm()
 
-    if request.form.get('submit') == 'Add' and addtagform.validate_on_submit() \
+    if request.form.get('submit_btn') == 'Add' and addtagform.validate_on_submit() \
         and current_user.is_authenticated and current_user.level < 2:
         tag = addtagform.tag.data
         regex = re.compile("^" + tag + "$", re.IGNORECASE)
@@ -110,7 +110,7 @@ def tags():
 
         return redirect(url_for("results.tags"))
     
-    if request.form.get('submit') == 'Delete' and deletetagform.validate_on_submit() \
+    if request.form.get('submit_btn') == 'Delete' and deletetagform.validate_on_submit() \
         and current_user.is_authenticated and current_user.level < 2:
         delete_tag = Tag.objects(tag=deletetagform.tag.data).first()
 
@@ -156,7 +156,7 @@ def file(file_id):
     updatedescriptionform = UpdateDescriptionForm()
     image = File.objects(file_id=file_id).first()
 
-    if request.form.get('submit') == 'Add' and addtagform.validate_on_submit() \
+    if request.form.get('form') == 'Add' and addtagform.validate_on_submit() \
         and current_user.is_authenticated and image:
         tag = addtagform.tag.data
         regex = re.compile("^" + tag + "$", re.IGNORECASE)
@@ -180,7 +180,7 @@ def file(file_id):
         image.save()
         return redirect(url_for("results.file", file_id=file_id))
 
-    if request.form.get('submit') == 'Delete' and deletetagform.validate_on_submit() \
+    if request.form.get('submit_btn') == 'Delete' and deletetagform.validate_on_submit() \
         and current_user.is_authenticated and image:
         tag = deletetagform.tag.data
         if any(x.tag.lower() == tag.lower() for x in image.tags):
@@ -190,7 +190,7 @@ def file(file_id):
         
         return redirect(url_for("results.file", file_id=file_id))
 
-    if request.form.get('submit') == 'Save' and updatedescriptionform.validate_on_submit() \
+    if request.form.get('submit_btn') == 'Save' and updatedescriptionform.validate_on_submit() \
         and current_user.is_authenticated and image:
         description = updatedescriptionform.description.data.strip()
         image.description = None if description == "" else description
@@ -230,7 +230,7 @@ def folder(folder_id):
     folder = Folder.objects(folder_id=folder_id).first()
 
 
-    if request.form.get('submit') == 'Add' and addtagform.validate_on_submit() \
+    if request.form.get('form') == 'Add' and addtagform.validate_on_submit() \
         and current_user.is_authenticated and folder:
         files = list(File.objects(folder_id=folder.folder_id))
         tag = addtagform.tag.data
@@ -264,7 +264,7 @@ def folder(folder_id):
 
         return redirect(url_for("results.folder", folder_id=folder_id))
 
-    if request.form.get('submit') == 'Delete' and deletetagform.validate_on_submit() \
+    if request.form.get('submit_btn') == 'Delete' and deletetagform.validate_on_submit() \
         and current_user.is_authenticated and folder:
         files = list(File.objects(folder_id=folder.folder_id))
         tag = deletetagform.tag.data
@@ -286,7 +286,7 @@ def folder(folder_id):
 
         return redirect(url_for("results.folder", folder_id=folder_id))
 
-    if request.form.get('submit') == 'Save' and updatedescriptionform.validate_on_submit() \
+    if request.form.get('submit_btn') == 'Save' and updatedescriptionform.validate_on_submit() \
         and current_user.is_authenticated and folder:
         description = updatedescriptionform.description.data.strip()
         folder.description = None if description == "" else description
