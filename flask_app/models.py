@@ -31,9 +31,8 @@ class Folder(db.Document):
     description = db.StringField()
 
 class Metadata():
-    def __init__(self, url=None, description=None, image=None, title=None, image_type=None):
+    def __init__(self, url=None, description=None, image=None, title=None):
         self.title = title
         self.url = url
         self.description = description
         self.image = image
-        self.image_type = image_type
