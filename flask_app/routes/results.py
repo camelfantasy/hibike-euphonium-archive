@@ -210,7 +210,7 @@ def file(file_id):
 
     title = "Image - " + image.name if image else "Error"
     updatedescriptionform.description.data = image.description if image else None
-    image_type = image.name[image.name.rindex('.')+1:] if image else None
+    image_type = image.name[image.name.rindex('.')+1:] if image and '.' in image.name else "jpeg"
     metadata = Metadata(title=image.name if image else None,
         url=current_app.config["SITE_URL"] + url_for('results.file', file_id=file_id),
         description=", ".join(existing_tags),
