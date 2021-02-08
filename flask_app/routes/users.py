@@ -27,7 +27,7 @@ def login():
         
         return redirect(url_for("users.login"))
 
-    metadata = Metadata(title="Login", url=None, description="", image=None)
+    metadata = Metadata(title="Login", description="")
     return render_template("login.html", title="Login", form=form, searchform=SearchForm(),
         searchtags=getSearchTags(), metadata=metadata)
 
@@ -82,7 +82,7 @@ def account():
     users = list(User.objects())
     users.sort(key=lambda x: (x.level, x.username.lower()))
 
-    metadata = Metadata(title="Account", url=None, description="", image=None)
+    metadata = Metadata(title="Account", description="")
     return render_template("account.html", title="Account", searchform=SearchForm(),
         password_form=password_form, addform=add_form, deleteuserform=delete_user_form,
         users=users, searchtags=getSearchTags(), metadata=metadata)

@@ -27,7 +27,7 @@ def index():
 
 @results.route("/about", methods=["GET"])
 def about():
-    metadata = Metadata(title="About", url=None, description=None, image=None)
+    metadata = Metadata(title="About")
     return render_template("about.html", title="About", searchform=SearchForm(),
         searchtags=getSearchTags(), metadata=metadata)
 
@@ -80,7 +80,7 @@ def search_results(query):
 
     metadata = Metadata(title="Search results for: " + query,
         url=current_app.config["SITE_URL"] + url_for('results.search_results', query=query),
-        description="", image=None)
+        description="")
     return render_template("search_results.html", title=title, searchform=SearchForm(),
         query=query, results=initial_results, remaining_results=remaining_results,
         searchtags=getSearchTags(), metadata=metadata)
@@ -143,7 +143,7 @@ def tags():
     characters2 = characters[split1:split2]
     characters3 = characters[split2:]
     
-    metadata = Metadata(title="Tags", url=None, description="", image=None)
+    metadata = Metadata(title="Tags", description="")
     return render_template("tags.html", title="Tags", searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, media=media, other=other,
         unsorted=unsorted, characters1=characters1, characters2=characters2,
@@ -210,10 +210,12 @@ def file(file_id):
 
     title = "Image - " + image.name if image else "Error"
     updatedescriptionform.description.data = image.description if image else None
+    image_type = image.name[image.name.rindex('.')+1:] if image else None
     metadata = Metadata(title=image.name if image else None,
         url=current_app.config["SITE_URL"] + url_for('results.file', file_id=file_id),
         description=", ".join(existing_tags),
-        image='https://drive.google.com/uc?id=' + image.file_id if image else None)
+        image='https://drive.google.com/uc?id=' + image.file_id if image else None,
+        image_type=image_type)
     return render_template("image.html", title=title, searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
         image=image, folder=folder, tags=suggestion_tags, searchtags=getSearchTags(), metadata=metadata)
@@ -315,7 +317,7 @@ def folder(folder_id):
     updatedescriptionform.description.data = folder.description if folder else None
     metadata = Metadata(title=folder.name if folder else None,
         url=current_app.config["SITE_URL"] + url_for('results.folder',
-        folder_id=folder_id), description="Folder", image=None)
+        folder_id=folder_id), description="Folder")
     return render_template("folder.html", title=title, searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
         folder=folder, children=children, parent=parent, results=initial_results,
