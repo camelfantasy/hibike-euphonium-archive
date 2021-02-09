@@ -122,6 +122,5 @@ Development is currently still in beta.  The full release at an undetermined poi
 * Allowing users to favorite images, which will require implementing a fourth level of user permissions for the general public.
 * Increasing the efficiency of certain functions related to retrieving database information due to MongoEngine limitations.
 * Embedding other file types
-* Changing some requests to GET instead of POST
 * Adding an album view for folders.
 * Some support for Japanese.

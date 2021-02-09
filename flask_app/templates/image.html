@@ -25,22 +25,21 @@
                 {% endif %}
             </div>
             <hr>
-            <div>
+            <div id="taglist">
                 {% if image.tags %}
-                <b>Tags:</b>
-                <br>
+                <div id="tag-label"><b>Tags:</b></div>
                 {% for tag in image.tags %}
-                <div class="form-group row" style="margin:0px">
+                <div class="form-group row" style="margin:0px" id="{{ 'tag_' + tag.tag | replace(' ', '_') }}">
                     <label class="col-11 col-form-label" style="padding:0px">
                         <a href="{{ url_for('results.search_results', query=tag.tag) }}" class="tag-link">{{ tag.tag }}</a>
                     </label>
                     <label class="col-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;">
                         {% if current_user.is_authenticated %}
-                        <form method="POST" action="" style="margin:0px">
-                            {{ deletetagform.submit_btn(hidden=true) }}
+                        <form method="POST" action="" style="margin:0px" id="{{ 'deleteTagForm_' + tag.tag | replace(' ', '_') }}">
                             {{ deletetagform.csrf_token }}
                             {{ deletetagform.tag(value=tag.tag, hidden=true) }}
-                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer">
+                            {{ deletetagform.file_id(hidden="true", value=image.file_id) }}
+                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer" onclick="submit_delete_tag_form('{{ tag.tag | replace(' ', '_') }}')">
                                 <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
                                 <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
                             </svg>
@@ -50,44 +49,32 @@
                 </div>
                 {% endfor %}
                 {% else %}
-                <div>No tags.</div>
+                <div id="tag-label">No tags.</div>
                 {% endif %}
             </div>
             {% if current_user.is_authenticated %}
             <div>
-                <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete" id="tagForm">
+                <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete" id="addTagForm">
                     {{ addtagform.csrf_token }}
                     {{ addtagform.category(hidden="true", value="") }}
                     {{ addtagform.tag(class="addtag-small", autocomplete="off", placeholder="Add tag", id="myInput") }}
-                    {{ addtagform.form(hidden="true", value="Add") }}
-                    {{ addtagform.submit_btn(hidden="true") }}
+                    {{ addtagform.file_id(hidden="true", value=image.file_id) }}
                 </form>
             </div>
             {% endif %}
         </div>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        {% if category == "success" %}
-        <div id="fadeout" class="alert alert-success" style="text-align:center; margin-bottom:0px; margin-top:16px">
-            {{ message }}
+        <div id="tag_box">
+            <div id="tag_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%; display:none"></div>
         </div>
-        {% elif category == "warning" %}
-        <div id="fadeout" class="alert alert-warning" style="text-align:center; margin-bottom:0px; margin-top:16px">
-            {{ message }}
-        </div>
-        {% endif %}
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
         <br>
         <div class="page-item" style="font-size:14px">
             {% if current_user.is_authenticated %}
             <div><b>Notes:</b></div>
-            <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete">
+            <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete" id="updateDescriptionForm">
                 {{ updatedescriptionform.csrf_token }}
                 {{ updatedescriptionform.description(class="form-control my-3", style="resize:none; font-size:14px", id="descriptionbox") }}
-                {{ updatedescriptionform.submit_btn(class="btn btn-submit float-right") }}
+                {{ updatedescriptionform.file_id(hidden="true", value=image.file_id) }}
+                <button type="button" class="btn btn-submit float-right" onclick="submit_update_description_form()">Save</button>
             </form>
             {% else %}
             {% if image.description %}
@@ -98,17 +85,9 @@
             {% endif %}
             {% endif %}
         </div>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        {% if category == "notes" %}
-        <div id="fadeout" class="alert alert-success" style="text-align:center; margin-bottom:0px; margin-top:16px">
-            {{ message }}
+        <div id="description_box">
+            <div id="description_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%; display:none"></div>
         </div>
-        {% endif %}
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
     </div>
     {% else %}
     <div class="col" align="center">Image does not exist.</div>
@@ -128,10 +107,23 @@
     // extract server response
     var dict = { "tags" : {{ tags|tojson }} };
     var tags = dict.tags;
-    console.log(document.getElementById("tagForm"))
-    autocomplete(document.getElementById("myInput"), tags, document.getElementById("tagForm"));
+
+    autocomplete(document.getElementById("myInput"), tags, document.getElementById("addTagForm"));
     // end tag suggestions
+
+    // part of ajax functions
+    var add_file_tag_url = "{{ url_for('results.add_file_tag') }}";
+    var delete_file_tag_url = "{{ url_for('results.delete_file_tag') }}";
+    var update_file_description_url = "{{ url_for('results.update_file_description') }}";
+
+    var updateddescriptionform_csrf_token = "{{ updatedescriptionform.csrf_token._value() }}";
+    var deletetagform_csrf_token = "{{ deletetagform.csrf_token._value() }}";
+    var addtagform_csrf_token = "{{ addtagform.csrf_token._value() }}";
+    var deletetagform_file_id_field = `{{ deletetagform.file_id(hidden='true', value=image.file_id) }}`;
+    var deletetagform_csrf_token_field = `{{ deletetagform.csrf_token }}`;
+    // end ajax functions
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='/scripts/resize_description.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='/scripts/image.js') }}"></script>
 {% endif %}
 {% endblock %}

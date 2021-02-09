@@ -10,6 +10,8 @@ results = Blueprint("results", __name__)
 def getSearchTags():
     return list(map(lambda x: x.tag, Tag.objects()))
 
+# viewpoints below
+
 @results.route("/", methods=["GET", "POST"])
 def index():
     searchform = SearchForm()
@@ -156,48 +158,6 @@ def file(file_id):
     updatedescriptionform = UpdateDescriptionForm()
     image = File.objects(file_id=file_id).first()
 
-    if request.form.get('form') == 'Add' and addtagform.validate_on_submit() \
-        and current_user.is_authenticated and image:
-        tag = addtagform.tag.data
-        regex = re.compile("^" + tag + "$", re.IGNORECASE)
-        existing_tag = Tag.objects(tag=regex).first()
-
-        if existing_tag:
-            if not any(x.tag.lower() == existing_tag.tag.lower() for x in image.tags):
-                image.tags.append(existing_tag)
-                flash("Tag '" + tag + "' added to image.", "success")
-            else:
-                flash("Tag '" + tag + "' already added.", "warning")
-        else:
-            if current_user.level < 2:
-                new_tag = Tag(tag=tag, category="Unsorted")
-                new_tag.save()
-                image.tags.append(new_tag)
-                flash("Tag '" + tag + "' created and added to image.", "success")
-            else:
-                flash("New tag '" + tag + "' can only be added by an admin.", "warning")
-        
-        image.save()
-        return redirect(url_for("results.file", file_id=file_id))
-
-    if request.form.get('submit_btn') == 'Delete' and deletetagform.validate_on_submit() \
-        and current_user.is_authenticated and image:
-        tag = deletetagform.tag.data
-        if any(x.tag.lower() == tag.lower() for x in image.tags):
-            image.tags = list(filter(lambda x: x.tag.lower() != tag.lower(), image.tags))
-            image.save()
-            flash("Tag '" + tag + "' removed from image.", "success")
-        
-        return redirect(url_for("results.file", file_id=file_id))
-
-    if request.form.get('submit_btn') == 'Save' and updatedescriptionform.validate_on_submit() \
-        and current_user.is_authenticated and image:
-        description = updatedescriptionform.description.data.strip()
-        image.description = None if description == "" else description
-        image.save()
-        flash("Notes updated.", "notes")
-        return redirect(url_for("results.file", file_id=file_id))
-
     folder = None
     if image:
         folder = Folder.objects(folder_id=image.folder_id).first()
@@ -206,6 +166,7 @@ def file(file_id):
 
     existing_tags = list(map(lambda x: x.tag, image.tags)) if image else []
     all_tags = list(map(lambda x: x.tag, Tag.objects()))
+    all_tags.sort(key=lambda x:x.lower())
     suggestion_tags = list(filter(lambda x: x not in existing_tags, all_tags))
 
     title = "Image - " + image.name if image else "Error"
@@ -215,6 +176,7 @@ def file(file_id):
         description=", ".join(existing_tags) if len(existing_tags) <= 10
             else ", ".join(existing_tags[:10]) + "...",
         image='https://drive.google.com/uc?id=' + image.file_id if image else None)
+    
     return render_template("image.html", title=title, searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
         image=image, folder=folder, tags=suggestion_tags, searchtags=getSearchTags(), metadata=metadata)
@@ -229,71 +191,7 @@ def folder(folder_id):
         folder_id = current_app.config['ROOT_ID']
     folder = Folder.objects(folder_id=folder_id).first()
 
-
-    if request.form.get('form') == 'Add' and addtagform.validate_on_submit() \
-        and current_user.is_authenticated and folder:
-        files = list(File.objects(folder_id=folder.folder_id))
-        tag = addtagform.tag.data
-        regex = re.compile("^" + tag + "$", re.IGNORECASE)
-        existing_tag = Tag.objects(tag=regex).first()
-
-        # add tag if it doesn't exist
-        if not existing_tag:
-            if current_user.level < 2:
-                if len(files) != 0:
-                    new_tag = Tag(tag=tag, category="Unsorted")
-                    new_tag.save()
-                    existing_tag = new_tag
-                    flash("Tag '" + tag + "' created and added to images.", "success")
-                else:
-                    flash("No images to update.", "warning")
-            else:
-                flash("New tag '" + tag + "' can only be added by an admin.", "warning")
-        else:
-            if len(files) != 0:
-                flash("Tag '" + tag + "' added to images.", "success")
-            else:
-                flash("No images to update.", "warning")
-        
-        # checks against user with no permission to add a new tag
-        if existing_tag:
-            for image in files:
-                if not any(x.tag.lower() == existing_tag.tag.lower() for x in image.tags):
-                    image.tags.append(existing_tag)
-                    image.save()
-
-        return redirect(url_for("results.folder", folder_id=folder_id))
-
-    if request.form.get('submit_btn') == 'Delete' and deletetagform.validate_on_submit() \
-        and current_user.is_authenticated and folder:
-        files = list(File.objects(folder_id=folder.folder_id))
-        tag = deletetagform.tag.data
-        regex = re.compile("^" + tag + "$", re.IGNORECASE)
-        existing_tag = Tag.objects(tag=regex).first()
-
-        if existing_tag:
-            for image in files:
-                if any(x.tag.lower() == tag.lower() for x in image.tags):
-                    image.tags = list(filter(lambda x: x.tag.lower() != tag.lower(), image.tags))
-                    image.save()
-        
-            if len(files) == 0:
-                flash("No images to update.", "warning")
-            else:
-                flash("Tag '" + tag + "' removed from images.", "success")
-        else:
-            flash("Tag '" + tag + "' does not exist.", "warning")
-
-        return redirect(url_for("results.folder", folder_id=folder_id))
-
-    if request.form.get('submit_btn') == 'Save' and updatedescriptionform.validate_on_submit() \
-        and current_user.is_authenticated and folder:
-        description = updatedescriptionform.description.data.strip()
-        folder.description = None if description == "" else description
-        folder.save()
-        flash("Notes updated.", "notes")
-        return redirect(url_for("results.folder", folder_id=folder_id))
-
+    # gets assorted data associated with the folder
     parent = None
     children = []
     files = []
@@ -312,12 +210,201 @@ def folder(folder_id):
     remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
 
     tags = list(map(lambda x: x.tag, Tag.objects()))
+    tags.sort(key=lambda x:x.lower())
+
     title = "Folder - " + folder.name if folder else "Error"
     updatedescriptionform.description.data = folder.description if folder else None
     metadata = Metadata(title=folder.name if folder else None,
         url=current_app.config["SITE_URL"] + url_for('results.folder',
         folder_id=folder_id), description="Folder")
+    
     return render_template("folder.html", title=title, searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
         folder=folder, children=children, parent=parent, results=initial_results,
         remaining_results=remaining_results, tags=tags, searchtags=getSearchTags(), metadata=metadata)
+
+# ajax routes below
+
+@results.route("/add_file_tag", methods=["POST"])
+def add_file_tag():
+    success = -1
+    message = ""
+    
+    tag = ""
+    addtagform = AddTagForm()
+    image = File.objects(file_id=addtagform.file_id.data).first() if addtagform.file_id is not None else None
+
+    if addtagform.validate_on_submit() and current_user.is_authenticated and image:
+        tag = addtagform.tag.data
+        regex = re.compile("^" + tag + "$", re.IGNORECASE)
+        existing_tag = Tag.objects(tag=regex).first()
+
+        if existing_tag:
+            if not any(x.tag.lower() == existing_tag.tag.lower() for x in image.tags):
+                image.tags.append(existing_tag)
+                message = "Tag '" + tag + "' added to image."
+                success = 0
+            else:
+                message = "Tag '" + tag + "' already added."
+                success = 1
+        else:
+            if current_user.level < 2:
+                new_tag = Tag(tag=tag, category="Unsorted")
+                new_tag.save()
+                image.tags.append(new_tag)
+                message = "Tag '" + tag + "' created and added to image."
+                success = 0
+            else:
+                message = "New tag '" + tag + "' can only be added by an admin."
+                success = 1
+        
+        image.save()
+
+    url = url_for('results.search_results', query=tag)
+    
+    return {'success':success, 'message':message, 'url_for':url, 'tag':tag}, 200
+
+@results.route("/delete_file_tag", methods=["POST"])
+def delete_file_tag():
+    success = -1
+    message = ""
+    
+    tag = ""
+    deletetagform = DeleteTagForm()
+    image = File.objects(file_id=deletetagform.file_id.data).first() \
+        if deletetagform.file_id is not None else None
+
+    if deletetagform.validate_on_submit() and current_user.is_authenticated and image:
+        tag = deletetagform.tag.data
+        if any(x.tag.lower() == tag.lower() for x in image.tags):
+            image.tags = list(filter(lambda x: x.tag.lower() != tag.lower(), image.tags))
+            image.save()
+            message = "Tag '" + tag + "' removed from image."
+            success = 0
+        
+    return {'success':success, 'message':message}, 200
+
+@results.route("/update_file_description", methods=["POST"])
+def update_file_description():
+    success = -1
+    message = ""
+    
+    tag = ""
+    updatedescriptionform = UpdateDescriptionForm()
+    image = File.objects(file_id=updatedescriptionform.file_id.data).first() \
+        if updatedescriptionform.file_id is not None else None
+
+    if updatedescriptionform.validate_on_submit() and current_user.is_authenticated and image:
+        description = updatedescriptionform.description.data.strip()
+        image.description = None if description == "" else description
+        image.save()
+        message = "Notes updated."
+        success = 0
+
+    return {'success':success, 'message':message}, 200
+
+@results.route("/add_folder_tag", methods=["POST"])
+def add_folder_tag():
+    success = -1
+    message = ""
+    tag = ""
+
+    addtagform = AddTagForm()
+    folder_id = addtagform.file_id.data
+    if folder_id == "root":
+        folder_id = current_app.config['ROOT_ID']
+    folder = Folder.objects(folder_id=folder_id).first()
+
+    if addtagform.validate_on_submit() and current_user.is_authenticated and folder:
+        files = list(File.objects(folder_id=folder.folder_id))
+        tag = addtagform.tag.data
+        regex = re.compile("^" + tag + "$", re.IGNORECASE)
+        existing_tag = Tag.objects(tag=regex).first()
+
+        # add tag if it doesn't exist
+        if not existing_tag:
+            if current_user.level < 2:
+                if len(files) != 0:
+                    new_tag = Tag(tag=tag, category="Unsorted")
+                    new_tag.save()
+                    existing_tag = new_tag
+                    message = "Tag '" + tag + "' created and added to images."
+                    success = 0
+                else:
+                    message = "No images to update."
+                    success = 1
+            else:
+                message = "New tag '" + tag + "' can only be added by an admin."
+                success = 1
+        else:
+            if len(files) != 0:
+                message = "Tag '" + tag + "' added to images."
+                success = 0
+            else:
+                message = "No images to update."
+                success = 1
+        
+        # checks against user with no permission to add a new tag
+        if existing_tag:
+            for image in files:
+                if not any(x.tag.lower() == existing_tag.tag.lower() for x in image.tags):
+                    image.tags.append(existing_tag)
+                    image.save()
+
+    return {'success':success, 'message':message, 'tag':tag}, 200
+
+@results.route("/delete_folder_tag", methods=["POST"])
+def delete_folder_tag():
+    success = -1
+    message = ""
+    existing_tag = None
+
+    deletetagform = DeleteTagForm()
+    folder_id = deletetagform.file_id.data
+    if folder_id == "root":
+        folder_id = current_app.config['ROOT_ID']
+    folder = Folder.objects(folder_id=folder_id).first()
+    
+    if deletetagform.validate_on_submit() and current_user.is_authenticated and folder:
+        files = list(File.objects(folder_id=folder.folder_id))
+        tag = deletetagform.tag.data
+        regex = re.compile("^" + tag + "$", re.IGNORECASE)
+        existing_tag = Tag.objects(tag=regex).first()
+
+        if existing_tag:
+            for image in files:
+                if any(x.tag.lower() == tag.lower() for x in image.tags):
+                    image.tags = list(filter(lambda x: x.tag.lower() != tag.lower(), image.tags))
+                    image.save()
+        
+            if len(files) == 0:
+                message = "No images to update."
+                success = 1
+            else:
+                message = "Tag '" + tag + "' removed from images."
+                success = 0
+        else:
+            message = "Tag '" + tag + "' does not exist."
+            success = 1
+
+    return {'success':success, 'message':message, 'tag':existing_tag.tag if existing_tag else None}, 200
+
+@results.route("/update_folder_description", methods=["POST"])
+def update_folder_description():
+    success = -1
+    message = ""
+
+    updatedescriptionform = UpdateDescriptionForm()
+    folder_id = updatedescriptionform.file_id.data
+    if folder_id == "root":
+        folder_id = current_app.config['ROOT_ID']
+    folder = Folder.objects(folder_id=folder_id).first()
+
+    if updatedescriptionform.validate_on_submit() and current_user.is_authenticated and folder:
+        description = updatedescriptionform.description.data.strip()
+        folder.description = None if description == "" else description
+        folder.save()
+        message = "Notes updated."
+        success = 0
+
+    return {'success':success, 'message':message}, 200

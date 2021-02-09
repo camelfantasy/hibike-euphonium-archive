@@ -12,6 +12,8 @@ users = Blueprint("users", __name__)
 def getSearchTags():
     return list(map(lambda x: x.tag, Tag.objects()))
 
+# viewpoints below
+
 @users.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
@@ -86,6 +88,8 @@ def account():
     return render_template("account.html", title="Account", searchform=SearchForm(),
         password_form=password_form, addform=add_form, deleteuserform=delete_user_form,
         users=users, searchtags=getSearchTags(), metadata=metadata)
+
+# ajax route and helpers below
 
 @users.route("/sync", methods=["GET"])
 def sync():

@@ -32,47 +32,35 @@
         <br>
         <div class="page-item" style="word-wrap: break-word; font-size:14px">
             <div>
-                <form method="POST" action="" style="margin:0px; width:100%; max-height:100%" class="autocomplete" id="tagForm">
+                <form method="POST" action="" style="margin:0px; width:100%; max-height:100%" class="autocomplete" id="addTagForm">
                     {{ addtagform.csrf_token }}
                     {{ addtagform.category(hidden="true", value="") }}
                     {{ addtagform.tag(class="addtag-small", autocomplete="off", id="myInput", placeholder="Add tag to all files") }}
-                    {{ addtagform.form(hidden="true", value="Add") }}
-                    {{ addtagform.submit_btn(hidden="true") }}
+                    {{ addtagform.file_id(hidden="true", value=folder.folder_id) }}
                 </form>
             </div>
             <br>
             <div>
-                <form method="POST" action="" style="margin:0px">
+                <form method="POST" action="" style="margin:0px" id="deleteTagForm">
                     {{ deletetagform.csrf_token }}
-                    {{ deletetagform.tag(class="addtag-small", autocomplete="off", placeholder="Delete tag from all files") }}
-                    {{ deletetagform.submit_btn(hidden="true") }}
+                    {{ deletetagform.tag(class="addtag-small", autocomplete="off", id="deleteInput", placeholder="Delete tag from all files") }}
+                    {{ deletetagform.file_id(hidden="true", value=folder.folder_id) }}
                 </form>
             </div>
         </div>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        {% if category == "success" %}
-        <div id="fadeout" class="alert alert-success" style="text-align:center; margin-bottom:0px; margin-top:16px">
-            {{ message }}
+        <div id="tag_box">
+            <div id="tag_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%; display:none"></div>
         </div>
-        {% elif category == "warning" %}
-        <div id="fadeout" class="alert alert-warning" style="text-align:center; margin-bottom:0px; margin-top:16px">
-            {{ message }}
-        </div>
-        {% endif %}
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-        {% endif %}
         <br>
+        {% endif %}
         <div class="page-item" style="font-size:14px">
             {% if current_user.is_authenticated %}
             <div><b>Notes:</b></div>
-            <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete">
+            <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete" id="updateDescriptionForm">
                 {{ updatedescriptionform.csrf_token }}
                 {{ updatedescriptionform.description(class="form-control my-3", style="resize:none; font-size:14px", id="descriptionbox") }}
-                {{ updatedescriptionform.submit_btn(class="btn btn-submit float-right") }}
+                {{ updatedescriptionform.file_id(hidden="true", value=folder.folder_id) }}
+                <button type="button" class="btn btn-submit float-right" onclick="submit_update_description_form()">Save</button>
             </form>
             {% else %}
             {% if folder.description %}
@@ -83,17 +71,9 @@
             {% endif %}
             {% endif %}
         </div>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        {% if category == "notes" %}
-        <div id="fadeout" class="alert alert-success" style="text-align:center; margin-bottom:0px; margin-top:16px">
-            {{ message }}
+        <div id="description_box">
+            <div id="description_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%; display:none"></div>
         </div>
-        {% endif %}
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
     </div>
     <div class="col-11 col-lg-9 order-lg-1 mt-4 mt-lg-0">
         {% if results|length == 0 %}
@@ -144,10 +124,23 @@
     var dict = { "tags" : {{ tags|tojson }} };
     var tags = dict.tags;
 
-    autocomplete(document.getElementById("myInput"), tags, document.getElementById("tagForm"));
+    autocomplete(document.getElementById("myInput"), tags, document.getElementById("addTagForm"));
     // end tag suggestions
+
+    // part of ajax functions
+    var add_folder_tag_url = "{{ url_for('results.add_folder_tag') }}";
+    var delete_folder_tag_url = "{{ url_for('results.delete_folder_tag') }}";
+    var update_folder_description_url = "{{ url_for('results.update_folder_description') }}";
+
+    var updateddescriptionform_csrf_token = "{{ updatedescriptionform.csrf_token._value() }}";
+    var deletetagform_csrf_token = "{{ deletetagform.csrf_token._value() }}";
+    var addtagform_csrf_token = "{{ addtagform.csrf_token._value() }}";
+    var deletetagform_file_id_field = `{{ deletetagform.file_id(hidden='true', value=folder.folder_id) }}`;
+    var deletetagform_csrf_token_field = `{{ deletetagform.csrf_token }}`;
+    // end ajax functions
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='/scripts/resize_description.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='/scripts/folder.js') }}"></script>
 {% endif %}
 <script>
     // part of dynamic loader

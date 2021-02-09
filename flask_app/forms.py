@@ -11,11 +11,12 @@ class SearchForm(FlaskForm):
 class AddTagForm(FlaskForm):
     tag = StringField("Add tag", validators=[InputRequired()])
     category = SelectField("Category", choices=[("Characters", "Characters"), ("Media", "Media"), ("Other", "Other")])
-    form = StringField("Form")
+    file_id = StringField("File ID")
     submit_btn = SubmitField("Add")
 
 class DeleteTagForm(FlaskForm):
     tag = StringField("Tag", validators=[InputRequired()])
+    file_id = StringField("File ID")
     submit_btn = SubmitField("Delete")
 
 class LoginForm(FlaskForm):
@@ -42,4 +43,5 @@ class DeleteUserForm(FlaskForm):
 
 class UpdateDescriptionForm(FlaskForm):
     description = TextAreaField("Description")
+    file_id = StringField("File ID")
     submit_btn = SubmitField("Save")

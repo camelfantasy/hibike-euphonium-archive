@@ -53,12 +53,18 @@ function autocomplete(inp, arr, form) {
         } else if (e.keyCode == 38) { // up
             currentFocus--;
             addActive(x);
-        } else if (e.keyCode == 13 && document.getElementsByClassName(autocomplete_active_name).length != 0) { // enter
+        } else if (e.keyCode == 13) { // enter
             e.preventDefault();
             if (currentFocus > -1) {
                 if (x) x[currentFocus].click();
             }
-            form.submit();
+
+            // call custom form submission on each page
+            if (form.id == 'addTagForm') {
+                submit_add_tag_form(e);
+            } else if (form.id == 'searchForm') {
+                submit_search_form();
+            }
         }
     });
 
