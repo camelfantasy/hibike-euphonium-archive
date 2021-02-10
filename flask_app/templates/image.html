@@ -3,7 +3,7 @@
 <div class="row justify-content-center">
     {% if image %}
     <div class="col-11 col-lg-9">
-        <div class="page-item" align="center">
+        <div class="page-item" align="center" id="imagebox">
             <a href="{{ 'https://drive.google.com/uc?id=' + image.file_id }}">
                 <img src="{{ 'https://drive.google.com/uc?id=' + image.file_id }}" style="max-width:100%; max-height:100%">
             </a>
@@ -122,6 +122,10 @@
     var deletetagform_file_id_field = `{{ deletetagform.file_id(hidden='true', value=image.file_id) }}`;
     var deletetagform_csrf_token_field = `{{ deletetagform.csrf_token }}`;
     // end ajax functions
+
+    // part of large image handler
+    var fileid = "{{ image.file_id }}";
+    // end large image handler
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='/scripts/resize_description.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='/scripts/image.js') }}"></script>

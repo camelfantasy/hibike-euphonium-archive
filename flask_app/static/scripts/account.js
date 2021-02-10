@@ -6,7 +6,7 @@ function ajax_sync() {
     document.getElementById("sync_message").setAttribute("class", "alert alert-secondary");
     document.getElementById("sync_message").style.visibility = "visible";
     document.getElementById("sync_message").style.display = "block";
-    document.getElementById("sync_col").className = "col-lg-2 order-lg-2 mt-4 mt-lg-0";
+    document.getElementById("sync_col").className = "col-11 col-lg-2 order-lg-2 mt-4 mt-lg-0";
     
     dots = '<span class="dot dot1">.</span><span class="dot dot2">.</span><span class="dot dot3">.</span>';
     document.getElementById("sync_message").innerHTML = "Syncing" + dots;

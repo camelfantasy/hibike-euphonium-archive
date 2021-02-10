@@ -3,6 +3,12 @@ var update_description_timer = null;
 
 // submits add tag form
 function submit_add_tag_form(e) {
+    // resets fadeout timer if handling more than one request before timeout
+    if (tag_message_timer) {
+        clearTimeout(tag_message_timer)
+        tag_message_timer = null;
+    }
+
     $.ajax({
         type: "POST",
         url: add_file_tag_url,
@@ -12,7 +18,7 @@ function submit_add_tag_form(e) {
             $("#tag_message").css("display", "block");
             $("#tag_box").attr("class", "mt-4");
             $("#tag_message").html(data.message);
-            if (data.success == 0) {
+            if (data.success == 0 || data.success == 2) {
                 $("#tag_message").attr("class", "alert alert-success fade-message");
                 $("#taglist").append(`
                     <div class="form-group row" style="margin:0px" id="tag_` + data.tag.replace(' ', '_') + `">
@@ -41,16 +47,20 @@ function submit_add_tag_form(e) {
 
                 // ensures tag label is correct
                 $("#tag-label").html('<b>Tags:</b>');
+
+                // insert tag into search suggestions if newly created
+                if (data.success == 2) {
+                    if (search_tags.indexOf(data.tag) == -1) {
+                        search_tags.push(data.tag)
+                        search_tags.sort()
+                    }
+                }
             } else {
                 $("#tag_message").attr("class", "alert alert-warning fade-message");
             }
             $("#myInput").val("");
 
-            // resets timer if handling more than one request before timeout
-            if (tag_message_timer) {
-                clearTimeout(tag_message_timer)
-                tag_message_timer = null;
-            }
+            // sets fadeout timer
             tag_message_timer = setTimeout(function() {
                 if ($('#tag_message').css("visibility") != "hidden") {
                     $('#tag_message').fadeOut(500,function(){
@@ -75,6 +85,12 @@ function submit_add_tag_form(e) {
 
 // sends tag deletion request
 function submit_delete_tag_form(tag) {
+    // resets fadeout timer if handling more than one request before timeout
+    if (tag_message_timer) {
+        clearTimeout(tag_message_timer)
+        tag_message_timer = null;
+    }
+
     $.ajax({
         type: "POST",
         url: delete_file_tag_url,
@@ -103,11 +119,7 @@ function submit_delete_tag_form(tag) {
                 $("#tag_message").attr("class", "alert alert-warning fade-message");
             }
 
-            // resets timer if handling more than one request before timeout
-            if (tag_message_timer) {
-                clearTimeout(tag_message_timer)
-                tag_message_timer = null;
-            }
+            // sets fadeout timer
             tag_message_timer = setTimeout(function() {
                 if ($('#tag_message').css("visibility") != "hidden") {
                     $('#tag_message').fadeOut(500,function(){
@@ -131,6 +143,12 @@ function submit_delete_tag_form(tag) {
 
 // sends update description request
 function submit_update_description_form() {
+    // resets fadeout timer if handling more than one request before timeout
+    if (update_description_timer) {
+        clearTimeout(update_description_timer)
+        update_description_timer = null;
+    }
+
     $.ajax({
         type: "POST",
         url: update_file_description_url,
@@ -146,11 +164,7 @@ function submit_update_description_form() {
                 $("#description_message").attr("class", "alert alert-warning fade-message");
             }
 
-            // resets timer if handling more than one request before timeout
-            if (update_description_timer) {
-                clearTimeout(update_description_timer)
-                update_description_timer = null;
-            }
+            // sets fadeout timer
             update_description_timer = setTimeout(function() {
                 if ($('#description_message').css("visibility") != "hidden") {
                     $('#description_message').fadeOut(500,function(){
@@ -171,3 +185,12 @@ function submit_update_description_form() {
         }
     })
 }
+
+// alternate for images too large to display
+setTimeout(function () {
+    if (document.querySelector('img').naturalHeight == 0) {
+        imagebox = document.getElementById('imagebox');
+        imagebox.innerHTML = `Image too large to load.
+            View <a href="https://drive.google.com/file/d/` + fileid + `/view" class="reverse-link" target="_blank">here</a>.`;
+    }
+}, 5000);

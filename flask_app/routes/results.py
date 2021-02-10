@@ -8,7 +8,9 @@ from ..models import User, Tag, File, Folder, Metadata
 results = Blueprint("results", __name__)
 
 def getSearchTags():
-    return list(map(lambda x: x.tag, Tag.objects()))
+    tags = list(map(lambda x: x.tag, Tag.objects()))
+    tags.sort(key=lambda x:x.lower())
+    return tags
 
 # viewpoints below
 
@@ -253,7 +255,7 @@ def add_file_tag():
                 new_tag.save()
                 image.tags.append(new_tag)
                 message = "Tag '" + tag + "' created and added to image."
-                success = 0
+                success = 2
             else:
                 message = "New tag '" + tag + "' can only be added by an admin."
                 success = 1
@@ -269,7 +271,6 @@ def delete_file_tag():
     success = -1
     message = ""
     
-    tag = ""
     deletetagform = DeleteTagForm()
     image = File.objects(file_id=deletetagform.file_id.data).first() \
         if deletetagform.file_id is not None else None
@@ -289,7 +290,6 @@ def update_file_description():
     success = -1
     message = ""
     
-    tag = ""
     updatedescriptionform = UpdateDescriptionForm()
     image = File.objects(file_id=updatedescriptionform.file_id.data).first() \
         if updatedescriptionform.file_id is not None else None
@@ -321,15 +321,15 @@ def add_folder_tag():
         regex = re.compile("^" + tag + "$", re.IGNORECASE)
         existing_tag = Tag.objects(tag=regex).first()
 
-        # add tag if it doesn't exist
+        # add tag if it doesn't exist and sets messages first
         if not existing_tag:
             if current_user.level < 2:
                 if len(files) != 0:
                     new_tag = Tag(tag=tag, category="Unsorted")
                     new_tag.save()
                     existing_tag = new_tag
-                    message = "Tag '" + tag + "' created and added to images."
-                    success = 0
+                    message = "Tag '" + tag + "' created and added to {} images."
+                    success = 2
                 else:
                     message = "No images to update."
                     success = 1
@@ -338,7 +338,7 @@ def add_folder_tag():
                 success = 1
         else:
             if len(files) != 0:
-                message = "Tag '" + tag + "' added to images."
+                message = "Tag '" + tag + "' added to {} images."
                 success = 0
             else:
                 message = "No images to update."
@@ -346,10 +346,14 @@ def add_folder_tag():
         
         # checks against user with no permission to add a new tag
         if existing_tag:
+            count = 0
             for image in files:
                 if not any(x.tag.lower() == existing_tag.tag.lower() for x in image.tags):
                     image.tags.append(existing_tag)
                     image.save()
+                    count += 1
+
+            message = message.format(count)
 
     return {'success':success, 'message':message, 'tag':tag}, 200
 
@@ -372,16 +376,18 @@ def delete_folder_tag():
         existing_tag = Tag.objects(tag=regex).first()
 
         if existing_tag:
+            count = 0
             for image in files:
                 if any(x.tag.lower() == tag.lower() for x in image.tags):
                     image.tags = list(filter(lambda x: x.tag.lower() != tag.lower(), image.tags))
                     image.save()
+                    count += 1
         
             if len(files) == 0:
                 message = "No images to update."
                 success = 1
             else:
-                message = "Tag '" + tag + "' removed from images."
+                message = "Tag '" + tag + "' removed from " + str(count) + " images."
                 success = 0
         else:
             message = "Tag '" + tag + "' does not exist."
