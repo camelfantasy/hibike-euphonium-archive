@@ -185,12 +185,3 @@ function submit_update_description_form() {
         }
     })
 }
-
-// alternate for images too large to display
-setTimeout(function () {
-    if (document.querySelector('img').naturalHeight == 0) {
-        imagebox = document.getElementById('imagebox');
-        imagebox.innerHTML = `Image too large to load.
-            View <a href="https://drive.google.com/file/d/` + fileid + `/view" class="reverse-link" target="_blank">here</a>.`;
-    }
-}, 5000);
