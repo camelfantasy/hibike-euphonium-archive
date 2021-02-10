@@ -3,9 +3,9 @@
 <div class="row justify-content-center">
     {% if image %}
     <div class="col-11 col-lg-9">
-        <div class="page-item" align="center" id="imagebox">
+        <div class="page-item" align="center">
             <a href="{{ 'https://drive.google.com/uc?id=' + image.file_id }}">
-                <img src="{{ 'https://drive.google.com/uc?id=' + image.file_id }}" onerror="image_error()" style="max-width:100%; max-height:100%">
+                <img src="https://drive.google.com/thumbnail?id={{ image.file_id }}&sz=w1200" style="max-width:100%; max-height:100%">
             </a>
         </div>
     </div>
@@ -93,16 +93,6 @@
     <div class="col" align="center">Image does not exist.</div>
     {% endif %}
 </div>
-<script>
-    // alternate for images too large to display
-    function image_error() {
-        imagebox = document.getElementById('imagebox');
-        imagebox.innerHTML = `
-            Image too large to load.
-            View <a href="https://drive.google.com/file/d/{{ image.file_id }}/view" class="reverse-link" target="_blank">here</a>.
-            `;
-    }
-</script>
 {% if current_user.is_authenticated %}
 <script>
     // part of tag suggestions
