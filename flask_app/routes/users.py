@@ -132,7 +132,7 @@ def getfiles():
                         name=afile.get('name'), description=description))
                     ids.append(afile.get('id'))
                 elif 'image' in afile.get('mimeType'):
-                    tags = file_dict[afile.get('id')][0] if afile.get('id') in file_dict else None
+                    tags = file_dict[afile.get('id')][0] if afile.get('id') in file_dict else []
                     description = file_dict[afile.get('id')][1] if afile.get('id') in file_dict else None
                     ret_files.append(File(file_id=afile.get('id'), folder_id=current_folder,
                         name=afile.get('name'), tags=tags, description=description))

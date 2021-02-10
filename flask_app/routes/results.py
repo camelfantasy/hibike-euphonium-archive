@@ -37,19 +37,13 @@ def about():
 
 @results.route("/search-results/<query>", methods=["GET"])
 def search_results(query):
-    conn = None
     query = query.strip()
     files = []
 
-    if query.lower() == "all":
-        files = File.objects()
-    elif query.lower() == "untagged":
-        files = File.objects(tags=[])
-    else:
-        regex = re.compile("^" + query + "$", re.IGNORECASE)
-        tag = Tag.objects(tag=regex).first()
-        if tag:
-            files = File.objects().filter(tags__contains=tag.id)
+    regex = re.compile("^" + query + "$", re.IGNORECASE)
+    tag = Tag.objects(tag=regex).first()
+    if tag:
+        files = File.objects().filter(tags__contains=tag.id)
 
         # saving below code for potential future use
         # regex will match for individual words in phrases but not substrings
@@ -89,6 +83,46 @@ def search_results(query):
         query=query, results=initial_results, remaining_results=remaining_results,
         searchtags=getSearchTags(), metadata=metadata)
 
+@results.route("/all-images", methods=["GET"])
+def all_images():
+    files = File.objects()
+    results = list(files)
+    results.sort(key=lambda x:(x.folder_id, x.name.lower()))
+
+    # arranges results into rows of 4 results each
+    results_matrix = [results[i:i + 4] for i in range(0, len(results), 4)]
+
+    # loads first 10 rows (40 images), stores any remaining files to be loaded dynamically
+    initial_results = results_matrix[:10]
+    remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
+
+    metadata = Metadata(title="All images",
+        url=current_app.config["SITE_URL"] + url_for('results.all_images'),
+        description="")
+    return render_template("all_images.html", title="All images", searchform=SearchForm(),
+        results=initial_results, remaining_results=remaining_results,
+        searchtags=getSearchTags(), metadata=metadata)
+
+@results.route("/untagged-images", methods=["GET"])
+def untagged_images():
+    files = File.objects(tags=[])
+    results = list(files)
+    results.sort(key=lambda x:(x.folder_id, x.name.lower()))
+
+    # arranges results into rows of 4 results each
+    results_matrix = [results[i:i + 4] for i in range(0, len(results), 4)]
+
+    # loads first 10 rows (40 images), stores any remaining files to be loaded dynamically
+    initial_results = results_matrix[:10]
+    remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
+
+    metadata = Metadata(title="Untagged images",
+        url=current_app.config["SITE_URL"] + url_for('results.untagged_images'),
+        description="")
+    return render_template("untagged_images.html", title="Untagged images", searchform=SearchForm(),
+        results=initial_results, remaining_results=remaining_results,
+        searchtags=getSearchTags(), metadata=metadata)
+        
 @results.route("/tags", methods=["GET", "POST"])
 def tags():
     addtagform = AddTagForm()

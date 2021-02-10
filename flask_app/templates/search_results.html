@@ -3,13 +3,9 @@
 <div class="row justify-content-center">
     <div class="col-11 col-lg-12">
         <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
-            {% if query.lower() == "all" %}
-            All images
-            {% elif query.lower() == "untagged" %}
-            Untagged images
-            {% else %}
+            {% block search_query %}
             Search results for: {{ query }}
-            {% endif %}
+            {% endblock %}
         </div>
         <br>
         {% if results|length == 0 %}

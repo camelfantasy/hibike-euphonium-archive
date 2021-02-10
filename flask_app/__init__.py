@@ -12,7 +12,7 @@ bcrypt = Bcrypt()
 from flask_app.routes.users import users
 from flask_app.routes.results import results
 from .forms import SearchForm
-from .models import User
+from .models import User, Tag
 
 # sets root user if not in database
 def initialize_root_user():
@@ -27,7 +27,10 @@ def initialize_root_user():
         return 1
 
 def page_not_found(e):
-    return render_template("404.html", title="404", searchform=SearchForm())
+    tags = list(map(lambda x: x.tag, Tag.objects()))
+    tags.sort(key=lambda x:x.lower())
+    return render_template("404.html", title="404", searchform=SearchForm(),
+        searchtags=tags)
 
 def create_app(test_config=None):
     app = Flask(__name__)
