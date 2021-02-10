@@ -177,8 +177,8 @@ def file(file_id):
         url=current_app.config["SITE_URL"] + url_for('results.file', file_id=file_id),
         description=", ".join(existing_tags) if len(existing_tags) <= 10
             else ", ".join(existing_tags[:10]) + "...",
-        image='https://drive.google.com/uc?id=' + image.file_id if image else None)
-    
+        image='https://drive.google.com/thumbnail?id=' + image.file_id + '&sz=w1200' if image else None)
+        
     return render_template("image.html", title=title, searchform=SearchForm(),
         addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
         image=image, folder=folder, tags=suggestion_tags, searchtags=getSearchTags(), metadata=metadata)
