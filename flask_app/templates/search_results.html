@@ -4,13 +4,15 @@
     <div class="col-11 col-lg-12">
         <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
             {% block search_query %}
-            Search results for: {{ query }}
+            {% if num_results == 1 %}
+            1 result for {{ query }}
+            {% else %}
+            {{ num_results }} results for "{{ query }}"
+            {% endif %}
             {% endblock %}
         </div>
         <br>
-        {% if results|length == 0 %}
-        <div>No Results.</div>
-        {% else %}
+        {% if results|length != 0 %}
         <div class="page-item">
             {% for row in results %}
             <div class="row" style="display:flex; align-items: center;">

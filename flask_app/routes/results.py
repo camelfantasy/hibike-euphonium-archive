@@ -81,7 +81,7 @@ def search_results(query):
         description="")
     return render_template("search_results.html", title=title, searchform=SearchForm(),
         query=query, results=initial_results, remaining_results=remaining_results,
-        searchtags=getSearchTags(), metadata=metadata)
+        searchtags=getSearchTags(), metadata=metadata, num_results=len(results))
 
 @results.route("/all-images", methods=["GET"])
 def all_images():
@@ -101,7 +101,7 @@ def all_images():
         description="")
     return render_template("all_images.html", title="All images", searchform=SearchForm(),
         results=initial_results, remaining_results=remaining_results,
-        searchtags=getSearchTags(), metadata=metadata)
+        searchtags=getSearchTags(), metadata=metadata, num_results=len(results))
 
 @results.route("/untagged-images", methods=["GET"])
 def untagged_images():
@@ -121,7 +121,7 @@ def untagged_images():
         description="")
     return render_template("untagged_images.html", title="Untagged images", searchform=SearchForm(),
         results=initial_results, remaining_results=remaining_results,
-        searchtags=getSearchTags(), metadata=metadata)
+        searchtags=getSearchTags(), metadata=metadata, num_results=len(results))
         
 @results.route("/tags", methods=["GET", "POST"])
 def tags():
