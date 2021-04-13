@@ -9,6 +9,7 @@ class User(db.Document, UserMixin):
     username = db.StringField(required=True, unique=True)
     password = db.StringField(required=True)
     level = db.IntField(required=True)
+    api_key = db.StringField(required=True)
 
     def get_id(self):
         return self.username

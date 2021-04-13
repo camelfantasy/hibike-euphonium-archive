@@ -173,6 +173,42 @@ pre {
 .dot1 {
     animation: visibility1 5s linear infinite;
 }
+
+.api-route {
+    border-radius: 4px;
+    background:#eee;
+    color:#777
+}
+
+.api-get {
+    margin:5px;
+    background-color:darkseagreen;
+    color:white;
+    border-radius: 2px;
+    padding: 4px 12px;
+}
+
+.api-post {
+    margin:5px;
+    background-color:goldenrod;
+    color:white;
+    border-radius: 2px;
+    padding: 4px 12px;
+}
+
+.api-pre {
+    margin:0;
+    padding:0;
+}
+
+.api-code {
+    margin: 0;
+    padding: 8px;
+    display: block;
+    background:#eeeeee;
+    border-radius: 4px;
+    font-size:14px
+}
    
 @keyframes visibility1 {
     0% {

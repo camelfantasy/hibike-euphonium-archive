@@ -41,6 +41,9 @@ class DeleteUserForm(FlaskForm):
     username = StringField("Username", validators=[InputRequired()])
     submit_btn = SubmitField("Delete")
 
+class ChangeAPIKeyForm(FlaskForm):
+    submit_btn = SubmitField("Change")
+
 class UpdateDescriptionForm(FlaskForm):
     description = TextAreaField("Description")
     file_id = StringField("File ID")

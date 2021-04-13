@@ -2,10 +2,11 @@ from flask import Blueprint, redirect, url_for, render_template, flash, request,
 from flask_login import current_user, login_required, login_user, logout_user
 
 from .. import bcrypt
-from ..forms import SearchForm, UpdatePasswordForm, LoginForm, AddUserForm, DeleteUserForm
+from ..forms import SearchForm, UpdatePasswordForm, LoginForm, AddUserForm, DeleteUserForm, ChangeAPIKeyForm
 from ..models import User, File, Folder, Tag, Metadata
 
 import googleapiclient.discovery
+import secrets
 
 users = Blueprint("users", __name__)
 
@@ -44,6 +45,7 @@ def account():
     password_form = UpdatePasswordForm()
     add_form = AddUserForm()
     delete_user_form = DeleteUserForm()
+    changeapikeyform = ChangeAPIKeyForm()
 
     if request.form.get('submit_btn') == 'Change Password' and password_form.validate_on_submit() \
         and current_user.is_authenticated:
@@ -62,7 +64,8 @@ def account():
         if User.objects(username=add_form.username.data).first():
             flash("User '" + username + "' already exists.", "bottom-warning")
         else:
-            user = User(username=username, password=hashed, level=add_form.level.data)
+            api_key = secrets.token_urlsafe(32) if add_form.level < 2 else None
+            user = User(username=username, password=hashed, level=add_form.level.data, api_key=api_key)
             user.save()
             flash("User '" + username + "' added.", "bottom-success")
 
@@ -81,13 +84,22 @@ def account():
             
         return redirect(url_for("users.account"))
 
+    if request.form.get('submit_btn') == 'Change' and changeapikeyform.validate_on_submit() \
+        and current_user.is_authenticated and current_user.level < 2:
+
+        current_user.modify(api_key=secrets.token_urlsafe(32))
+        current_user.save()
+        flash("API key changed.", "top-success")
+        return redirect(url_for("users.account"))
+
     users = list(User.objects())
     users.sort(key=lambda x: (x.level, x.username.lower()))
 
     metadata = Metadata(title="Account", description="")
     return render_template("account.html", title="Account", searchform=SearchForm(),
         password_form=password_form, addform=add_form, deleteuserform=delete_user_form,
-        users=users, searchtags=getSearchTags(), metadata=metadata)
+        changeapikeyform=changeapikeyform, users=users, searchtags=getSearchTags(),
+        metadata=metadata)
 
 # ajax route and helpers below
 

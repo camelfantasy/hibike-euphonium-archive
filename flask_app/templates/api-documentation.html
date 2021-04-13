@@ -1,0 +1,31 @@
+{% extends "header.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-11 col-lg-8">
+        <div style="font-weight:bold; font-size:20px" align="center">
+            API Documentation
+        </div>
+        <br>
+        <div class="page-item">
+            <div>
+                This is the documentation for version 1 of the API.
+                <br><br>
+                All successful queries will return a response code of 200; all errors will return 400.
+            </div>
+            <hr style="border-top: 1px solid rgba(0,0,0,.25); margin-top:32px; margin-bottom:32px">
+            <div id="unrestricted">
+                <h2><b>Unrestricted</b></h2>
+                These routes are available to anyone; no authentication is required.
+            </div>
+            <hr style="border-top: 1px solid rgba(0,0,0,.25); margin-top:32px; margin-bottom:32px">
+            <div id="restricted">
+                <h2><b>Restricted</b></h2>
+                These routes are available only to administrators; the following authentication is required:
+                <br><br>
+                <pre class="api-pre"><code class="api-code">"username": your login username<br>"api_key": found on your account page</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{{ url_for('static', filename='/scripts/api-documentation.js') }}"></script>
+{% endblock %}

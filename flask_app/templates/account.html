@@ -65,7 +65,7 @@
             {% endfor %}
         </div>
         {% endif %}
-        <form action="" method="post">
+        <form action="" method="post" style="margin:0px">
             {{ password_form.csrf_token }}
             <div class="form-group row justify-content-center">
                 <div class="col-lg">
@@ -107,8 +107,28 @@
 </div>
 {% if current_user.level < 2  %}
 <div class="row justify-content-center">
+    <div class="col-11 col-lg-8"><hr></div>
+</div>
+<div class="row justify-content-center">
     <div class="col-11 col-lg-8">
-        <hr>
+        <div style="font-size:32px">API Key</div>
+        <br>
+        <form action="" method="post" style="margin:0px">
+            {{ password_form.csrf_token }}
+            <div class="form-group row justify-content-center" style="margin:0px; display:flex; align-items:center">
+                <label class="col-lg-9 col-form-label mb-2 mb-lg-0" style="padding:0px">
+                    {{ current_user.api_key }}
+                </label>
+                <label class="col-lg-3" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;">
+                    {{ changeapikeyform.submit_btn(class="form-control btn-submit") }}
+                </label>
+            </div>
+        </form>
+    </div>
+</div>
+<br>
+<div class="row justify-content-center">
+    <div class="col-11 col-lg-8">
         <div style="font-size:32px">Users</div>
         <br>
         {% with messages = get_flashed_messages(with_categories=true) %}

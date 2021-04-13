@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, url_for, redirect, flash, request, current_app
 from flask_login import current_user
-import re, json
+import re
 
 from ..forms import SearchForm, AddTagForm, DeleteTagForm, UpdateDescriptionForm
 from ..models import User, Tag, File, Folder, Metadata
+from mongoengine.queryset.visitor import Q
 
 results = Blueprint("results", __name__)
 
@@ -34,6 +35,12 @@ def about():
     metadata = Metadata(title="About")
     return render_template("about.html", title="About", searchform=SearchForm(),
         searchtags=getSearchTags(), metadata=metadata)
+
+@results.route("/api-documentation", methods=["GET"])
+def api_documentation():
+    metadata = Metadata(title="API Documentation")
+    return render_template("api-documentation.html", title="API Documentation",
+        searchform=SearchForm(), searchtags=getSearchTags(), metadata=metadata)
 
 @results.route("/search-results/<query>", methods=["GET"])
 def search_results(query):
@@ -105,7 +112,7 @@ def all_images():
 
 @results.route("/untagged-images", methods=["GET"])
 def untagged_images():
-    files = File.objects(tags=[])
+    files = File.objects(Q(tags__exists=False) | Q(tags__size=0))
     results = list(files)
     results.sort(key=lambda x:(x.folder_id, x.name.lower()))
 
@@ -130,21 +137,26 @@ def tags():
 
     if request.form.get('submit_btn') == 'Add' and addtagform.validate_on_submit() \
         and current_user.is_authenticated and current_user.level < 2:
-        tag = addtagform.tag.data
-        regex = re.compile("^" + tag + "$", re.IGNORECASE)
+        tag = addtagform.tag.data.strip()
 
-        existing_tag = Tag.objects(tag=regex).first()
-        if existing_tag:
-            if existing_tag.category == addtagform.category.data:
-                flash("Tag '" + tag + "' already exists.", "narrow-warning")
+        # checks for empty tag
+        if tag:
+            regex = re.compile("^" + tag + "$", re.IGNORECASE)
+
+            existing_tag = Tag.objects(tag=regex).first()
+            if existing_tag:
+                if existing_tag.category == addtagform.category.data:
+                    flash("Tag '" + tag + "' already exists.", "narrow-warning")
+                else:
+                    existing_tag.category = addtagform.category.data
+                    existing_tag.save()
+                    flash("Tag '" + tag + "' updated.", "narrow-success")
             else:
-                existing_tag.category = addtagform.category.data
-                existing_tag.save()
-                flash("Tag '" + tag + "' updated.", "narrow-success")
+                new_tag = Tag(tag=tag, category=addtagform.category.data)
+                new_tag.save()
+                flash("Tag '" + tag + "' added.", "narrow-success")
         else:
-            new_tag = Tag(tag=tag, category=addtagform.category.data)
-            new_tag.save()
-            flash("Tag '" + tag + "' added.", "narrow-success")
+            flash("Tag cannot be empty.", "narrow-warning")
 
         return redirect(url_for("results.tags"))
     
@@ -189,8 +201,6 @@ def tags():
 
 @results.route("/file/<file_id>", methods=["GET", "POST"])
 def file(file_id):
-    addtagform = AddTagForm()
-    deletetagform = DeleteTagForm()
     updatedescriptionform = UpdateDescriptionForm()
     image = File.objects(file_id=file_id).first()
 
@@ -214,13 +224,11 @@ def file(file_id):
         image='https://drive.google.com/thumbnail?id=' + image.file_id + '&sz=w1200' if image else None)
         
     return render_template("image.html", title=title, searchform=SearchForm(),
-        addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
+        addtagform=AddTagForm(), deletetagform=DeleteTagForm(), updatedescriptionform=updatedescriptionform,
         image=image, folder=folder, tags=suggestion_tags, searchtags=getSearchTags(), metadata=metadata)
 
 @results.route("/folder/<folder_id>", methods=["GET", "POST"])
 def folder(folder_id):
-    addtagform = AddTagForm()
-    deletetagform = DeleteTagForm()
     updatedescriptionform = UpdateDescriptionForm()
 
     if folder_id == "root":
@@ -255,7 +263,7 @@ def folder(folder_id):
         folder_id=folder_id), description="Folder")
     
     return render_template("folder.html", title=title, searchform=SearchForm(),
-        addtagform=addtagform, deletetagform=deletetagform, updatedescriptionform=updatedescriptionform,
+        addtagform=AddTagForm(), deletetagform=DeleteTagForm(), updatedescriptionform=updatedescriptionform,
         folder=folder, children=children, parent=parent, results=initial_results,
         remaining_results=remaining_results, tags=tags, searchtags=getSearchTags(), metadata=metadata)
 
@@ -271,28 +279,34 @@ def add_file_tag():
     image = File.objects(file_id=addtagform.file_id.data).first() if addtagform.file_id is not None else None
 
     if addtagform.validate_on_submit() and current_user.is_authenticated and image:
-        tag = addtagform.tag.data
-        regex = re.compile("^" + tag + "$", re.IGNORECASE)
-        existing_tag = Tag.objects(tag=regex).first()
+        tag = addtagform.tag.data.strip()
 
-        if existing_tag:
-            if not any(x.tag.lower() == existing_tag.tag.lower() for x in image.tags):
-                image.tags.append(existing_tag)
-                message = "Tag '" + tag + "' added to image."
-                success = 0
+        # checks for empty tag
+        if tag:
+            regex = re.compile("^" + tag + "$", re.IGNORECASE)
+            existing_tag = Tag.objects(tag=regex).first()
+
+            if existing_tag:
+                if not any(x.tag.lower() == existing_tag.tag.lower() for x in image.tags):
+                    image.tags.append(existing_tag)
+                    message = "Tag '" + tag + "' added to image."
+                    success = 0
+                else:
+                    message = "Tag '" + tag + "' already added."
+                    success = 1
             else:
-                message = "Tag '" + tag + "' already added."
-                success = 1
+                if current_user.level < 2:
+                    new_tag = Tag(tag=tag, category="Unsorted")
+                    new_tag.save()
+                    image.tags.append(new_tag)
+                    message = "Tag '" + tag + "' created and added to image."
+                    success = 2
+                else:
+                    message = "New tag '" + tag + "' can only be added by an admin."
+                    success = 1
         else:
-            if current_user.level < 2:
-                new_tag = Tag(tag=tag, category="Unsorted")
-                new_tag.save()
-                image.tags.append(new_tag)
-                message = "Tag '" + tag + "' created and added to image."
-                success = 2
-            else:
-                message = "New tag '" + tag + "' can only be added by an admin."
-                success = 1
+            message = "Tag cannot be empty."
+            success = 1
         
         image.save()
 
@@ -351,32 +365,39 @@ def add_folder_tag():
 
     if addtagform.validate_on_submit() and current_user.is_authenticated and folder:
         files = list(File.objects(folder_id=folder.folder_id))
-        tag = addtagform.tag.data
-        regex = re.compile("^" + tag + "$", re.IGNORECASE)
-        existing_tag = Tag.objects(tag=regex).first()
+        tag = addtagform.tag.data.strip()
+        existing_tag = None
 
-        # add tag if it doesn't exist and sets messages first
-        if not existing_tag:
-            if current_user.level < 2:
+        # checks for empty tag
+        if tag:
+            regex = re.compile("^" + tag + "$", re.IGNORECASE)
+            existing_tag = Tag.objects(tag=regex).first()
+
+            # add tag if it doesn't exist and sets messages first
+            if not existing_tag:
+                if current_user.level < 2:
+                    if len(files) != 0:
+                        new_tag = Tag(tag=tag, category="Unsorted")
+                        new_tag.save()
+                        existing_tag = new_tag
+                        message = "Tag '" + tag + "' created and added to {} images."
+                        success = 2
+                    else:
+                        message = "No images to update."
+                        success = 1
+                else:
+                    message = "New tag '" + tag + "' can only be added by an admin."
+                    success = 1
+            else:
                 if len(files) != 0:
-                    new_tag = Tag(tag=tag, category="Unsorted")
-                    new_tag.save()
-                    existing_tag = new_tag
-                    message = "Tag '" + tag + "' created and added to {} images."
-                    success = 2
+                    message = "Tag '" + tag + "' added to {} images."
+                    success = 0
                 else:
                     message = "No images to update."
                     success = 1
-            else:
-                message = "New tag '" + tag + "' can only be added by an admin."
-                success = 1
         else:
-            if len(files) != 0:
-                message = "Tag '" + tag + "' added to {} images."
-                success = 0
-            else:
-                message = "No images to update."
-                success = 1
+            message = "Tag cannot be empty."
+            success = 1
         
         # checks against user with no permission to add a new tag
         if existing_tag:

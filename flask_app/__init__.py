@@ -3,14 +3,18 @@ from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_talisman import Talisman
 from flask_mongoengine import MongoEngine
+from flask_pymongo import PyMongo
+# from pymongo import MongoClient
 import os
 
 db = MongoEngine()
 login_manager = LoginManager()
 bcrypt = Bcrypt()
+pymongo = PyMongo()
 
 from flask_app.routes.users import users
 from flask_app.routes.results import results
+from flask_app.routes.api import api
 from .forms import SearchForm
 from .models import User, Tag
 
@@ -56,6 +60,7 @@ def create_app(test_config=None):
     mongodb_host = os.getenv("MONGODB_HOST")
     if mongodb_host and not app.config["MONGODB_HOST"]:
         app.config["MONGODB_HOST"] = mongodb_host
+        app.config["MONGO_URI"] = mongodb_host
 
     site_url = os.getenv("SITE_URL")
     if site_url and not app.config["SITE_URL"]:
@@ -71,6 +76,8 @@ def create_app(test_config=None):
     print("Initializing root user")
     if initialize_root_user() == 1:
         return None
+    print("Initializing PyMongo")
+    pymongo.init_app(app)
 
     csp = {
         'default-src': ['\'self\'','stackpath.bootstrapcdn.com','code.jquery.com',
@@ -84,6 +91,7 @@ def create_app(test_config=None):
     print("Registering blueprints")
     app.register_blueprint(results)
     app.register_blueprint(users)
+    app.register_blueprint(api)
     app.register_error_handler(404, page_not_found)
 
     login_manager.login_view = "users.login"
