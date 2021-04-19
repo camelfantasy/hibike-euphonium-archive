@@ -17,10 +17,13 @@ function submit_add_tag_form(e) {
     dots = '<span class="dot dot1">.</span><span class="dot dot2">.</span><span class="dot dot3">.</span>';
     document.getElementById("tag_message").innerHTML = "Adding" + dots;
 
+    var formdata = $('#addTagForm').serialize();
+    $("#myInput").val("");
+
     $.ajax({
         type: "POST",
         url: add_folder_tag_url,
-        data: $('#addTagForm').serialize(),
+        data: formdata,
         success: function (data) {
             $("#tag_message").html(data.message);
             if (data.success == 0 || data.success == 2) {
@@ -42,7 +45,6 @@ function submit_add_tag_form(e) {
             } else {
                 $("#tag_message").attr("class", "alert alert-warning fade-message");
             }
-            $("#myInput").val("");
 
             // sets fadeout timer
             tag_message_timer = setTimeout(function() {
@@ -83,10 +85,13 @@ function submit_delete_tag_form(e) {
     dots = '<span class="dot dot1">.</span><span class="dot dot2">.</span><span class="dot dot3">.</span>';
     document.getElementById("tag_message").innerHTML = "Deleting" + dots;
 
+    var formdata = $('#deleteTagForm').serialize();
+    $("#deleteInput").val("");
+
     $.ajax({
         type: "POST",
         url: delete_folder_tag_url,
-        data: $('#deleteTagForm').serialize(),
+        data: formdata,
         success: function (data) {
             $("#tag_message").html(data.message);
             if (data.success == 0) {

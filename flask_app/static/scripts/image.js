@@ -9,10 +9,13 @@ function submit_add_tag_form(e) {
         tag_message_timer = null;
     }
 
+    var formdata = $('#addTagForm').serialize();
+    $("#myInput").val("");
+
     $.ajax({
         type: "POST",
         url: add_file_tag_url,
-        data: $('#addTagForm').serialize(),
+        data: formdata,
         success: function (data) {
             $("#tag_message").css("visibility", "visible");
             $("#tag_message").css("display", "block");
@@ -58,7 +61,6 @@ function submit_add_tag_form(e) {
             } else {
                 $("#tag_message").attr("class", "alert alert-warning fade-message");
             }
-            $("#myInput").val("");
 
             // sets fadeout timer
             tag_message_timer = setTimeout(function() {

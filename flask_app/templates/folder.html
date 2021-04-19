@@ -6,6 +6,13 @@
         <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
             {{ folder.name }}
         </div>
+        <div style="font-size:20px; word-wrap:break-word">
+            {% if num_results == 1 %}
+            ({{ num_results }} image)
+            {% else %}
+            ({{ num_results }} images)
+            {% endif %}
+        </div>
         <br>
         <div class="page-item" style="word-wrap: break-word; font-size:14px">
             {% if parent %}
@@ -28,8 +35,8 @@
             {% endfor %}
             {% endif %}
         </div>
-        {% if current_user.is_authenticated %}
         <br>
+        {% if current_user.is_authenticated %}
         <div class="page-item" style="word-wrap: break-word; font-size:14px">
             <div>
                 <form method="POST" action="" style="margin:0px; width:100%; max-height:100%" class="autocomplete" id="addTagForm">

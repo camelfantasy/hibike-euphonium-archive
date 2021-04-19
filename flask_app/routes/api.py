@@ -25,9 +25,8 @@ def all_images(page):
     
     if page < 1:
         return "Page number must be at least 1", 400
-    elif size == 0:
-        return "No images", 400
-    elif (page-1)*100 > size:
+
+    if (page-1)*100 > size and page != 1:
         return "No more pages", 400
 
     images = File.objects.skip((page-1)*100).limit(100)
@@ -40,8 +39,9 @@ def all_images(page):
 
     return jsonify(ret)
 
-@api.route("/api/v1/tag_images", methods=["GET"])
-def tag_images():
+@api.route("/api/v1/tag_images/<page>", methods=["GET"])
+def tag_images(page):
+    # check tag parameter
     if not request.args.get('tag'):
         return "Missing tag parameter", 400
 
@@ -50,8 +50,21 @@ def tag_images():
 
     if not tag:
         return "Tag does not exist", 400
+
+    # check page parameter
+    try:
+        page = int(page)
+    except:
+        return "Not an integer", 400
     
-    images = File.objects().filter(tags__contains=tag.id)
+    if page < 1:
+        return "Page number must be at least 1", 400
+
+    images = File.objects().filter(tags__contains=tag.id).skip((page-1)*100).limit(100)
+
+    if len(images) == 0 and page != 1:
+        return "No more pages", 400
+
     images = list(map(lambda x: API_File_No_Tags(file_id=x.file_id, folder_id=x.folder_id,
             name=x.name, description=x.description).__dict__, images))
 

@@ -265,7 +265,8 @@ def folder(folder_id):
     return render_template("folder.html", title=title, searchform=SearchForm(),
         addtagform=AddTagForm(), deletetagform=DeleteTagForm(), updatedescriptionform=updatedescriptionform,
         folder=folder, children=children, parent=parent, results=initial_results,
-        remaining_results=remaining_results, tags=tags, searchtags=getSearchTags(), metadata=metadata)
+        remaining_results=remaining_results, tags=tags, searchtags=getSearchTags(),
+        metadata=metadata, num_results=len(files))
 
 # ajax routes below
 

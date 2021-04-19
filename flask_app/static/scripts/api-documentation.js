@@ -37,8 +37,8 @@ data = {
         {
             "name":"Tag images",
             "method":"GET",
-            "route":"/api/v1/tag_images",
-            "description":"Returns data for all images for an exact tag.",
+            "route":"/api/v1/tag_images/&lt;page&gt;",
+            "description":"Returns data for all images for an exact tag in increments of 100.",
             "parameters":`"tag": case insensitive string`,
             "response":`[
     {
@@ -74,7 +74,7 @@ data = {
             "route":"/api/v1/random_image",
             "description":"Returns data for a random image.",
             "parameters":`"tag": if an empty string is passed, a purely random image will be returned
-"exact": if 'True', the tag will match exactly (case sensitive), else it will find the first tag it is a case-insensitive substring of`,
+"exact": if 'True', the tag will match exactly (case sensitive); if anything else or missing, it will find the first tag it is a case-insensitive substring of`,
             "response":`{
     "description": , 
     "file_id": ,
