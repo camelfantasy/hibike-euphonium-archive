@@ -34,7 +34,12 @@ pre {
     transition: color 0.1s linear;
 }
 
-.tag-link:hover {
+.tag-link-gray {
+    color:gray;
+    transition: color 0.1s linear;
+}
+
+.tag-link:hover, .tag-link-gray:hover {
     text-decoration: none;
     color:rgb(0, 172, 198);
 }
