@@ -210,6 +210,12 @@ def file(file_id):
         if image.tags:
             image.tags.sort(key=lambda x:x.tag.lower())
 
+    files = list(File.objects(folder_id=folder.folder_id))
+    files.sort(key=lambda x:x.name.lower())
+    i = files.index(image)
+    prev_id = None if i == 0 else files[i-1].file_id
+    next_id = None if i == len(files) - 1 else files[i+1].file_id
+
     existing_tags = list(map(lambda x: x.tag, image.tags)) if image else []
     all_tags = list(map(lambda x: x.tag, Tag.objects()))
     all_tags.sort(key=lambda x:x.lower())
@@ -225,7 +231,8 @@ def file(file_id):
         
     return render_template("image.html", title=title, searchform=SearchForm(),
         addtagform=AddTagForm(), deletetagform=DeleteTagForm(), updatedescriptionform=updatedescriptionform,
-        image=image, folder=folder, tags=suggestion_tags, searchtags=getSearchTags(), metadata=metadata)
+        image=image, folder=folder, prev=prev_id, next=next_id, tags=suggestion_tags,
+        searchtags=getSearchTags(), metadata=metadata)
 
 @results.route("/folder/<folder_id>", methods=["GET", "POST"])
 def folder(folder_id):

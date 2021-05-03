@@ -91,6 +91,14 @@
         <div id="description_box">
             <div id="description_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%; display:none"></div>
         </div>
+        <div style="padding-top:12px">
+            {% if prev %}
+            <a href="{{ url_for('results.file', file_id=prev) }}" class="tag-link-gray">« Previous</a>
+            {% endif %}
+            {% if next %}
+            <a href="{{ url_for('results.file', file_id=next) }}" class="tag-link-gray" style="float:right">Next »</a>
+            {% endif %}
+        </div>
     </div>
     {% else %}
     <div class="col" align="center">Image does not exist.</div>
