@@ -48,7 +48,7 @@
             </div>
             <br>
             <div>
-                <form method="POST" action="" style="margin:0px" id="deleteTagForm">
+                <form method="POST" action="" style="margin:0px; width:100%; max-height:100%" class="autocomplete" id="deleteTagForm">
                     {{ deletetagform.csrf_token }}
                     {{ deletetagform.tag(class="addtag-small", autocomplete="off", id="deleteInput", placeholder="Delete tag from all files") }}
                     {{ deletetagform.file_id(hidden="true", value=folder.folder_id) }}
@@ -128,10 +128,12 @@
 <script>
     // part of tag suggestions
     // extract server response
-    var dict = { "tags" : {{ tags|tojson }} };
-    var tags = dict.tags;
+    var dict = { "add_tags" : {{ add_tags|tojson }}, "delete_tags" : {{ delete_tags|tojson }} };
+    var add_tags = dict.add_tags;
+    var delete_tags = dict.delete_tags;
 
-    autocomplete(document.getElementById("myInput"), tags, document.getElementById("addTagForm"));
+    autocomplete(document.getElementById("myInput"), add_tags, document.getElementById("addTagForm"));
+    autocomplete(document.getElementById("deleteInput"), delete_tags, document.getElementById("deleteTagForm"));
     // end tag suggestions
 
     // part of ajax functions

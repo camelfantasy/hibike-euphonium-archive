@@ -75,7 +75,9 @@
 
         // submits search form
         function submit_search_form() {
-            document.getElementById("searchForm").submit();
+            if (document.getElementById("searchInput").value.trim()) {
+                document.getElementById("searchForm").submit();
+            }
         }
     </script>
     <script type="text/javascript" src="{{ url_for('static', filename='/scripts/base.js') }}"></script>

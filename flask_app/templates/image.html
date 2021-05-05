@@ -30,7 +30,7 @@
             <hr>
             <div id="taglist">
                 {% if image.tags %}
-                <div id="tag-label"><b>Tags:</b></div>
+                <div id="tag-label"><b>Tags ({{ image.tags|length }}):</b></div>
                 {% for tag in image.tags %}
                 <div class="form-group row" style="margin:0px" id="{{ 'tag_' + tag.tag | replace(' ', '_') }}">
                     <label class="col-11 col-form-label" style="padding:0px">

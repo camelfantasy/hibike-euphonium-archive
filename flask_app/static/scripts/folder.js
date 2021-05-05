@@ -3,6 +3,9 @@ var update_description_timer = null;
 
 // submits add tag form
 function submit_add_tag_form(e) {
+    // ignores blank tag
+    if (!document.getElementById("myInput").value.trim()) return;
+    
     // resets timer if handling more than one request before timeout
     if (tag_message_timer) {
         clearTimeout(tag_message_timer)
@@ -29,17 +32,21 @@ function submit_add_tag_form(e) {
             if (data.success == 0 || data.success == 2) {
                 $("#tag_message").attr("class", "alert alert-success fade-message");
                 
-                // removes added tag from tag suggestions
-                index = tags.indexOf(data.tag);
+                // removes added tag from add_tags and adds to delete_tags
+                index = add_tags.indexOf(data.tag);
                 if (index != -1) {
-                    tags.splice(index, 1);
+                    add_tags.splice(index, 1);
+                }
+                if (delete_tags.indexOf(data.tag) == -1) {
+                    delete_tags.push(data.tag);
+                    delete_tags.sort();
                 }
 
                 // insert tag into search suggestions if newly created
                 if (data.success == 2) {
                     if (search_tags.indexOf(data.tag) == -1) {
-                        search_tags.push(data.tag)
-                        search_tags.sort()
+                        search_tags.push(data.tag);
+                        search_tags.sort();
                     }
                 }
             } else {
@@ -97,10 +104,14 @@ function submit_delete_tag_form(e) {
             if (data.success == 0) {
                 $("#tag_message").attr("class", "alert alert-success fade-message");
                 
-                // adds tag to tag suggestions
-                if (tags.indexOf(data.tag) == -1) {
-                    tags.push(data.tag)
-                    tags.sort()
+                // adds tag to add_tags and removes from delete_tags
+                if (add_tags.indexOf(data.tag) == -1) {
+                    add_tags.push(data.tag)
+                    add_tags.sort()
+                }
+                index = delete_tags.indexOf(data.tag);
+                if (index != -1) {
+                    delete_tags.splice(index, 1);
                 }
             } else {
                 $("#tag_message").attr("class", "alert alert-warning fade-message");

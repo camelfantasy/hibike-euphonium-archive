@@ -14,11 +14,13 @@ function autocomplete(inp, arr, form) {
         a.setAttribute("id", this.id + autocomplete_list_name);
         a.setAttribute("class", autocomplete_items_name);
         this.parentNode.appendChild(a);
-        
+
+        var hasItems = false;
         var numItems = 0;
         for (i = 0; i < arr.length; i++) {
             // check for same initial letters ignoring case and limits results to 5
             if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase() && numItems++ < 5) {
+                hasItems = true;
                 b = document.createElement("DIV");
                 b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
                 b.innerHTML += arr[i].substr(val.length);
@@ -29,9 +31,22 @@ function autocomplete(inp, arr, form) {
                 b.addEventListener("click", function(e) {
                     inp.value = this.getElementsByTagName("input")[0].value;
                     closeAllLists();
+                    
+                    if (form.id == 'addTagForm') {
+                        submit_add_tag_form(e);
+                    } else if (form.id == 'deleteTagForm') {
+                        submit_delete_tag_form(e);
+                    } else if (form.id == 'searchForm') {
+                        submit_search_form();
+                    }
                 });
             a.appendChild(b);
             }
+        }
+
+        // hide search suggestion box if no suggestions are found
+        if (!hasItems) {
+            closeAllLists();
         }
 
         // selects first item
@@ -62,6 +77,8 @@ function autocomplete(inp, arr, form) {
             // call custom form submission on each page
             if (form.id == 'addTagForm') {
                 submit_add_tag_form(e);
+            } else if (form.id == 'deleteTagForm') {
+                submit_delete_tag_form(e);
             } else if (form.id == 'searchForm') {
                 submit_search_form();
             }

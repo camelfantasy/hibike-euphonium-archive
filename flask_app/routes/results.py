@@ -203,6 +203,8 @@ def tags():
 def file(file_id):
     updatedescriptionform = UpdateDescriptionForm()
     image = File.objects(file_id=file_id).first()
+    prev_id = None
+    next_id = None
 
     folder = None
     if image:
@@ -210,11 +212,11 @@ def file(file_id):
         if image.tags:
             image.tags.sort(key=lambda x:x.tag.lower())
 
-    files = list(File.objects(folder_id=folder.folder_id))
-    files.sort(key=lambda x:x.name.lower())
-    i = files.index(image)
-    prev_id = None if i == 0 else files[i-1].file_id
-    next_id = None if i == len(files) - 1 else files[i+1].file_id
+        files = list(File.objects(folder_id=folder.folder_id))
+        files.sort(key=lambda x:x.name.lower())
+        i = files.index(image)
+        prev_id = None if i == 0 else files[i-1].file_id
+        next_id = None if i == len(files) - 1 else files[i+1].file_id
 
     existing_tags = list(map(lambda x: x.tag, image.tags)) if image else []
     all_tags = list(map(lambda x: x.tag, Tag.objects()))
@@ -260,8 +262,9 @@ def folder(folder_id):
     initial_results = results_matrix[:10]
     remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
 
-    tags = list(map(lambda x: x.tag, Tag.objects()))
-    tags.sort(key=lambda x:x.lower())
+    add_tags = list(map(lambda x: x.tag, Tag.objects()))
+    add_tags.sort(key=lambda x:x.lower())
+    delete_tags = add_tags.copy()
 
     title = "Folder - " + folder.name if folder else "Error"
     updatedescriptionform.description.data = folder.description if folder else None
@@ -272,8 +275,8 @@ def folder(folder_id):
     return render_template("folder.html", title=title, searchform=SearchForm(),
         addtagform=AddTagForm(), deletetagform=DeleteTagForm(), updatedescriptionform=updatedescriptionform,
         folder=folder, children=children, parent=parent, results=initial_results,
-        remaining_results=remaining_results, tags=tags, searchtags=getSearchTags(),
-        metadata=metadata, num_results=len(files))
+        remaining_results=remaining_results, add_tags=add_tags, delete_tags=delete_tags,
+        searchtags=getSearchTags(), metadata=metadata, num_results=len(files))
 
 # ajax routes below
 

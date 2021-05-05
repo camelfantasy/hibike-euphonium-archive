@@ -3,6 +3,9 @@ var update_description_timer = null;
 
 // submits add tag form
 function submit_add_tag_form(e) {
+    // ignores blank tag
+    if (!document.getElementById("myInput").value.trim()) return;
+
     // resets fadeout timer if handling more than one request before timeout
     if (tag_message_timer) {
         clearTimeout(tag_message_timer)
@@ -48,8 +51,8 @@ function submit_add_tag_form(e) {
                     tags.splice(index, 1);
                 }
 
-                // ensures tag label is correct
-                $("#tag-label").html('<b>Tags:</b>');
+                // updates tag label
+                $("#tag-label").html('<b>Tags (' + ($("#taglist div").length - 1) + '):</b>');
 
                 // insert tag into search suggestions if newly created
                 if (data.success == 2) {
@@ -113,9 +116,11 @@ function submit_delete_tag_form(tag) {
                     tags.sort()
                 }
 
-                // ensures tag label is correct
+                // updates tag label
                 if ($("#taglist div").length == 1) {
                     $("#tag-label").html('No tags.');
+                } else {
+                    $("#tag-label").html('<b>Tags (' + ($("#taglist div").length - 1) + '):</b>');
                 }
             } else {
                 $("#tag_message").attr("class", "alert alert-warning fade-message");

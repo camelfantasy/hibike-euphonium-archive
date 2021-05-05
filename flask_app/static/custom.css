@@ -122,21 +122,19 @@ pre {
 .autocomplete-items, .autocomplete-items-search {
     position: absolute;
     border: 1px solid #d4d4d4;
-    border-bottom: none;
-    border-top: none;
     z-index: 99;
     top: 100%;
     left: 0;
     right: 0;
     max-height:155px;
     overflow:auto;
+    border-radius: 4px;
 }
 
 .autocomplete-items div, .autocomplete-items-search div {
     padding: 10px;
     cursor: pointer;
-    background-color: #fff; 
-    border-bottom: 1px solid #d4d4d4; 
+    background-color: #fff;
 }
 
 .autocomplete-items div:hover, .autocomplete-items-search div:hover {
@@ -145,7 +143,7 @@ pre {
 
 .autocomplete-active, .autocomplete-active-search {
     background-color: #d3f4f8 !important; 
-    color: black; 
+    color: black;
 }
 
 .footer {
