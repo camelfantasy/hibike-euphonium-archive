@@ -5,6 +5,7 @@ import re
 from ..forms import SearchForm, AddTagForm, DeleteTagForm, UpdateDescriptionForm
 from ..models import User, Tag, File, Folder, Metadata
 from mongoengine.queryset.visitor import Q
+from bson import ObjectId
 
 results = Blueprint("results", __name__)
 
@@ -47,10 +48,14 @@ def search_results(query):
     query = query.strip()
     files = []
 
-    regex = re.compile("^" + query + "$", re.IGNORECASE)
-    tag = Tag.objects(tag=regex).first()
-    if tag:
-        files = File.objects().filter(tags__contains=tag.id)
+    # use different logic for advanced search if below keywords are present
+    if 'AND ' in query or 'NOT ' in query:
+        files = advanced_search(query)
+    else:
+        regex = re.compile("^" + query + "$", re.IGNORECASE)
+        tag = Tag.objects(tag=regex).first()
+        if tag:
+            files = File.objects().filter(tags__contains=tag.id)
 
         # saving below code for potential future use
         # regex will match for individual words in phrases but not substrings
@@ -480,3 +485,85 @@ def update_folder_description():
         success = 0
 
     return {'success':success, 'message':message}, 200
+
+# advanced search query
+def advanced_search(query):
+    # lexer
+    toks = []
+    while len(query) > 0:
+        incr = 0
+        if re.search(r'^ ', query):
+            incr = 1
+        elif re.search(r'^AND', query):
+            incr = 3
+            toks.append('AND')
+        elif re.search(r'^NOT', query):
+            incr = 3
+            toks.append('NOT')
+        else:
+            next_term = re.search(r' +(AND|NOT) +', query)
+            if next_term: # gets next term based on everything before next AND or NOT
+                toks.append(query[:next_term.span()[0]])
+                incr = next_term.span()[0]
+            else: # if next term is at end of query
+                term = re.search(r'^\S.*', query)
+                if term:
+                    toks.append(term.group())
+                    incr = len(term.group())
+
+        query = query[incr:]
+
+    # parser
+    and_count = 0
+    ands = None
+    nots = None
+    # validates and preprocesses query
+    if toks[0] == 'AND':
+        return []
+    if toks[0] != 'NOT':
+        ands = Q(tag=re.compile("^" + toks[0] + "$", re.IGNORECASE))
+        toks = toks[1:]
+        and_count += 1
+    if len(toks)%2 == 1:
+        return []
+
+    while len(toks) > 0:
+        if toks[0] == 'AND':
+            q = Q(tag=re.compile("^" + toks[1] + "$", re.IGNORECASE))
+            if ands == None:
+                ands = q
+            else:
+                ands = ands | q
+            and_count += 1
+        elif toks[0] == 'NOT':
+            q = Q(tag=re.compile("^" + toks[1] + "$", re.IGNORECASE))
+            if nots == None:
+                nots = q
+            else:
+                nots = nots | Q(tag=re.compile("^" + toks[1] + "$", re.IGNORECASE))
+        else:
+            return []
+        toks = toks[2:]
+        
+    # get ids
+    and_tags = Tag.objects(ands) if ands != None else []
+    not_tags = Tag.objects(nots) if nots != None else []
+    # if invalid tag exists in and tags
+    if len(and_tags) != and_count:
+        return []
+    
+    # get files
+    q = None
+    for tag in and_tags:
+        if q == None:
+            q = Q(tags__contains=tag.id)
+        else:
+            q = q & Q(tags__contains=tag.id)
+    for tag in not_tags:
+        if q == None:
+            q = Q(tags__ne=tag.id)
+        else:
+            q = q & Q(tags__ne=tag.id)
+
+    files = File.objects(q)
+    return files
