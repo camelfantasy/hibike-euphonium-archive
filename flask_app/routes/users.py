@@ -7,8 +7,11 @@ from ..models import User, File, Folder, Tag, Metadata
 
 import googleapiclient.discovery
 import secrets
+import threading
 
 users = Blueprint("users", __name__)
+syncing = False
+last_sync = 0
 
 def getSearchTags():
     return list(map(lambda x: x.tag, Tag.objects()))
@@ -101,26 +104,43 @@ def account():
         changeapikeyform=changeapikeyform, users=users, searchtags=getSearchTags(),
         metadata=metadata)
 
-# ajax route and helpers below
+# ajax routes and helpers below
 
+# 0: success, 1: failed, 2: sync started, 3: another sync in progress
 @users.route("/sync", methods=["GET"])
 def sync():
     if current_user.is_authenticated and current_user.level < 2:
-        files, folders = getfiles()
-        if files:
-            success = update(files, folders)
-            return success, 200
-        return "1", 200
+        global syncing
+        if syncing:
+            return "3", 200
+        else:
+            syncing = True
+            thread = threading.Thread(target=sync_pipeline, kwargs={'config': current_app.config})
+            thread.daemon = True
+            thread.start()
+            return "2", 200
+
     return render_template("404.html", title="404", searchform=SearchForm(), searchtags=getSearchTags())
 
-def getfiles():
+def sync_pipeline(config):
+    global syncing
+    global last_sync
+
+    files, folders = getfiles(config)
+    if files is not None:
+        last_sync = update(files, folders)
+    else:
+        last_sync = 1
+    syncing = False
+
+def getfiles(config):
     try:
         # preserve tags through file deletion
         file_dict = { i.file_id : [i.tags, i.description] for i in File.objects() }
         folder_dict = { i.folder_id : i.description for i in Folder.objects() }
 
-        service = googleapiclient.discovery.build('drive', 'v3', developerKey=current_app.config['DRIVE_API_KEY'])
-        ids = [current_app.config['ROOT_ID']]
+        service = googleapiclient.discovery.build('drive', 'v3', developerKey=config['DRIVE_API_KEY'])
+        ids = [config['ROOT_ID']]
         ret_files = []
         ret_folders = []
 
@@ -136,7 +156,7 @@ def getfiles():
             param = {"q": "'" + current_folder + "' in parents", "fields":"files(id, mimeType, name)", "pageSize":"1000"}
             result = service.files().list(**param).execute()
             files = result.get('files')
-
+            
             for afile in files:
                 if afile.get('mimeType') == 'application/vnd.google-apps.folder':
                     description = folder_dict[afile.get('id')] if afile.get('id') in folder_dict else None
@@ -164,3 +184,10 @@ def update(files, folders):
         success = "1"
 
     return success
+
+@users.route("/sync_progress", methods=["GET"])
+def sync_progress():
+    if current_user.is_authenticated and current_user.level < 2:
+        return {'syncing': syncing, 'last_sync': last_sync}, 200
+    else:
+        return render_template("404.html", title="404", searchform=SearchForm(), searchtags=getSearchTags())

@@ -7,28 +7,39 @@ function ajax_sync() {
     document.getElementById("sync_message").style.visibility = "visible";
     document.getElementById("sync_message").style.display = "block";
     document.getElementById("sync_col").className = "col-11 col-lg-2 order-lg-2 mt-4 mt-lg-0";
-    
-    dots = '<span class="dot dot1">.</span><span class="dot dot2">.</span><span class="dot dot3">.</span>';
-    document.getElementById("sync_message").innerHTML = "Syncing" + dots;
 
+    var waiting_to_sync;
     $.ajax({url: "/sync", success: function(result){
-        $("#sync_button").prop("disabled", false);
-        $("#sync_button").attr("class", "form-control btn-submit");
-        if (result == "0") {
-            $("#sync_message").html("Sync success.");
-            $("#sync_message").attr("class", "alert alert-success fade-message");
-        } else if (result == "1") {
-            $("#sync_message").html("Sync failed.");
-            $("#sync_message").attr("class", "alert alert-danger fade-message");
+        $("#sync_message").attr("class", "alert alert-secondary");
+        dots = '<span class="dot dot1">.</span><span class="dot dot2">.</span><span class="dot dot3">.</span>';
+        if (result == "2") {
+            $("#sync_message").html("Syncing" + dots);
+            waiting_to_sync = false;
+        } else if (result == "3") {
+            $("#sync_message").html("Wait" + dots);
+            waiting_to_sync = true;
         }
-        setTimeout(function() {
-            $('[id=sync_message]').fadeOut(500,function(){
-                $("#sync_col").removeClass("mt-4")
-                $("#sync_col").removeClass("mt-lg-0")
-                $('[id=sync_message]').css({"visibility":"hidden",display:'block'}).slideUp();
-            });
-        }, 5000);
     }});
+
+    // check result of sync every 5 seconds
+    timer = setInterval(function() {
+        $.ajax({url: "/sync_progress", success: function(result){
+            if (!result['syncing']) {
+                if (waiting_to_sync) {
+                    $("#sync_message").html("Sync available.");
+                } else if (result['last_sync'] == "0") {
+                    $("#sync_message").html("Sync success.");
+                    $("#sync_message").attr("class", "alert alert-success");
+                } else if (result['last_sync'] == "1") {
+                    $("#sync_message").html("Sync failed.");
+                    $("#sync_message").attr("class", "alert alert-danger");
+                }
+                $("#sync_button").prop("disabled", false);
+                $("#sync_button").attr("class", "form-control btn-submit");
+                clearInterval(timer);
+            }
+        }});
+    }, 5000);
 }
 
 // delete account below
