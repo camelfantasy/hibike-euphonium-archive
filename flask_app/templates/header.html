@@ -26,7 +26,7 @@
             <li class="nav-item">
                 <form action="/" class="form-inline autocomplete-search" style="margin:0px; display:inline-block" method="POST" id="searchForm">
                     {{ searchform.csrf_token }}
-                    {{ searchform.search_query(class="form-control", id="searchInput", placeholder="Search", autocomplete="off", required="") }}
+                    {{ searchform.search_query(class="form-control", id="searchInput", placeholder="Search", autocomplete="off", required="", value=(query if query else "")) }}
                 </form>
             </li>
             <li class="nav-item" style="padding-left:8px">
