@@ -5,15 +5,6 @@ from . import db, login_manager
 def load_user(username):
     return User.objects(username=username).first()
 
-class User(db.Document, UserMixin):
-    username = db.StringField(required=True, unique=True)
-    password = db.StringField(required=True)
-    level = db.IntField(required=True)
-    api_key = db.StringField(required=True)
-
-    def get_id(self):
-        return self.username
-
 class Tag(db.Document):
     tag = db.StringField(required=True, unique=True)
     category = db.StringField(required=True)
@@ -30,6 +21,17 @@ class Folder(db.Document):
     parent_id = db.StringField()
     name = db.StringField(required=True)
     description = db.StringField()
+
+# level - 0: root, 1: admin, 2: mod, 3: user
+class User(db.Document, UserMixin):
+    username = db.StringField(required=True, unique=True)
+    password = db.StringField(required=True)
+    level = db.IntField(required=True)
+    api_key = db.StringField(required=True)
+    favorites = db.ListField(db.ReferenceField(File, required=True))
+
+    def get_id(self):
+        return self.username
 
 class Metadata():
     def __init__(self, url=None, description=None, image=None, title=None):
