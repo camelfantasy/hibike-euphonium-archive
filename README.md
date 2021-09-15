@@ -65,80 +65,116 @@ This guide assumes little programming or server management knowledge.  Further c
 
 The application follows a basic permission system.  No account is required for actions related to accessing images and folders, creating an account, or using the unrestricted API routes.
 <table>
-<th width="60%">Permission</th>
-<th width="10%">User</th>
-<th width="10%">Mod</th>
-<th width="10%">Admin</th>
-<th width="10%">Root</th>
-<tr>
-<td>
-Change own password
-</td>
-<td>Y</td><td>Y</td><td>Y</td><td>Y</td>
-<tr>
-<td>
-Delete own account
-</td>
-<td>Y</td><td>Y</td><td>Y</td><td>N</td>
-<tr>
-<td>
-Favorite images
-</td>
-<td>Y</td><td>Y</td><td>Y</td><td>Y</td>
-</tr>
-<tr>
-<td>
-Add/remove existing image tags to/from images and all images in a folder
-</td>
-<td>N</td><td>Y</td><td>Y</td><td>Y</td>
-</tr>
-<td>
-Set/delete API key
-</td>
-<td>N</td><td>Y</td><td>Y</td><td>Y</td>
-</tr>
-<tr>
-<td>
-Delete/edit User accounts
-</td>
-<td>N</td><td>Y</td><td>Y</td><td>Y</td>
-</tr>
-<tr>
-<td>
-Add new image tags to images and all images in a folder
-</td>
-<td>N</td><td>N</td><td>Y</td><td>Y</td>
-</tr>
-<tr>
-<td>
-Add/delete/recategorize tags from the Tags page
-</td>
-<td>N</td><td>N</td><td>Y</td><td>Y</td>
-</tr>
-<tr>
-<td>
-Sync Google Drive to database
-</td>
-<td>N</td><td>N</td><td>Y</td><td>Y</td>
-</tr>
-<tr>
-<td>
-Use restricted API routes
-</td>
-<td>N</td><td>N</td><td>Y</td><td>Y</td>
-</tr>
-<tr>
-<td>
-Delete/edit Mod accounts
-</td>
-<td>N</td><td>N</td><td>Y</td><td>Y</td>
-</tr>
-<tr>
-<td>
-Delete/edit Administrator accounts
-</td>
-<td>N</td><td>N</td><td>N</td><td>Y</td>
-</tr>
+	<th width="60%">Permission</th>
+	<th width="10%">User</th>
+	<th width="10%">Mod</th>
+	<th width="10%">Admin</th>
+	<th width="10%">Root</th>
+	<tr>
+		<td>
+			Change own password
+		</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+	<tr>
+		<td>
+			Delete own account
+		</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+		<td style="color:red">N</td>
+	<tr>
+		<td>
+			Favorite images
+		</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+	</tr>
+	<tr>
+		<td>
+			Add/remove existing image tags to/from images and all images in a folder
+		</td>
+		<td style="color:red">N</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+	</tr>
+        <td>
+            Set/delete API key
+        </td>
+        <td style="color:red">N</td>
+        <td style="color:green">Y</td>
+            <td style="color:green">Y</td>
+        <td style="color:green">Y</td>
+	</tr>
+	<tr>
+		<td>
+			Delete/edit User accounts
+		</td>
+		<td style="color:red">N</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+	</tr>
+	<tr>
+		<td>
+			Add new image tags to images and all images in a folder
+		</td>
+		<td style="color:red">N</td>
+		<td style="color:red">N</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+	</tr>
+	<tr>
+		<td>
+			Add/delete/recategorize tags from the Tags page
+		</td>
+		<td style="color:red">N</td>
+		<td style="color:red">N</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+	</tr>
+	<tr>
+		<td>
+			Sync Google Drive to database
+		</td>
+		<td style="color:red">N</td>
+		<td style="color:red">N</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+	</tr>
+	<tr>
+		<td>
+			Use restricted API routes
+		</td>
+		<td style="color:red">N</td>
+		<td style="color:red">N</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+	</tr>
+	<tr>
+		<td>
+			Delete/edit Mod accounts
+		</td>
+		<td style="color:red">N</td>
+		<td style="color:red">N</td>
+		<td style="color:green">Y</td>
+		<td style="color:green">Y</td>
+	</tr>
+	<tr>
+		<td>
+			Delete/edit Administrator accounts
+		</td>
+		<td style="color:red">N</td>
+		<td style="color:red">N</td>
+		<td style="color:red">N</td>
+		<td style="color:green">Y</td>
+	</tr>
 </table>
 
 ## Future development
