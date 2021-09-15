@@ -4,6 +4,7 @@
     <div class="row justify-content-center" style="padding-left:32px;padding-right:32px" align="center" id="confirm-row">
         <div class="col-lg-4 page-item" align="center" id="confirm-box">
             <div id="confirm-text" style="font-weight:bold"></div>
+            <div style="font-size:14px">This action cannot be undone.</div>
             <br>
             <div class="row">
                 <div class="col-5">
@@ -11,11 +12,14 @@
                 </div>
                 <div class="col-2"></div>
                 <div class="col-5">
-                    <form method="POST" action="" style="margin:0px">
-                        {{ deleteuserform.submit_btn(class="btn btn-logout", style="margin:0px; width:100%") }}
+                    <form method="POST" action="" style="margin:0px; display: none;" id="user-form">
                         {{ deleteuserform.csrf_token }}
+                        <button type="button" class="form-control btn-logout" onclick="delete_user()">Delete</button>
                         {{ deleteuserform.username(value="", hidden=true, id="confirm-user") }}
                     </form>
+                    <a style="display: none; text-decoration: none;" id="account-form" href="{{ url_for('users.delete') }}">
+                        <input type="submit" class="form-control btn-logout" value="Delete" />
+                    </a>
                 </div>
             </div>
         </div>
@@ -34,6 +38,8 @@
                     {% elif current_user.level == 1 %}
                     Admin
                     {% elif current_user.level == 2 %}
+                    Mod
+                    {% elif current_user.level == 3 %}
                     User
                     {% endif %}
                 </div>
@@ -51,21 +57,10 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-        {% if password_form.password.errors %}
-        <div id="fadeout" class="alert alert-warning" style="text-align:center">
-            {% for error in password_form.password.errors %}
-            <span>{{ error }}</span>
-            {% endfor %}
+        <div id="message_box" class="alert" style="text-align:center; display:none; visibility:hidden">
+            <span id="message"></span>
         </div>
-        {% endif %}
-        {% if password_form.confirm_password.errors %}
-        <div id="fadeout" class="alert alert-warning" style="text-align:center">
-            {% for error in password_form.confirm_password.errors %}
-            <span>{{ error }}</span>
-            {% endfor %}
-        </div>
-        {% endif %}
-        <form action="" method="post" style="margin:0px">
+        <form action="" method="post" style="margin:0px" id="changePasswordForm">
             {{ password_form.csrf_token }}
             <div class="form-group row justify-content-center">
                 <div class="col-lg">
@@ -78,7 +73,7 @@
                 </div>
             </div>
             <div class="form-group">
-                {{ password_form.submit_btn(class="form-control form-control-lg btn-submit") }}
+                <button type="button" class="form-control form-control-lg btn-submit" onclick="change_password()">Change Password</button>
             </div>
             <div class="row">
                 <div class="col" style="font-size:14">
@@ -92,38 +87,60 @@
 <div class="row justify-content-center">
     <div class="col-11 col-lg-2 order-lg-1">
         {% if current_user.level < 2  %}
-        <input type="submit" class="form-control btn-submit" value="Sync Drive"
-            onclick="ajax_sync()" id="sync_button"/>
+        <form style="margin-bottom:0px" id="syncForm">
+            {{ submitform.csrf_token }}
+            <input type="submit" class="form-control btn-submit" value="Sync Drive" onclick="ajax_sync()" id="sync_button"/>
+        </form>
         {% endif %}
     </div>
+    {% if current_user.level > 0 %}
     <div class="col-11 col-lg-2 order-lg-3 offset-lg-2 mt-2 mt-lg-0">
-        <form action="{{ url_for('users.logout') }}" style="margin:0px">
-            <input type="submit" class="form-control btn-logout" value="Logout" />
-        </form>
+        <input type="submit" class="form-control btn-logout" value="Delete" onclick="confirm_delete_account()"/>
     </div>
+    {% else %}
+    <div class="col-11 col-lg-2 order-lg-3 offset-lg-2"></div>
+    {% endif %}
     <div class="col-11 col-lg-2 order-lg-2" id="sync_col">
         <div id="sync_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%; display:none"></div>
     </div>
 </div>
-{% if current_user.level < 2  %}
+{% if current_user.level < 3  %}
 <div class="row justify-content-center">
     <div class="col-11 col-lg-8"><hr></div>
 </div>
 <div class="row justify-content-center">
     <div class="col-11 col-lg-8">
         <div style="font-size:32px">API Key</div>
+        <div id="message_box_2" class="alert alert-warning mt-3" style="text-align:center; display:none; visibility:hidden;">
+            <span id="message_2">
+                <b>This is the only time the API key will be shown.</b>
+            </span>
+        </div>
     </div>
 </div>
-<br>
-<div class="form-group row justify-content-center">
-    <div class="col-11 col-lg-6 col-form-label mb-2 mb-lg-0" style="word-wrap:break-word">
-        {{ current_user.api_key }}
+<div class="form-group row justify-content-center mb-0">
+    <div class="col-11 col-lg-6 col-form-label mb-0" style="word-wrap:break-word" id="api_key">
+        {% if current_user.api_key %}
+        {{ '&#8226;'|safe * 32 }}
+        {% else %}
+        Key not set
+        {% endif %}
     </div>
-    <div class="col-11 col-lg-2">
-        <form action="" method="post" style="margin:0px">
-            {{ password_form.csrf_token }}
-            {{ changeapikeyform.submit_btn(class="form-control btn-submit") }}
-        </form>
+    <div class="col-11 col-lg-2 col-form-label mb-0">
+        <div class="row" style="margin-right:0px; margin-left:0">
+            <label class="col btn btn-submit" style="margin-bottom:0px; margin-right:8px" onclick="replace_api_key()">
+                <form style="margin-bottom:0px" id="replaceApiKeyForm">
+                    {{ submitform.csrf_token }}
+                    <i class="bi bi-arrow-repeat"></i>
+                </form>
+            </label>
+            <label class="col btn btn-logout" style="margin-bottom:0px; margin-left:8px" onclick="delete_api_key()">
+                <form style="margin-bottom:0px" id="deleteApiKeyForm">
+                    {{ submitform.csrf_token }}
+                    <i class="bi bi-x-lg"></i>
+                </form>
+            </label>
+        </div>
     </div>
 </div>
 <div class="row justify-content-center">
@@ -133,107 +150,54 @@
     <div class="col-11 col-lg-8">
         <div style="font-size:32px">Users</div>
         <br>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        {% if category == "bottom-success" %}
-        <div id="fadeout" class="alert alert-success" style="text-align:center">
-            {{ message }}
+        <div id="message_box_3" class="alert" style="text-align:center; display:none; visibility:hidden">
+            <span id="message_3"></span>
         </div>
-        {% elif category == "bottom-warning" %}
-        <div id="fadeout" class="alert alert-warning" style="text-align:center">
-            {{ message }}
-        </div>
-        {% endif %}
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-        {% if addform.username.errors %}
-        <div id="fadeout" class="alert alert-warning" style="text-align:center">
-            {% for error in addform.username.errors %}
-            <span>{{ error }}</span>
-            {% endfor %}
-        </div>
-        {% endif %}
-        {% if addform.password.errors %}
-        <div id="fadeout" class="alert alert-warning" style="text-align:center">
-            {% for error in addform.password.errors %}
-            <span>{{ error }}</span>
-            {% endfor %}
-        </div>
-        {% endif %}
         <div class="page-item">
-            {% if current_user.level == 0 %}
-            <form method="POST" action="" style="margin:0px">
-                {{ addform.csrf_token }}
-                <div class="form-group row">
-                    <div class="col-lg-4 mb-4 mb-lg-0">
-                        {{ addform.username(class="form-control", placeholder="Username", autocomplete="off") }}
-                    </div>
-                    <div class="col-lg-4 mb-4 mb-lg-0">
-                        {{ addform.password(class="form-control", placeholder="Password") }}
-                    </div>
-                    <div class="col-lg-2 mb-4 mb-lg-0">
-                        {{ addform.level(class="form-control") }}
-                    </div>
-                    <div class="col-lg-2" align="right">
-                        {{ addform.submit_btn(class="form-control btn-submit") }}
-                    </div>
-                </div>
-            </form>
-            {% elif current_user.level == 1 %}
-            <form method="POST" action="" style="margin:0px">
-                {{ addform.csrf_token }}
-                {{ addform.level(hidden=true) }}
-                <div class="form-group row justify-content-center">
-                    <div class="col-lg-5">
-                        {{ addform.username(class="form-control", placeholder="Username", autocomplete="off") }}
-                    </div>
-                    <div class="col-lg-5">
-                        {{ addform.password(class="form-control", placeholder="Password") }}
-                    </div>
-                    <div class="col-lg-2" align="right">
-                        {{ addform.submit_btn(class="form-control btn-submit") }}
-                    </div>
-                </div>
-            </form>
-            {% endif %}
-            <hr style="border-top: 1px solid rgba(0,0,0,.25)">
             <div class="row justify-content-center" style="margin:0px">
-                <div class="col-9" style="padding:0px; font-weight:bold">Username</div>
-                <div class="col-2" style="padding:0px; font-weight:bold">Level</div>
-                <div class="col-1" style="padding:0px"></div>
+                <div class="col-7 col-lg-9" style="padding:0px; font-weight:bold">Username</div>
+                <div class="col-4 col-lg-2" style="padding:0px; font-weight:bold">Level</div>
+                <div class="col-1 col-lg-1" style="padding:0px"></div>
             </div>
             {% for user in users %}
-            <hr style="margin-top:8px; margin-bottom:8px">
-            <div class="form-group row justify-content-center" style="margin:0px">
-                <label class="col-9 col-form-label" style="padding:0px">
-                    {{ user.username }}
-                </label>
-                <label class="col-2 col-form-label" style="padding:0px">
-                    {% if user.level == 0 %}
-                    Root
-                    {% elif user.level == 1 %}
-                    Admin
-                    {% elif user.level == 2 %}
-                    User
+            <div id="{{ user.username + '_row' }}">
+                <hr style="margin-top:8px; margin-bottom:8px">
+                <div class="form-group row justify-content-center" style="margin:0px">
+                    <label class="col-7 col-lg-9 col-form-label" style="padding:0px; display:flex; align-items:center;">
+                        {{ user.username }}
+                    </label>
+                    <label class="col-4 col-lg-2 col-form-label" style="padding:0px; display:flex; align-items:center;">
+                        <form method="POST" action="" style="margin:0px; width:100%" id="{{ user.username + '_level' }}">
+                            {{ changeuserlevelform.csrf_token }}
+                            {{ changeuserlevelform.username(value=user.username, hidden=true) }}
+                            {% if current_user.level >= user.level %}
+                            <select class="form-control form-control-sm" id="level" name="level" style="width:85%" disabled>
+                                <option value={{ user.level }} selected>{{ levels[user.level] }}</option>
+                            </select>
+                            {% else %}
+                            <select class="form-control form-control-sm" id="{{ user.username + '_level' }}" name="level" style="width:85%" onchange="change_level('{{ user.username }}')">
+                                {% for level,text in levels.items() %}
+                                {% if current_user.level < level %}
+                                <option value={{ level }} {{ "selected" if level == user.level else "" }}>{{ text }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                            {% endif %}
+                        </form>
+                    </label>
+                    {% if current_user.level < user.level %}
+                    <label class="col-1 col-lg-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;" onclick="confirm_delete('{{ user.username }}')">
+                        <i class="bi bi-trash" style="color:red; cursor:pointer"></i>
+                    </label>
+                    {% else %}
+                    <label class="col-1" style="padding:0px"></label>
                     {% endif %}
-                </label>
-                {% if current_user.level < user.level %}
-                <label class="col-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;" onclick="confirm_delete('{{ user.username }}')">
-                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer">
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                    </svg>
-                </label>
-                {% else %}
-                <lable class="col-1" style="padding:0px"></lable>
-                {% endif %}
+                </div>
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
-<script type="text/javascript" src="{{ url_for('static', filename='/scripts/account.js') }}"></script>
 {% endif %}
+<script type="text/javascript" src="{{ url_for('static', filename='/scripts/account.js') }}"></script>
 {% endblock %}

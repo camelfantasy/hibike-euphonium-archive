@@ -33,9 +33,9 @@ function autocomplete(inp, arr, form) {
                     closeAllLists();
                     
                     if (form.id == 'addTagForm') {
-                        submit_add_tag_form(e);
+                        submit_add_tag_form(false);
                     } else if (form.id == 'deleteTagForm') {
-                        submit_delete_tag_form(e);
+                        submit_delete_tag_form();
                     } else if (form.id == 'searchForm') {
                         submit_search_form();
                     }
@@ -74,13 +74,16 @@ function autocomplete(inp, arr, form) {
                 if (x) x[currentFocus].click();
             }
 
-            // call custom form submission on each page
-            if (form.id == 'addTagForm') {
-                submit_add_tag_form(e);
-            } else if (form.id == 'deleteTagForm') {
-                submit_delete_tag_form(e);
-            } else if (form.id == 'searchForm') {
-                submit_search_form();
+            // run only if no suggestions are displayed
+            if (!x) {
+                // call custom form submission on each page
+                if (form.id == 'addTagForm') {
+                    submit_add_tag_form(false);
+                } else if (form.id == 'deleteTagForm') {
+                    submit_delete_tag_form();
+                } else if (form.id == 'searchForm') {
+                    submit_search_form();
+                }
             }
         }
     });

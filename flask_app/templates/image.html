@@ -1,5 +1,22 @@
 {% extends "header.html" %}
 {% block content %}
+<div class="delete-confirmation" id="confirm-background">
+    <div class="row justify-content-center" style="padding-left:32px;padding-right:32px" align="center" id="confirm-row">
+        <div class="col-lg-4 page-item" align="center" id="confirm-box">
+            <div id="confirm-text" style="font-weight:bold"></div>
+            <br>
+            <div class="row">
+                <div class="col-5">
+                    <label class="btn btn-logout" style="margin:0px; width:100%" onclick="cancel()">Cancel</label>
+                </div>
+                <div class="col-2"></div>
+                <div class="col-5">
+                    <label class="btn btn-submit" style="margin:0px; width:100%" onclick="submit_add_tag_form(true)">Add</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="row justify-content-center">
     {% if image %}
     <div class="col-11 col-lg-9">
@@ -13,9 +30,25 @@
         </div>
     </div>
     <div class="col-11 col-lg-3 mt-4 mt-lg-0">
+        {% if current_user.is_authenticated %}
+        <div class="row">
+            <div class="col-9" style="font-weight:bold; font-size:20px; word-wrap:break-word">
+                {{ image.name }}
+            </div>
+            <form class="col-3" style="font-size:20px; display:flex; direction:rtl; margin-bottom:0px; color:gold" id="starForm" onclick="star('{{ image.file_id }}')">
+                {{ submitform.csrf_token }}
+                {% if starred %}
+                <i class="bi bi-star-fill" style="padding-top:4px" id="star"></i>
+                {% else %}
+                <i class="bi bi-star" style="padding-top:4px" id="star"></i>
+                {% endif %}
+            </form>
+        </div>
+        {% else %}
         <div style="font-weight:bold; font-size:20px; word-wrap:break-word">
             {{ image.name }}
         </div>
+        {% endif %}
         <br>
         <div class="page-item" style="word-wrap: break-word; font-size:14px">
             <div>
@@ -42,10 +75,7 @@
                             {{ deletetagform.csrf_token }}
                             {{ deletetagform.tag(value=tag.tag, hidden=true) }}
                             {{ deletetagform.file_id(hidden="true", value=image.file_id) }}
-                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer" onclick="submit_delete_tag_form('{{ tag.tag | replace(' ', '_') }}')">
-                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                            </svg>
+                            <i class="bi bi-trash" style="color:red; cursor:pointer" onclick="submit_delete_tag_form('{{ tag.tag | replace(' ', '_') }}')"></i>
                         </form>
                         {% endif %}
                     </label>
@@ -66,8 +96,8 @@
             </div>
             {% endif %}
         </div>
-        <div id="tag_box">
-            <div id="tag_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%; display:none"></div>
+        <div id="tag_box" class="mt-4" style="display:none; visibility:hidden">
+            <div id="tag_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%"></div>
         </div>
         <br>
         <div class="page-item" style="font-size:14px">
@@ -88,8 +118,8 @@
             {% endif %}
             {% endif %}
         </div>
-        <div id="description_box">
-            <div id="description_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%; display:none"></div>
+        <div id="description_box" class="mt-4" style="display:none; visibility:hidden">
+            <div id="description_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%"></div>
         </div>
         <div style="padding-top:12px">
             {% if prev %}
@@ -116,22 +146,15 @@
 <script>
     // part of tag suggestions
     // extract server response
-    var dict = { "tags" : {{ tags|tojson }} };
-    var tags = dict.tags;
+    var tags = JSON.parse(`{{ tags|tojson }}`);
 
     autocomplete(document.getElementById("myInput"), tags, document.getElementById("addTagForm"));
     // end tag suggestions
 
     // part of ajax functions
-    var add_file_tag_url = "{{ url_for('results.add_file_tag') }}";
-    var delete_file_tag_url = "{{ url_for('results.delete_file_tag') }}";
-    var update_file_description_url = "{{ url_for('results.update_file_description') }}";
-
-    var updateddescriptionform_csrf_token = "{{ updatedescriptionform.csrf_token._value() }}";
-    var deletetagform_csrf_token = "{{ deletetagform.csrf_token._value() }}";
-    var addtagform_csrf_token = "{{ addtagform.csrf_token._value() }}";
     var deletetagform_file_id_field = `{{ deletetagform.file_id(hidden='true', value=image.file_id) }}`;
     var deletetagform_csrf_token_field = `{{ deletetagform.csrf_token }}`;
+    var user_level = `{{ current_user.level }}`;
     // end ajax functions
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='/scripts/resize_description.js') }}"></script>

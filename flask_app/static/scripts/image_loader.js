@@ -24,13 +24,22 @@ function loadItems() {
             let template_clone = template_row.content.cloneNode(true);
             var innerhtml = "";
             new_row.forEach(function(file_id) {
-                var href = results_url + file_id;
+                var href = "/file/" + file_id;
                 var src = 'https://drive.google.com/thumbnail?id=' + file_id;
+                
                 innerhtml += `  <div class="col-lg-3 col-md-6 col-sm-12 d-flex justify-content-center" style="height:235px; display:flex; align-items: center;">
                                     <a href="` + href + `" id="link" target="_blank">
                                         <img src="` + src + `" style="max-width:100%; max-height:100%" id="image">
-                                    </a>
-                                </div>`
+                                    </a>`;
+                
+                if (user_authenticated) {
+                    innerhtml += `<form style="color:gold; position:absolute; top:5%; left:5%; margin-bottom:0px; font-size:20px;" id="starForm_` + file_id + `" onclick="star('` + file_id + `')">`
+                    innerhtml += starform_csrf_token_field;
+                    innerhtml += favorites.indexOf(file_id) == -1 ? `<i class="bi bi-star"` : `<i class="bi bi-star-fill"`;
+                    innerhtml += ` id="star_` + file_id + `"></i>`;
+                }
+                
+                innerhtml += `</div></form>`;
             })
             template_clone.querySelector("#row").innerHTML = innerhtml;
             scroller.appendChild(template_clone);
@@ -53,3 +62,21 @@ var intersectionObserver = new IntersectionObserver(entries => {
 });
 
 intersectionObserver.observe(sentinel);
+
+// star function
+function star(id) {
+    $.ajax({
+        type: "POST",
+        url: "/star/" + id,
+        data: $('#starForm_' +  id).serialize(),
+        success: function(result){
+            if (result == "0") {
+                $("#star_" + id).addClass("bi-star-fill");
+                $("#star_" + id).removeClass("bi-star");
+            } else if (result == "1") {
+                $("#star_" + id).addClass("bi-star");
+                $("#star_" + id).removeClass("bi-star-fill");
+            }
+        }
+    });
+}

@@ -1,5 +1,22 @@
 {% extends "header.html" %}
 {% block content %}
+<div class="delete-confirmation" id="confirm-background">
+    <div class="row justify-content-center" style="padding-left:32px;padding-right:32px" align="center" id="confirm-row">
+        <div class="col-lg-4 page-item" align="center" id="confirm-box">
+            <div id="confirm-text" style="font-weight:bold"></div>
+            <br>
+            <div class="row">
+                <div class="col-5">
+                    <label class="btn btn-logout" style="margin:0px; width:100%" onclick="cancel()">Cancel</label>
+                </div>
+                <div class="col-2"></div>
+                <div class="col-5">
+                    <label class="btn btn-submit" style="margin:0px; width:100%" onclick="submit_add_tag_form(true)">Add</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="row justify-content-center">
     {% if folder %}
     <div class="col-11 col-lg-3 order-lg-2">
@@ -55,8 +72,8 @@
                 </form>
             </div>
         </div>
-        <div id="tag_box">
-            <div id="tag_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%; display:none"></div>
+        <div id="tag_box" class="mt-4" style="display:none; visibility:hidden">
+            <div id="tag_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%"></div>
         </div>
         <br>
         {% endif %}
@@ -78,8 +95,8 @@
             {% endif %}
             {% endif %}
         </div>
-        <div id="description_box">
-            <div id="description_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%; display:none"></div>
+        <div id="description_box" class="mt-4" style="display:none; visibility:hidden">
+            <div id="description_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%"></div>
         </div>
     </div>
     <div class="col-11 col-lg-9 order-lg-1 mt-4 mt-lg-0">
@@ -94,6 +111,12 @@
                     <a href="{{ url_for('results.file', file_id=item.file_id) }}" target="_blank">
                         <img src="{{ 'https://drive.google.com/thumbnail?id=' + item.file_id }}" style="max-width:100%; max-height:100%">
                     </a>
+                    {% if current_user.is_authenticated %}
+                    <form style="color:gold; position:absolute; top:5%; left:5%; margin-bottom:0px; font-size:20px;" id="{{ 'starForm_' + item.file_id}}" onclick="star('{{ item.file_id }}')">
+                        {{ submitform.csrf_token }}
+                        <i class="bi {{ 'bi-star-fill' if item.file_id in current_user.favorites|map(attribute='file_id') else 'bi-star' }}" id="{{ 'star_' + item.file_id}}"></i>
+                    </form>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -128,25 +151,14 @@
 <script>
     // part of tag suggestions
     // extract server response
-    var dict = { "add_tags" : {{ add_tags|tojson }}, "delete_tags" : {{ delete_tags|tojson }} };
-    var add_tags = dict.add_tags;
-    var delete_tags = dict.delete_tags;
+    var add_tags = JSON.parse(`{{ add_tags|tojson }}`)
+    var delete_tags = JSON.parse(`{{ delete_tags|tojson }}`)
 
     autocomplete(document.getElementById("myInput"), add_tags, document.getElementById("addTagForm"));
     autocomplete(document.getElementById("deleteInput"), delete_tags, document.getElementById("deleteTagForm"));
     // end tag suggestions
 
-    // part of ajax functions
-    var add_folder_tag_url = "{{ url_for('results.add_folder_tag') }}";
-    var delete_folder_tag_url = "{{ url_for('results.delete_folder_tag') }}";
-    var update_folder_description_url = "{{ url_for('results.update_folder_description') }}";
-
-    var updateddescriptionform_csrf_token = "{{ updatedescriptionform.csrf_token._value() }}";
-    var deletetagform_csrf_token = "{{ deletetagform.csrf_token._value() }}";
-    var addtagform_csrf_token = "{{ addtagform.csrf_token._value() }}";
-    var deletetagform_file_id_field = `{{ deletetagform.file_id(hidden='true', value=folder.folder_id) }}`;
-    var deletetagform_csrf_token_field = `{{ deletetagform.csrf_token }}`;
-    // end ajax functions
+    var user_level = `{{ current_user.level }}`;
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='/scripts/resize_description.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='/scripts/folder.js') }}"></script>
@@ -154,11 +166,18 @@
 <script>
     // part of dynamic loader
     // extract server response
-    var dict = { "ids" : {{ remaining_results|tojson }} };
-    var remaining_results = dict.ids;
-
-    var results_url = {{ url_for('results.file', file_id="") }};
+    var remaining_results = JSON.parse(`{{ remaining_results|tojson }}`);
     // end dynamic loader
+
+    // gets id list of favorite images
+    var user_authenticated = {{ current_user.is_authenticated|tojson }}
+
+    {% if current_user.is_authenticated %}
+    var starform_csrf_token_field = `{{ submitform.csrf_token }}`;
+    var favorites_json = JSON.parse(`{{ current_user.favorites|tojson }}`);
+    var favorites = []
+    favorites_json.forEach(x => favorites.push(x.file_id));
+    {% endif %}
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='/scripts/image_loader.js') }}"></script>
 {% endblock %}

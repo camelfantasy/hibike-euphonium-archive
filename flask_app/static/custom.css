@@ -69,6 +69,12 @@ pre {
     transition: background-color 0.1s linear;
 }
 
+.btn-logout:focus {
+    text-decoration: none;
+    background-color:#c82333;
+    color: white;
+}
+
 .btn-logout:hover {
     text-decoration: none;
     background-color:#990000;
@@ -212,7 +218,35 @@ pre {
     border-radius: 4px;
     font-size:14px
 }
-   
+
+.dropdown-item {
+    transition: background-color 0.1s linear
+}
+
+.dropdown-item:hover {
+    transition: background-color 0.1s linear;
+    background-color: rgba(0, 172, 198, 0.1);
+}
+
+.dropdown-item:active {
+    background-color: rgb(0, 172, 198);
+}
+
+.logout-item {
+    color: #c82333
+}
+
+.logout-item:hover {
+    transition: background-color 0.1s linear;
+    background-color: #c8233310;
+    color: #c82333
+}
+
+.logout-item:active {
+    background-color: #990000;
+    color:white
+}
+
 @keyframes visibility1 {
     0% {
         opacity: 0;
@@ -284,5 +318,33 @@ pre {
 @media (min-width: 992px) {
     .character3-col {
         border-right: 1px solid lightgray;
+    }
+}
+
+@media (min-width: 0px) {
+    .media-header-1 {
+        visibility: none;
+        display: none;
+    }
+}
+
+@media (min-width: 992px) {
+    .media-header-1 {
+        visibility: visible;
+        display: block;
+    }
+}
+
+@media (min-width: 0px) {
+    .media-header-2 {
+        visibility: visible;
+        display: block;
+    }
+}
+
+@media (min-width: 992px) {
+    .media-header-2 {
+        visibility: none;
+        display: none;
     }
 }

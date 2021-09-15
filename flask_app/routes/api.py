@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, url_for, current_app, jsonify, request
 from ..models import File, Folder, Tag, User
 from ..api_models import API_Tag, API_File, API_File_No_Tags, API_Folder
-from .. import bcrypt, pymongo
+from .. import bcrypt, pymongo, hashing
 import re
 
 api = Blueprint("api", __name__)
@@ -91,7 +91,6 @@ def image():
 def random_image():
     cursor = None
     tag = None
-    print(request.args)
 
     if request.args.get('tag'):
         if request.args.get('exact') == 'True':
@@ -153,19 +152,23 @@ def folder():
     return jsonify(folder.__dict__)
 
 # routes for admins/root only below
+def authenticate(data):
+    if not 'api_key' in data or not data['api_key']: return "API key missing"
+    api_key_hashed = hashing.hash_value(data['api_key'])
+    
+    user = User.objects(api_key=api_key_hashed).first()
+    if user is None:
+        return "Invalid credentials"
+    if user.level >= 2: return "Insufficient permissions"
+
+    return None
+
 @api.route("/api/v1/add_file_tags", methods=["POST"])
 def add_file_tags():
     data = request.form
     
-    if not 'username' in data: return "Username missing", 400
-    username = data['username']
-    if not 'api_key' in data: return "API key missing", 400
-    api_key = data['api_key']
-    
-    user = User.objects(username=username).first()
-    if user is None or user.api_key != api_key:
-        return "Invalid credentials", 400
-    if user.level >= 2: return "Insufficient permissions", 400
+    result = authenticate(data)
+    if result: return result, 400
     
     if not 'file_id' in data: return "File id missing", 400
     file_id = data['file_id']
@@ -207,15 +210,8 @@ def add_file_tags():
 def remove_file_tags():
     data = request.form
     
-    if not 'username' in data: return "Username missing", 400
-    username = data['username']
-    if not 'api_key' in data: return "API key missing", 400
-    api_key = data['api_key']
-    
-    user = User.objects(username=username).first()
-    if user is None or user.api_key != api_key:
-        return "Invalid credentials", 400
-    if user.level >= 2: return "Insufficient permissions", 400
+    result = authenticate(data)
+    if result: return result, 400
     
     if not 'file_id' in data: return "File id missing", 400
     file_id = data['file_id']
@@ -246,15 +242,8 @@ def remove_file_tags():
 def add_folder_tags():
     data = request.form
     
-    if not 'username' in data: return "Username missing", 400
-    username = data['username']
-    if not 'api_key' in data: return "API key missing", 400
-    api_key = data['api_key']
-    
-    user = User.objects(username=username).first()
-    if user is None or user.api_key != api_key:
-        return "Invalid credentials", 400
-    if user.level >= 2: return "Insufficient permissions", 400
+    result = authenticate(data)
+    if result: return result, 400
     
     if not 'folder_id' in data: return "Folder id missing", 400
     folder_id = current_app.config['ROOT_ID'] if data['folder_id'] == "root" else data['folder_id']
@@ -306,15 +295,8 @@ def add_folder_tags():
 def remove_folder_tags():
     data = request.form
     
-    if not 'username' in data: return "Username missing", 400
-    username = data['username']
-    if not 'api_key' in data: return "API key missing", 400
-    api_key = data['api_key']
-    
-    user = User.objects(username=username).first()
-    if user is None or user.api_key != api_key:
-        return "Invalid credentials", 400
-    if user.level >= 2: return "Insufficient permissions", 400
+    result = authenticate(data)
+    if result: return result, 400
     
     if not 'folder_id' in data: return "Folder id missing", 400
     folder_id = current_app.config['ROOT_ID'] if data['folder_id'] == "root" else data['folder_id']
@@ -352,15 +334,8 @@ def remove_folder_tags():
 def update_file_description():
     data = request.form
     
-    if not 'username' in data: return "Username missing", 400
-    username = data['username']
-    if not 'api_key' in data: return "API key missing", 400
-    api_key = data['api_key']
-    
-    user = User.objects(username=username).first()
-    if user is None or user.api_key != api_key:
-        return "Invalid credentials", 400
-    if user.level >= 2: return "Insufficient permissions", 400
+    result = authenticate(data)
+    if result: return result, 400
     
     if not 'file_id' in data: return "File id missing", 400
     file_id = data['file_id']
@@ -381,15 +356,8 @@ def update_file_description():
 def update_folder_description():
     data = request.form
     
-    if not 'username' in data: return "Username missing", 400
-    username = data['username']
-    if not 'api_key' in data: return "API key missing", 400
-    api_key = data['api_key']
-    
-    user = User.objects(username=username).first()
-    if user is None or user.api_key != api_key:
-        return "Invalid credentials", 400
-    if user.level >= 2: return "Insufficient permissions", 400
+    result = authenticate(data)
+    if result: return result, 400
     
     if not 'folder_id' in data: return "Folder id missing", 400
     folder_id = data['folder_id']
@@ -410,15 +378,8 @@ def update_folder_description():
 def add_tags():
     data = request.get_json()
     
-    if not 'username' in data: return "Username missing", 400
-    username = data['username']
-    if not 'api_key' in data: return "API key missing", 400
-    api_key = data['api_key']
-    
-    user = User.objects(username=username).first()
-    if user is None or user.api_key != api_key:
-        return "Invalid credentials", 400
-    if user.level >= 2: return "Insufficient permissions", 400
+    result = authenticate(data)
+    if result: return result, 400
 
     if not 'tags' in data: return "Tags missing", 400
     tags = data['tags']
@@ -450,15 +411,8 @@ def add_tags():
 def remove_tags():
     data = request.get_json()
     
-    if not 'username' in data: return "Username missing", 400
-    username = data['username']
-    if not 'api_key' in data: return "API key missing", 400
-    api_key = data['api_key']
-    
-    user = User.objects(username=username).first()
-    if user is None or user.api_key != api_key:
-        return "Invalid credentials", 400
-    if user.level >= 2: return "Insufficient permissions", 400
+    result = authenticate(data)
+    if result: return result, 400
 
     if not 'tags' in data: return "Tags missing", 400
     tags = data['tags']
@@ -490,15 +444,8 @@ def remove_tags():
 def update_tags():
     data = request.get_json()
     
-    if not 'username' in data: return "Username missing", 400
-    username = data['username']
-    if not 'api_key' in data: return "API key missing", 400
-    api_key = data['api_key']
-    
-    user = User.objects(username=username).first()
-    if user is None or user.api_key != api_key:
-        return "Invalid credentials", 400
-    if user.level >= 2: return "Insufficient permissions", 400
+    result = authenticate(data)
+    if result: return result, 400
 
     if not 'tags' in data: return "Tags missing", 400
     tags = data['tags']

@@ -27,7 +27,7 @@ class User(db.Document, UserMixin):
     username = db.StringField(required=True, unique=True)
     password = db.StringField(required=True)
     level = db.IntField(required=True)
-    api_key = db.StringField(required=True)
+    api_key = db.StringField()
     favorites = db.ListField(db.ReferenceField(File, required=True))
 
     def get_id(self):

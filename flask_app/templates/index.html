@@ -60,33 +60,38 @@
             <hr>
             <div style="text-align:center; font-size:18px">
                 <b>Permissions</b>
+            </div><br>
+            <div>
+                All users with accounts can favorite images and view all of them on a
+                <a href="{{ url_for('users.favorites') }}" class="reverse-link">single page</a>.
+                Anyone is free to create an account
+                <a href="{{ url_for('users.register') }}" class="reverse-link">here</a>.
             </div>
             <br>
             <div>
-                All users with accounts have permission to add or remove existing tags from individual images,
+                Staff (Moderator and above) have permission to add or remove existing tags from individual images,
                 as well as all images in a folder at once (will not affect subfolders).
+                They can also change the permissions of users ranked below them up to one rank below and delete their accounts.
             </div>
             <br>
             <div>
-                Administrators additionally have the ability to add or remove tags, create or delete user accounts,
+                Administrators additionally have the ability to add or remove tags, utilize the restricted API routes,
                 and sync data from Google Drive to the local database.
-                Tags' categories can be changed by adding a tag as usual but selecting a different category.
-                Database access is currently required for directly renaming tags.
             </div>
             <br>
             <div>
-                The Root user is the sole person able to add or remove administrator accounts.
+                The Root user is the sole person able to manage administrator accounts.
             </div>
             <hr>
             <div style="text-align:center; font-size:18px">
-                <b>List of users and admins</b>
+                <b>Staff</b>
             </div>
             <br>
             <div class="row" align="center">
                 <div class="col-6">
-                    <div><b>Users</b></div>
-                    {% for user in users %}
-                    <div>{{ user.username }}</div>
+                    <div><b>Mods</b></div>
+                    {% for mod in mods %}
+                    <div>{{ mod.username }}</div>
                     {% endfor %}
                 </div>
                 <div class="col-6">

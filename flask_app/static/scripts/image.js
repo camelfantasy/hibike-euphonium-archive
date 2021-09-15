@@ -1,49 +1,91 @@
 var tag_message_timer = null;
 var update_description_timer = null;
 
+// add confirmation below
+background = document.getElementById('confirm-background');
+box = document.getElementById('confirm-box');
+row = document.getElementById('confirm-row');
+confirm_text = document.getElementById('confirm-text');
+
+function confirm_add(tag) {
+    background.style.display = 'block';
+    box.style.display = 'block';
+    confirm_text.innerHTML = "Add new tag '" + tag + "'?";
+}
+
+function cancel() {
+    background.style.display = 'none';
+    box.style.display = 'none';
+}
+
+// also allow closing popup by clicking outside of it
+window.onclick = function(event) {
+    if (event.target == background || event.target == row) {
+        cancel();
+    }
+}
+
 // submits add tag form
-function submit_add_tag_form(e) {
+function submit_add_tag_form(isConfirmation) {
+    newtag = document.getElementById("myInput").value.trim();
+
     // ignores blank tag
-    if (!document.getElementById("myInput").value.trim()) return;
+    if (!newtag) return;
+
+    // confirmation if user is adding new tag
+    if (!isConfirmation && user_level < 2 && search_tags.map((x) => { return x.toLowerCase(); }).indexOf(newtag.toLowerCase()) == -1) {
+        confirm_add(newtag);
+        return;
+    }
+    cancel();
 
     // resets fadeout timer if handling more than one request before timeout
     if (tag_message_timer) {
         clearTimeout(tag_message_timer)
         tag_message_timer = null;
     }
-
-    var formdata = $('#addTagForm').serialize();
+    
+    formdata = $('#addTagForm').serialize();
     $("#myInput").val("");
-
     $.ajax({
         type: "POST",
-        url: add_file_tag_url,
+        url: "/add_file_tag",
         data: formdata,
         success: function (data) {
-            $("#tag_message").css("visibility", "visible");
-            $("#tag_message").css("display", "block");
-            $("#tag_box").attr("class", "mt-4");
             $("#tag_message").html(data.message);
             if (data.success == 0 || data.success == 2) {
-                $("#tag_message").attr("class", "alert alert-success fade-message");
-                $("#taglist").append(`
-                    <div class="form-group row" style="margin:0px" id="tag_` + data.tag.replace(' ', '_') + `">
-                        <label class="col-11 col-form-label" style="padding:0px">
-                            <a href="` + data.url_for + `" class="tag-link">` + data.tag + `</a>
-                        </label>
-                        <label class="col-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;">
-                            <form method="POST" action="" style="margin:0px" id="deleteTagForm_` + data.tag.replace(' ', '_') + `">
-                                ` + deletetagform_csrf_token_field + `
-                                ` + deletetagform_file_id_field + `
-                                <input hidden="" id="tag" name="tag" required="" type="text" value="` + data.tag + `">
-                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" fill="red" xmlns="http://www.w3.org/2000/svg" style="cursor: pointer" onclick="submit_delete_tag_form('` + data.tag.replace(' ', '_') + `')">
-                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                                </svg>
-                            </form>
-                        </label>
-                    </div>
-                `)
+                $("#tag_message").attr("class", "alert alert-success");
+
+                // add new tag to correct position
+                current_tags = Array.from(document.getElementById("taglist").children).slice(1);
+                newNode = document.createElement('div');
+                newNode.className = "form-group row";
+                newNode.style.margin = "0px";
+                newNode.id = "tag_" + data.tag.replace(' ', '_')
+                newNode.innerHTML = `
+                    <label class="col-11 col-form-label" style="padding:0px">
+                        <a href="` + data.url_for + `" class="tag-link">` + data.tag + `</a>
+                    </label>
+                    <label class="col-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;">
+                        <form method="POST" action="" style="margin:0px" id="deleteTagForm_` + data.tag.replace(' ', '_') + `">
+                            ` + deletetagform_csrf_token_field + `
+                            ` + deletetagform_file_id_field + `
+                            <input hidden="" id="tag" name="tag" required="" type="text" value="` + data.tag + `">
+                            <i class="bi bi-trash" style="color:red; cursor:pointer" onclick="submit_delete_tag_form('` + data.tag.replace(' ', '_') + `')"></i>
+                        </form>
+                    </label>
+                `
+                
+                // try catch necessary to break forEach
+                try {
+                    current_tags.forEach(x => {
+                        if (("tag_" + data.tag.replace(' ', '_')).toLowerCase() < x.id.toLowerCase()) {
+                            x.before(newNode);
+                            throw BreakException;
+                        }
+                    });
+                    document.getElementById("taglist").appendChild(newNode);
+                } catch {}
                 
                 // removes added tag from tag suggestions
                 index = tags.indexOf(data.tag);
@@ -58,34 +100,31 @@ function submit_add_tag_form(e) {
                 if (data.success == 2) {
                     if (search_tags.indexOf(data.tag) == -1) {
                         search_tags.push(data.tag)
-                        search_tags.sort()
+                        search_tags.sort(function (a, b) {
+                            return a.toLowerCase().localeCompare(b.toLowerCase());
+                        })
                     }
                 }
             } else {
-                $("#tag_message").attr("class", "alert alert-warning fade-message");
+                $("#tag_message").attr("class", "alert alert-warning");
+            }
+
+            if ($('#tag_box').css("visibility") != "visible") {
+                $('#tag_box').slideDown(250,function(){
+                    $('#tag_box').css({"visibility":"visible",display:'none'}).fadeIn(250);
+                });
             }
 
             // sets fadeout timer
             tag_message_timer = setTimeout(function() {
-                if ($('#tag_message').css("visibility") != "hidden") {
-                    $('#tag_message').fadeOut(500,function(){
-                        $("#tag_box").removeClass("mt-4")
-                        $('#tag_message').css({"visibility":"hidden",display:'block'}).slideUp();
+                if ($('#tag_box').css("visibility") != "hidden") {
+                    $('#tag_box').fadeOut(500,function(){
+                        $('#tag_box').css({"visibility":"hidden",display:'block'}).slideUp(500);
                     });
                 }
             }, 5000);
         }
     });
-    e.preventDefault();
-
-    // adds CSRF token to form
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", addtagform_csrf_token)
-            }
-        }
-    })
 }
 
 // sends tag deletion request
@@ -98,15 +137,12 @@ function submit_delete_tag_form(tag) {
 
     $.ajax({
         type: "POST",
-        url: delete_file_tag_url,
+        url: "/delete_file_tag",
         data: $('#deleteTagForm_' + tag).serialize(),
         success: function (data) {
-            $("#tag_message").css("visibility", "visible");
-            $("#tag_message").css("display", "block");
-            $("#tag_box").attr("class", "mt-4");
             $("#tag_message").html(data.message);
             if (data.success == 0) {
-                $("#tag_message").attr("class", "alert alert-success fade-message");
+                $("#tag_message").attr("class", "alert alert-success");
                 $("#tag_" + tag).remove();
                 
                 // adds tag to tag suggestions
@@ -123,29 +159,25 @@ function submit_delete_tag_form(tag) {
                     $("#tag-label").html('<b>Tags (' + ($("#taglist div").length - 1) + '):</b>');
                 }
             } else {
-                $("#tag_message").attr("class", "alert alert-warning fade-message");
+                $("#tag_message").attr("class", "alert alert-warning");
+            }
+
+            if ($('#tag_box').css("visibility") != "visible") {
+                $('#tag_box').slideDown(250,function(){
+                    $('#tag_box').css({"visibility":"visible",display:'none'}).fadeIn(250);
+                });
             }
 
             // sets fadeout timer
             tag_message_timer = setTimeout(function() {
-                if ($('#tag_message').css("visibility") != "hidden") {
-                    $('#tag_message').fadeOut(500,function(){
-                        $("#tag_box").removeClass("mt-4")
-                        $('#tag_message').css({"visibility":"hidden",display:'block'}).slideUp();
+                if ($('#tag_box').css("visibility") != "hidden") {
+                    $('#tag_box').fadeOut(500,function(){
+                        $('#tag_box').css({"visibility":"hidden",display:'block'}).slideUp(500);
                     });
                 }
             }, 5000);
         }
     });
-
-    // adds CSRF token to form
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", deletetagform_csrf_token)
-            }
-        }
-    })
 }
 
 // sends update description request
@@ -158,37 +190,47 @@ function submit_update_description_form() {
 
     $.ajax({
         type: "POST",
-        url: update_file_description_url,
+        url: "/update_file_description",
         data: $('#updateDescriptionForm').serialize(),
         success: function (data) {
-            $("#description_message").css("visibility", "visible");
-            $("#description_message").css("display", "block");
-            $("#description_box").attr("class", "mt-4");
             $("#description_message").html(data.message);
             if (data.success == 0) {
-                $("#description_message").attr("class", "alert alert-success fade-message");
+                $("#description_message").attr("class", "alert alert-success");
             } else {
-                $("#description_message").attr("class", "alert alert-warning fade-message");
+                $("#description_message").attr("class", "alert alert-warning");
+            }
+
+            if ($('#description_box').css("visibility") != "visible") {
+                $('#description_box').slideDown(250,function(){
+                    $('#description_box').css({"visibility":"visible",display:'none'}).fadeIn(250);
+                });
             }
 
             // sets fadeout timer
             update_description_timer = setTimeout(function() {
-                if ($('#description_message').css("visibility") != "hidden") {
-                    $('#description_message').fadeOut(500,function(){
-                        $("#description_box").removeClass("mt-4")
-                        $('#description_message').css({"visibility":"hidden",display:'block'}).slideUp();
+                if ($('#description_box').css("visibility") != "hidden") {
+                    $('#description_box').fadeOut(500,function(){
+                        $('#description_box').css({"visibility":"hidden",display:'block'}).slideUp(500);
                     });
                 }
             }, 5000);
         }
     });
+}
 
-    // adds CSRF token to form
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", updateddescriptionform_csrf_token)
+function star(id) {
+    $.ajax({
+        type: "POST",
+        url: "/star/" + id,
+        data: $('#starForm').serialize(),
+        success: function(result){
+            if (result == "0") {
+                $("#star").addClass("bi-star-fill");
+                $("#star").removeClass("bi-star");
+            } else if (result == "1") {
+                $("#star").addClass("bi-star");
+                $("#star").removeClass("bi-star-fill");
             }
         }
-    })
+    });
 }

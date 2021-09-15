@@ -21,6 +21,12 @@
                     <a href="{{ url_for('results.file', file_id=item.file_id) }}" target="_blank">
                         <img src="{{ 'https://drive.google.com/thumbnail?id=' + item.file_id }}" style="max-width:100%; max-height:100%">
                     </a>
+                    {% if current_user.is_authenticated %}
+                    <form style="color:gold; position:absolute; top:5%; left:5%; margin-bottom:0px; font-size:20px;" id="{{ 'starForm_' + item.file_id}}" onclick="star('{{ item.file_id }}')">
+                        {{ submitform.csrf_token }}
+                        <i class="bi {{ 'bi-star-fill' if item.file_id in current_user.favorites|map(attribute='file_id') else 'bi-star' }}" id="{{ 'star_' + item.file_id}}"></i>
+                    </form>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -39,10 +45,17 @@
 </div>
 <script>
     // extract server response - used as part of image loader in image_loader.js
-    var dict = { "ids" : {{ remaining_results|tojson }} };
-    var remaining_results = dict.ids;
-    
-    var results_url = {{ url_for('results.file', file_id="") }};
+    var remaining_results = JSON.parse(`{{ remaining_results|tojson }}`);
+
+    // gets id list of favorite images
+    var user_authenticated = {{ current_user.is_authenticated|tojson }}
+
+    {% if current_user.is_authenticated %}
+    var starform_csrf_token_field = `{{ submitform.csrf_token }}`;
+    var favorites_json = JSON.parse(`{{ current_user.favorites|tojson }}`);
+    var favorites = []
+    favorites_json.forEach(x => favorites.push(x.file_id));
+    {% endif %}
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='/scripts/image_loader.js') }}"></script>
 {% endblock %}

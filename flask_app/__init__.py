@@ -4,6 +4,7 @@ from flask_bcrypt import Bcrypt
 from flask_talisman import Talisman
 from flask_mongoengine import MongoEngine
 from flask_pymongo import PyMongo
+from flask_hashing import Hashing
 # from pymongo import MongoClient
 import os
 
@@ -11,6 +12,7 @@ db = MongoEngine()
 login_manager = LoginManager()
 bcrypt = Bcrypt()
 pymongo = PyMongo()
+hashing = Hashing()
 
 from flask_app.routes.users import users
 from flask_app.routes.results import results
@@ -78,6 +80,9 @@ def create_app(test_config=None):
         return None
     print("Initializing PyMongo")
     pymongo.init_app(app)
+
+    print("Initializing hashing")
+    hashing.init_app(app)
 
     csp = {
         'default-src': ['\'self\'','stackpath.bootstrapcdn.com','code.jquery.com',

@@ -9,36 +9,43 @@
         <ul class="navbar-nav ml-auto">
             {% if searchform %}
             <li class="nav-item">
-                <a class="nav-link nav-link-custom" href="{{ url_for('results.all_images') }}">
+                <a class="nav-link nav-link-custom" href="{{ url_for('results.all_images') }}" style="{{  'color:rgba(255,255,255,.75)' if request.path == '/all-images' else '' }}">
                     All Images
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link nav-link-custom" href="{{ url_for('results.folder', folder_id='root') }}">
+                <a class="nav-link nav-link-custom" href="{{ url_for('results.folder', folder_id='root') }}" style="{{  'color:rgba(255,255,255,.75)' if request.path == '/folder/root' else '' }}">
                     Root Folder
                 </a>
             </li>
-            <li class="nav-item" style="padding-right:8px">
-                <a class="nav-link nav-link-custom" href="{{ url_for('results.tags') }}">
+            <li class="nav-item">
+                <a class="nav-link nav-link-custom" href="{{ url_for('results.tags') }}" style="{{  'color:rgba(255,255,255,.75)' if request.path == '/tags' else '' }}">
                     Tags
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item px-lg-2">
                 <form action="/" class="form-inline autocomplete-search" style="margin:0px; display:inline-block" method="POST" id="searchForm">
                     {{ searchform.csrf_token }}
                     {{ searchform.search_query(class="form-control", id="searchInput", placeholder="Search", autocomplete="off", required="", value=(query if query else "")) }}
                 </form>
             </li>
-            <li class="nav-item" style="padding-left:8px">
-                <a class="nav-link nav-link-custom" href="{{ url_for('users.login') }}">
-                    {% if current_user.is_authenticated %}
-                    Account
-                    {% else %}
-                    Login
-                    {% endif %}
-                </a>
-            </li>   
-            {% endif %} 
+            {% if current_user.is_authenticated %}
+            <li class="nav-item dropdown">
+                <div class="nav-link dropdown-toggle nav-link-custom" style="cursor:pointer" data-toggle="dropdown">
+                    <i class="bi bi-person-circle" style="font-size:20px"></i>
+                </div>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="{{ url_for('users.account') }}" style="{{  'font-weight:bold' if request.path == '/account' else '' }}">Account</a>
+                    <a class="dropdown-item" href="{{ url_for('users.favorites') }}" style="{{  'font-weight:bold' if request.path == '/favorites' else '' }}">Favorites</a>
+                    <a class="dropdown-item logout-item" href="{{ url_for('users.logout') }}">Logout</a>
+                </div>
+            </li>
+            {% else %}
+            <li class="nav-item">
+                <a class="nav-link nav-link-custom" href="{{ url_for('users.login') }}" style="{{  'color:rgba(255,255,255,.75)' if request.path == '/login' else '' }}">Login</a>
+            </li>
+            {% endif %}
+            {% endif %}
         </ul>
     </div>  
 </nav>

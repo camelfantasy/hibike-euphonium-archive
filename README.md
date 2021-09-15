@@ -7,7 +7,7 @@ Note that this project is still in beta and will see frequent updates and ocassi
 ## Installation
 This guide assumes little programming or server management knowledge.  Further customization will require some knowledge in programming and web design.
 
-1. Ensure Python is installed and relatively up-to-date.  This application was developed in version 3.8.
+1. Ensure Python is installed and relatively up-to-date.  This application was developed in version 3.9.
 
 2. Install the packages in `requirements.txt` by navigating to the root folder of the application and running:
     ```
@@ -63,64 +63,90 @@ This guide assumes little programming or server management knowledge.  Further c
 
 ## Permissions
 
-The application follows a basic permission system.  No account is required for actions related to accessing images and folders.
+The application follows a basic permission system.  No account is required for actions related to accessing images and folders, creating an account, or using the unrestricted API routes.
 <table>
-<th width="70%">Permission</th>
+<th width="60%">Permission</th>
 <th width="10%">User</th>
+<th width="10%">Mod</th>
 <th width="10%">Admin</th>
 <th width="10%">Root</th>
 <tr>
 <td>
 Change own password
 </td>
-<td>Y</td><td>Y</td><td>Y</td>
+<td>Y</td><td>Y</td><td>Y</td><td>Y</td>
+<tr>
+<td>
+Delete own account
+</td>
+<td>Y</td><td>Y</td><td>Y</td><td>N</td>
+<tr>
+<td>
+Favorite images
+</td>
+<td>Y</td><td>Y</td><td>Y</td><td>Y</td>
 </tr>
 <tr>
 <td>
 Add/remove existing image tags to/from images and all images in a folder
 </td>
-<td>Y</td><td>Y</td><td>Y</td>
+<td>N</td><td>Y</td><td>Y</td><td>Y</td>
+</tr>
+<td>
+Set/delete API key
+</td>
+<td>N</td><td>Y</td><td>Y</td><td>Y</td>
+</tr>
+<tr>
+<td>
+Delete/edit User accounts
+</td>
+<td>N</td><td>Y</td><td>Y</td><td>Y</td>
 </tr>
 <tr>
 <td>
 Add new image tags to images and all images in a folder
 </td>
-<td>N</td><td>Y</td><td>Y</td>
+<td>N</td><td>N</td><td>Y</td><td>Y</td>
 </tr>
 <tr>
 <td>
 Add/delete/recategorize tags from the Tags page
 </td>
-<td>N</td><td>Y</td><td>Y</td>
-</tr>
-<tr>
-<td>
-Add/delete User accounts
-</td>
-<td>N</td><td>Y</td><td>Y</td>
+<td>N</td><td>N</td><td>Y</td><td>Y</td>
 </tr>
 <tr>
 <td>
 Sync Google Drive to database
 </td>
-<td>N</td><td>Y</td><td>Y</td>
+<td>N</td><td>N</td><td>Y</td><td>Y</td>
 </tr>
 <tr>
 <td>
-Add/delete Administrator accounts
+Use restricted API routes
 </td>
-<td>N</td><td>N</td><td>Y</td>
+<td>N</td><td>N</td><td>Y</td><td>Y</td>
+</tr>
+<tr>
+<td>
+Delete/edit Mod accounts
+</td>
+<td>N</td><td>N</td><td>Y</td><td>Y</td>
+</tr>
+<tr>
+<td>
+Delete/edit Administrator accounts
+</td>
+<td>N</td><td>N</td><td>N</td><td>Y</td>
 </tr>
 </table>
 
 ## Future development
 
 Development is currently still in beta.  The full release at an undetermined point in the future will include more features and improvements that will improve user experience.  These are likely (but not guaranteed) to include:
-* Advanced searching (i.e. with booleans).
-* An API.
-* Directly editing tags, usernames, and user permission levels.
-* Allowing users to favorite images, which will require implementing a fourth level of user permissions for the general public.
 * Increasing the efficiency of certain functions related to retrieving database information due to MongoEngine limitations.
 * Embedding other file types
-* Adding an album view for folders.
-* Some support for Japanese.
+* Adding an album view for pages with multiple images.
+* Implementing favorite counts and tag counts/similarity into various functions.
+* Annotated images.
+* Some support for Japanese and other languages.

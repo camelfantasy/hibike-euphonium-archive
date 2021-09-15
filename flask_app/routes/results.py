@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, url_for, redirect, flash, request, current_app
 from flask_login import current_user
-import re
 
-from ..forms import SearchForm, AddTagForm, DeleteTagForm, UpdateDescriptionForm
+from ..forms import SearchForm, AddTagForm, ModifyTagForm, DeleteTagForm, UpdateDescriptionForm, SubmitForm
 from ..models import User, Tag, File, Folder, Metadata
+
 from mongoengine.queryset.visitor import Q
-from bson import ObjectId
+import re
 
 results = Blueprint("results", __name__)
 
@@ -25,10 +25,10 @@ def index():
 
 	all_users = list(User.objects())
 	all_users.sort(key=lambda x:x.username.lower())
-	users = list(filter(lambda x: x.level == 2, all_users))
+	mods = list(filter(lambda x: x.level == 2, all_users))
 	admins = list(filter(lambda x: x.level == 1, all_users))
 
-	return render_template("index.html", searchform=searchform, users=users,
+	return render_template("index.html", searchform=searchform, mods=mods,
 		admins=admins, searchtags=getSearchTags())
 
 @results.route("/about", methods=["GET"])
@@ -80,19 +80,11 @@ def search_results(query):
 	initial_results = results_matrix[:10]
 	remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
 
-	title = ""
-	if query.lower() == "all":
-		title = "All images"
-	elif query.lower() == "untagged":
-		title = "Untagged images"
-	else:
-		title = "Search - " + query
-
 	metadata = Metadata(title="Search results for: " + query,
 		url=current_app.config["SITE_URL"] + url_for('results.search_results', query=query),
 		description="")
-	return render_template("search_results.html", title=title, searchform=SearchForm(),
-		query=query, results=initial_results, remaining_results=remaining_results,
+	return render_template("search_results.html", title="Search - " + query, searchform=SearchForm(),
+		submitform=SubmitForm(), query=query, results=initial_results, remaining_results=remaining_results,
 		searchtags=getSearchTags(), metadata=metadata, num_results=len(results))
 
 @results.route("/all-images", methods=["GET"])
@@ -112,7 +104,7 @@ def all_images():
 		url=current_app.config["SITE_URL"] + url_for('results.all_images'),
 		description="")
 	return render_template("all_images.html", title="All images", searchform=SearchForm(),
-		results=initial_results, remaining_results=remaining_results,
+		submitform=SubmitForm(), results=initial_results, remaining_results=remaining_results,
 		searchtags=getSearchTags(), metadata=metadata, num_results=len(results))
 
 @results.route("/untagged-images", methods=["GET"])
@@ -132,56 +124,14 @@ def untagged_images():
 		url=current_app.config["SITE_URL"] + url_for('results.untagged_images'),
 		description="")
 	return render_template("untagged_images.html", title="Untagged images", searchform=SearchForm(),
-		results=initial_results, remaining_results=remaining_results,
+		submitform=SubmitForm(), results=initial_results, remaining_results=remaining_results,
 		searchtags=getSearchTags(), metadata=metadata, num_results=len(results))
-		
-@results.route("/tags", methods=["GET", "POST"])
+
+@results.route("/tags", methods=["GET"])
 def tags():
-	addtagform = AddTagForm()
-	deletetagform = DeleteTagForm()
-
-	if request.form.get('submit_btn') == 'Add' and addtagform.validate_on_submit() \
-		and current_user.is_authenticated and current_user.level < 2:
-		tag = addtagform.tag.data.strip()
-
-		# checks for empty tag
-		if tag:
-			regex = re.compile("^" + tag + "$", re.IGNORECASE)
-
-			existing_tag = Tag.objects(tag=regex).first()
-			if existing_tag:
-				if existing_tag.category == addtagform.category.data:
-					flash("Tag '" + tag + "' already exists.", "narrow-warning")
-				else:
-					existing_tag.category = addtagform.category.data
-					existing_tag.save()
-					flash("Tag '" + tag + "' updated.", "narrow-success")
-			else:
-				new_tag = Tag(tag=tag, category=addtagform.category.data)
-				new_tag.save()
-				flash("Tag '" + tag + "' added.", "narrow-success")
-		else:
-			flash("Tag cannot be empty.", "narrow-warning")
-
-		return redirect(url_for("results.tags"))
-	
-	if request.form.get('submit_btn') == 'Delete' and deletetagform.validate_on_submit() \
-		and current_user.is_authenticated and current_user.level < 2:
-		delete_tag = Tag.objects(tag=deletetagform.tag.data).first()
-
-		if delete_tag:
-			files = File.objects().filter(tags__contains=delete_tag.id)
-			for image in files:
-				image.tags = list(filter(lambda x: x.tag.lower() != delete_tag.tag.lower(), image.tags))
-				image.save()
-
-			delete_tag.delete()
-			flash("Tag '" + deletetagform.tag.data + "' deleted.", "narrow-success")
-
-		return redirect(url_for("results.tags"))
-
 	result = list(Tag.objects())
 	result.sort(key=lambda x:x.tag.lower())
+	tags_dict = {x.tag:x.category for x in result}
 		
 	media = list(filter(lambda x: x.category == "Media", result))
 	other = list(filter(lambda x: x.category == "Other", result))
@@ -200,11 +150,11 @@ def tags():
 	
 	metadata = Metadata(title="Tags", description="")
 	return render_template("tags.html", title="Tags", searchform=SearchForm(),
-		addtagform=addtagform, deletetagform=deletetagform, media=media, other=other,
-		unsorted=unsorted, characters1=characters1, characters2=characters2,
-		characters3=characters3, searchtags=getSearchTags(), metadata=metadata)
+		addtagform=AddTagForm(), modifytagform=ModifyTagForm(), deletetagform=DeleteTagForm(),
+		media=media, other=other, unsorted=unsorted, characters1=characters1, characters2=characters2,
+		characters3=characters3, tags_dict=tags_dict, searchtags=getSearchTags(), metadata=metadata)
 
-@results.route("/file/<file_id>", methods=["GET", "POST"])
+@results.route("/file/<file_id>", methods=["GET"])
 def file(file_id):
 	updatedescriptionform = UpdateDescriptionForm()
 	image = File.objects(file_id=file_id).first()
@@ -228,6 +178,7 @@ def file(file_id):
 	all_tags.sort(key=lambda x:x.lower())
 	suggestion_tags = list(filter(lambda x: x not in existing_tags, all_tags))
 
+	starred = current_user.is_authenticated and image in current_user.favorites
 	title = "Image - " + image.name if image else "Error"
 	updatedescriptionform.description.data = image.description if image else None
 	metadata = Metadata(title=image.name if image else None,
@@ -237,11 +188,11 @@ def file(file_id):
 		image='https://drive.google.com/thumbnail?id=' + image.file_id + '&sz=w1200' if image else None)
 		
 	return render_template("image.html", title=title, searchform=SearchForm(),
-		addtagform=AddTagForm(), deletetagform=DeleteTagForm(), updatedescriptionform=updatedescriptionform,
-		image=image, folder=folder, prev=prev_id, next=next_id, tags=suggestion_tags,
-		searchtags=getSearchTags(), metadata=metadata)
+		addtagform=AddTagForm(), deletetagform=DeleteTagForm(), submitform=SubmitForm(),
+		updatedescriptionform=updatedescriptionform, image=image, folder=folder, prev=prev_id,
+		next=next_id, tags=suggestion_tags,starred=starred, searchtags=getSearchTags(), metadata=metadata)
 
-@results.route("/folder/<folder_id>", methods=["GET", "POST"])
+@results.route("/folder/<folder_id>", methods=["GET"])
 def folder(folder_id):
 	updatedescriptionform = UpdateDescriptionForm()
 
@@ -278,12 +229,80 @@ def folder(folder_id):
 		folder_id=folder_id), description="Folder")
 	
 	return render_template("folder.html", title=title, searchform=SearchForm(),
-		addtagform=AddTagForm(), deletetagform=DeleteTagForm(), updatedescriptionform=updatedescriptionform,
-		folder=folder, children=children, parent=parent, results=initial_results,
-		remaining_results=remaining_results, add_tags=add_tags, delete_tags=delete_tags,
-		searchtags=getSearchTags(), metadata=metadata, num_results=len(files))
+		addtagform=AddTagForm(), deletetagform=DeleteTagForm(), submitform=SubmitForm(),
+		updatedescriptionform=updatedescriptionform, folder=folder, children=children,
+		parent=parent, results=initial_results, remaining_results=remaining_results,
+		add_tags=add_tags, delete_tags=delete_tags, searchtags=getSearchTags(),
+		metadata=metadata, num_results=len(files))
 
 # ajax routes below
+
+@results.route("/add_tag", methods=["POST"])
+def add_tag():
+	addtagform = AddTagForm()
+	if addtagform.validate_on_submit() and current_user.is_authenticated and current_user.level < 2:
+		tag = addtagform.tag.data.strip()
+
+		# checks for empty tag
+		if tag:
+			regex = re.compile("^" + tag + "$", re.IGNORECASE)
+			existing_tag = Tag.objects(tag=regex).first()
+
+			if existing_tag:
+				message = "Tag '" + existing_tag.tag + "' already exists."
+				return {'success':1, 'message':message}, 200
+			else:
+				new_tag = Tag(tag=tag, category=addtagform.category.data.strip())
+				new_tag.save()
+				message = "Tag '" + tag + "' added."
+				return {'success':0, 'message':message}, 200
+
+	return render_template("404.html", title="404", searchform=SearchForm(), searchtags=getSearchTags())
+
+@results.route("/modify_tag", methods=["POST"])
+def modify_tag():
+	modifytagform = ModifyTagForm()
+	if modifytagform.validate_on_submit() and current_user.is_authenticated and current_user.level < 2:
+		tag = modifytagform.tag.data.strip()
+		newtag = modifytagform.newtag.data.strip()
+
+		regex = re.compile("^" + newtag + "$", re.IGNORECASE)
+		existing_new_tag = Tag.objects(tag=regex).first()
+
+		if existing_new_tag and tag.lower() != newtag.lower():
+			message = "Tag '" + existing_new_tag.tag + "' already exists."
+			return {'success':1, 'message':message}, 200
+		else:
+			regex = re.compile("^" + tag + "$", re.IGNORECASE)
+			existing_tag = Tag.objects(tag=regex).first()
+
+			if newtag:
+				existing_tag.modify(tag=newtag)
+			existing_tag.modify(category=modifytagform.category.data.strip())
+			existing_tag.save()
+
+			message = "Tag '" + tag + "' modified."
+			return {'success':0, 'message':message}, 200
+
+	return render_template("404.html", title="404", searchform=SearchForm(), searchtags=getSearchTags())
+
+@results.route("/delete_tag", methods=["POST"])
+def delete_tag():
+	deletetagform = DeleteTagForm()
+	if deletetagform.validate_on_submit() and current_user.is_authenticated and current_user.level < 2:
+		delete_tag = Tag.objects(tag=deletetagform.tag.data.strip()).first()
+		
+		files = File.objects().filter(tags__contains=delete_tag.id)
+		for image in files:
+			image.tags = list(filter(lambda x: x.tag.lower() != delete_tag.tag.lower(), image.tags))
+			image.save()
+
+		delete_tag.delete()
+		
+		message = "Tag '" + deletetagform.tag.data.strip() + "' deleted."
+		return {'success':0, 'message':message}, 200
+
+	return render_template("404.html", title="404", searchform=SearchForm(), searchtags=getSearchTags())
 
 @results.route("/add_file_tag", methods=["POST"])
 def add_file_tag():
@@ -293,7 +312,7 @@ def add_file_tag():
 	tag = ""
 	addtagform = AddTagForm()
 	image = File.objects(file_id=addtagform.file_id.data).first() if addtagform.file_id is not None else None
-
+	
 	if addtagform.validate_on_submit() and current_user.is_authenticated and image:
 		tag = addtagform.tag.data.strip()
 
@@ -305,10 +324,10 @@ def add_file_tag():
 			if existing_tag:
 				if not any(x.tag.lower() == existing_tag.tag.lower() for x in image.tags):
 					image.tags.append(existing_tag)
-					message = "Tag '" + tag + "' added to image."
+					message = "Tag '" + existing_tag.tag + "' added to image."
 					success = 0
 				else:
-					message = "Tag '" + tag + "' already added."
+					message = "Tag '" + existing_tag.tag + "' already added."
 					success = 1
 			else:
 				if current_user.level < 2:
@@ -406,7 +425,7 @@ def add_folder_tag():
 					success = 1
 			else:
 				if len(files) != 0:
-					message = "Tag '" + tag + "' added to {} images."
+					message = "Tag '" + existing_tag.tag + "' added to {} images."
 					success = 0
 				else:
 					message = "No images to update."
@@ -485,6 +504,22 @@ def update_folder_description():
 		success = 0
 
 	return {'success':success, 'message':message}, 200
+
+@results.route("/star/<id>", methods=["POST"])
+def star(id):
+	submitform = SubmitForm()
+	if submitform.validate_on_submit() and current_user.is_authenticated:
+		file = File.objects(file_id=id).first()
+		if file in current_user.favorites:
+			current_user.favorites.remove(file)
+			current_user.save()
+			return "1", 200
+		else:
+			current_user.favorites.append(file)
+			current_user.save()
+			return "0", 200
+	
+	return render_template("404.html", title="404", searchform=SearchForm(), searchtags=getSearchTags())
 
 # advanced search functions below
 

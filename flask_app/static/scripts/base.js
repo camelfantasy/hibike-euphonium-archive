@@ -1,7 +1,7 @@
 // fadeout for flashed messages
 setTimeout(function() {
     $('[id=fadeout]').fadeOut(500,function() {
-        $('[id=fadeout]').css({"visibility":"hidden",display:'block'}).slideUp();
+        $('[id=fadeout]').css({"visibility":"hidden",display:'block'}).slideUp(500);
     });
 }, 5000);
 
