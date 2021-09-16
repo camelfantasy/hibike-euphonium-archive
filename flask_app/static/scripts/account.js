@@ -107,8 +107,8 @@ function delete_api_key() {
         type: "POST",
         url: "/delete_api_key",
         data: $('#deleteApiKeyForm').serialize(),
-        success: function(result){
-            $("#api_key").html("None");
+        success: function(){
+            $("#api_key").html("Key not set");
             if ($('#message_box_2').css("visibility") != "hidden") {
                 $('#message_box_2').fadeOut(500,function(){
                     $('#message_box_2').css({"visibility":"hidden",display:'block'}).slideUp(500);
