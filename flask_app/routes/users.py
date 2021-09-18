@@ -88,11 +88,10 @@ def account():
 	users = list(User.objects())
 	users.sort(key=lambda x: (x.level, x.username.lower()))
 
-	metadata = Metadata(title="Account", description="")
 	return render_template("account.html", title="Account", searchform=SearchForm(),
 		password_form=UpdatePasswordForm(), deleteuserform=DeleteUserForm(),
 		changeuserlevelform=ChangeUserLevelForm(), submitform=SubmitForm(),
-		users=users, levels=levels, searchtags=getSearchTags(), metadata=metadata)
+		users=users, levels=levels, searchtags=getSearchTags())
 
 @users.route("/favorites", methods=["GET"])
 @login_required
@@ -206,7 +205,7 @@ def sync_pipeline(config):
 
 def getfiles(config):
 	try:
-		# preserve tags through file deletion
+		# preserve data through file/folder deletion
 		file_dict = { i.file_id : [i.tags, i.description, i.id] for i in File.objects() }
 		folder_dict = { i.folder_id : [i.description, i.id] for i in Folder.objects() }
 
@@ -215,11 +214,11 @@ def getfiles(config):
 		ret_files = []
 		ret_folders = []
 
-		# get root folder name
+		# set root folder
 		param = {"fileId": ids[0], "fields":"name"}
 		result = service.files().get(**param).execute()
-		root_name = result.get('name')
-		ret_folders.append(Folder(folder_id=ids[0], parent_id="", name=root_name))
+		info = folder_dict[ids[0]]
+		ret_folders.append(Folder(id=info[1], folder_id=ids[0], parent_id="", name=result.get('name'), description=info[0]))
 
 		# traverses folder structure breadth-first
 		while len(ids) != 0:
@@ -247,26 +246,21 @@ def getfiles(config):
 						ret_files.append(File(file_id=afile.get('id'), folder_id=current_folder,
 							name=afile.get('name'), tags=[], description=None))
 		
-		deleted_ids = set([x[2] for x in list(file_dict.values())]).difference(set([x.id for x in ret_files]))
+		deleted_ids = list(set([x[2] for x in list(file_dict.values())]).difference(set([x.id for x in ret_files])))
 		return ret_files, ret_folders, deleted_ids
 	except:
-		return None, None, None
+		return None
 
 def update(files, folders, deleted_ids):
-	success = "0"
+	success = 0
 	try:
 		File.objects.delete()
 		File.objects.insert(files)
 		Folder.objects.delete()
 		Folder.objects.insert(folders)
-
-		# get users with deleted files and remove
-		users = User.objects().filter(favorites__in=deleted_ids)
-		for user in users:
-			user.favorites = [x for x in user.favorites if x.id not in deleted_ids]
-			user.save()
+		User.bulkDeleteFavoriteIdsFromAllUsers(deleted_ids)
 	except:
-		success = "1"
+		success = 1
 
 	return success
 

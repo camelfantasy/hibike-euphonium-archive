@@ -14,6 +14,20 @@ def getSearchTags():
 	tags.sort(key=lambda x:x.lower())
 	return tags
 
+# takes in BaseQuerySet of files, sorts, and splits into initially displayed and dynamically loaded
+def process_files_display(files):
+	results = list(files)
+	results.sort(key=lambda x:(x.folder_id, x.name.lower()))
+
+	# arranges results into rows of 4 results each
+	results_matrix = [results[i:i + 4] for i in range(0, len(results), 4)]
+
+	# loads first 10 rows (40 images), stores any remaining files to be loaded dynamically
+	initial_results = results_matrix[:10]
+	remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
+
+	return initial_results, remaining_results
+
 # viewpoints below
 
 @results.route("/", methods=["GET", "POST"])
@@ -70,62 +84,38 @@ def search_results(query):
 		#         if not any(x.file_id == tag_file.file_id for x in files):
 		#             files.append(tag_file)
 
-	results = list(files)
-	results.sort(key=lambda x:(x.folder_id, x.name.lower()))
-
-	# arranges results into rows of 4 results each
-	results_matrix = [results[i:i + 4] for i in range(0, len(results), 4)]
-
-	# loads first 10 rows (40 images), stores any remaining files to be loaded dynamically
-	initial_results = results_matrix[:10]
-	remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
+	initial_results, remaining_results = process_files_display(files)
 
 	metadata = Metadata(title="Search results for: " + query,
 		url=current_app.config["SITE_URL"] + url_for('results.search_results', query=query),
 		description="")
 	return render_template("search_results.html", title="Search - " + query, searchform=SearchForm(),
 		submitform=SubmitForm(), query=query, results=initial_results, remaining_results=remaining_results,
-		searchtags=getSearchTags(), metadata=metadata, num_results=len(results))
+		searchtags=getSearchTags(), metadata=metadata, num_results=len(files))
 
 @results.route("/all-images", methods=["GET"])
 def all_images():
 	files = File.objects()
-	results = list(files)
-	results.sort(key=lambda x:(x.folder_id, x.name.lower()))
-
-	# arranges results into rows of 4 results each
-	results_matrix = [results[i:i + 4] for i in range(0, len(results), 4)]
-
-	# loads first 10 rows (40 images), stores any remaining files to be loaded dynamically
-	initial_results = results_matrix[:10]
-	remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
+	initial_results, remaining_results = process_files_display(files)
 
 	metadata = Metadata(title="All images",
 		url=current_app.config["SITE_URL"] + url_for('results.all_images'),
 		description="")
 	return render_template("all_images.html", title="All images", searchform=SearchForm(),
 		submitform=SubmitForm(), results=initial_results, remaining_results=remaining_results,
-		searchtags=getSearchTags(), metadata=metadata, num_results=len(results))
+		searchtags=getSearchTags(), metadata=metadata, num_results=len(files))
 
 @results.route("/untagged-images", methods=["GET"])
 def untagged_images():
 	files = File.objects(Q(tags__exists=False) | Q(tags__size=0))
-	results = list(files)
-	results.sort(key=lambda x:(x.folder_id, x.name.lower()))
-
-	# arranges results into rows of 4 results each
-	results_matrix = [results[i:i + 4] for i in range(0, len(results), 4)]
-
-	# loads first 10 rows (40 images), stores any remaining files to be loaded dynamically
-	initial_results = results_matrix[:10]
-	remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
-
+	initial_results, remaining_results = process_files_display(files)
+	
 	metadata = Metadata(title="Untagged images",
 		url=current_app.config["SITE_URL"] + url_for('results.untagged_images'),
 		description="")
 	return render_template("untagged_images.html", title="Untagged images", searchform=SearchForm(),
 		submitform=SubmitForm(), results=initial_results, remaining_results=remaining_results,
-		searchtags=getSearchTags(), metadata=metadata, num_results=len(results))
+		searchtags=getSearchTags(), metadata=metadata, num_results=len(files))
 
 @results.route("/tags", methods=["GET"])
 def tags():
@@ -208,15 +198,9 @@ def folder(folder_id):
 		parent = Folder.objects(folder_id=folder.parent_id).first()
 		children = list(Folder.objects(parent_id=folder.folder_id))
 		children.sort(key=lambda x:x.name.lower())
-		files = list(File.objects(folder_id=folder.folder_id))
-		files.sort(key=lambda x:x.name.lower())
+		files = File.objects(folder_id=folder.folder_id)
 
-	# arranges results into rows of 4 results each
-	results_matrix = [files[i:i + 4] for i in range(0, len(files), 4)]
-
-	# loads first 10 rows (40 images), stores any remaining files to be loaded dynamically
-	initial_results = results_matrix[:10]
-	remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
+	initial_results, remaining_results = process_files_display(files)
 
 	add_tags = list(map(lambda x: x.tag, Tag.objects()))
 	add_tags.sort(key=lambda x:x.lower())
@@ -291,12 +275,7 @@ def delete_tag():
 	deletetagform = DeleteTagForm()
 	if deletetagform.validate_on_submit() and current_user.is_authenticated and current_user.level < 2:
 		delete_tag = Tag.objects(tag=deletetagform.tag.data.strip()).first()
-		
-		files = File.objects().filter(tags__contains=delete_tag.id)
-		for image in files:
-			image.tags = list(filter(lambda x: x.tag.lower() != delete_tag.tag.lower(), image.tags))
-			image.save()
-
+		File.deleteTagIdFromAllFiles(delete_tag.id)
 		delete_tag.delete()
 		
 		message = "Tag '" + deletetagform.tag.data.strip() + "' deleted."
@@ -359,12 +338,14 @@ def delete_file_tag():
 		if deletetagform.file_id is not None else None
 
 	if deletetagform.validate_on_submit() and current_user.is_authenticated and image:
-		tag = deletetagform.tag.data
-		if any(x.tag.lower() == tag.lower() for x in image.tags):
-			image.tags = list(filter(lambda x: x.tag.lower() != tag.lower(), image.tags))
-			image.save()
-			message = "Tag '" + tag + "' removed from image."
-			success = 0
+		regex = re.compile("^" + deletetagform.tag.data + "$", re.IGNORECASE)
+		tag = Tag.objects(tag=regex).first()
+
+		image.tags = image.tags.remove(tag)
+		image.save()
+		
+		message = "Tag '" + tag.tag + "' removed from image."
+		success = 0
 		
 	return {'success':success, 'message':message}, 200
 
@@ -399,7 +380,7 @@ def add_folder_tag():
 	folder = Folder.objects(folder_id=folder_id).first()
 
 	if addtagform.validate_on_submit() and current_user.is_authenticated and folder:
-		files = list(File.objects(folder_id=folder.folder_id))
+		files = File.objects(folder_id=folder.folder_id)
 		tag = addtagform.tag.data.strip()
 		existing_tag = None
 
@@ -436,14 +417,7 @@ def add_folder_tag():
 		
 		# checks against user with no permission to add a new tag
 		if existing_tag:
-			count = 0
-			for image in files:
-				if not any(x.tag.lower() == existing_tag.tag.lower() for x in image.tags):
-					image.tags.append(existing_tag)
-					image.save()
-					count += 1
-
-			message = message.format(count)
+			message = message.format(File.bulkAddTagIdToFiles(existing_tag.id, files))
 
 	return {'success':success, 'message':message, 'tag':tag}, 200
 
@@ -460,23 +434,17 @@ def delete_folder_tag():
 	folder = Folder.objects(folder_id=folder_id).first()
 	
 	if deletetagform.validate_on_submit() and current_user.is_authenticated and folder:
-		files = list(File.objects(folder_id=folder.folder_id))
+		files = File.objects(folder_id=folder.folder_id)
 		tag = deletetagform.tag.data
 		regex = re.compile("^" + tag + "$", re.IGNORECASE)
 		existing_tag = Tag.objects(tag=regex).first()
 
 		if existing_tag:
-			count = 0
-			for image in files:
-				if any(x.tag.lower() == tag.lower() for x in image.tags):
-					image.tags = list(filter(lambda x: x.tag.lower() != tag.lower(), image.tags))
-					image.save()
-					count += 1
-		
 			if len(files) == 0:
 				message = "No images to update."
 				success = 1
 			else:
+				count = File.bulkDeleteTagIdFromFiles(existing_tag.id, files)
 				message = "Tag '" + tag + "' removed from " + str(count) + " images."
 				success = 0
 		else:
@@ -523,22 +491,6 @@ def star(id):
 
 # advanced search functions below
 
-db_query = [{"$unwind": "$tags"},
-			{"$lookup":
-				 {"from": "tag",
-				  "localField": "tags",
-				  "foreignField": "_id",
-				  "as": "tags"
-				  }
-			 },
-			{"$group": {
-				"_id": "$_id",
-				"tag": {"$first": "$tag"},
-				"tags": {"$push": "$tags"}
-			}
-			}
-			]
-
 # handles advanced search flow
 def advanced_search(query):
 	try:
@@ -548,15 +500,11 @@ def advanced_search(query):
 		return []
 
 	ids = []
-	files = list(File.objects.aggregate(*db_query)) + list(File.objects(Q(tags__exists=False) | Q(tags__size=0)))
+	files = File.objectsDereferencedTags()
 
 	for f in files:
 		if evaluate(tree, f["tags"]):
-			# list has both dicts and objects
-			try:
-				ids.append(f["_id"])
-			except:
-				ids.append(f.id)
+			ids.append(f.id)
 
 	return File.objects().filter(id__in=ids)
 
@@ -671,4 +619,4 @@ def evaluate(tree, tags):
 	elif op == 'NOT':
 		return not evaluate(tree[1], tags)
 	else:
-		return tree[1].lower() in [x[0]['tag'].lower() for x in tags]
+		return tree[1].lower() in [x.tag.lower() for x in tags]

@@ -45,16 +45,6 @@ function submit_add_tag_form(isConfirmation) {
         tag_message_timer = null;
     }
 
-    // set loading message
-    document.getElementById("tag_message").setAttribute("class", "alert alert-secondary");
-    dots = '<span class="dot dot1">.</span><span class="dot dot2">.</span><span class="dot dot3">.</span>';
-    document.getElementById("tag_message").innerHTML = "Adding" + dots;
-    if ($('#tag_box').css("visibility") != "visible") {
-        $('#tag_box').slideDown(250,function(){
-            $('#tag_box').css({"visibility":"visible",display:'none'}).fadeIn(250);
-        });
-    }
-
     formdata = $('#addTagForm').serialize();
     $("#myInput").val("");
 
@@ -90,6 +80,12 @@ function submit_add_tag_form(isConfirmation) {
                 $("#tag_message").attr("class", "alert alert-warning");
             }
 
+            if ($('#tag_box').css("visibility") != "visible") {
+                $('#tag_box').slideDown(250,function(){
+                    $('#tag_box').css({"visibility":"visible",display:'none'}).fadeIn(250);
+                });
+            }
+
             // sets fadeout timer
             tag_message_timer = setTimeout(function() {
                 if ($('#tag_box').css("visibility") != "hidden") {
@@ -108,16 +104,6 @@ function submit_delete_tag_form() {
     if (tag_message_timer) {
         clearTimeout(tag_message_timer)
         tag_message_timer = null;
-    }
-
-    // set loading message
-    document.getElementById("tag_message").setAttribute("class", "alert alert-secondary");
-    dots = '<span class="dot dot1">.</span><span class="dot dot2">.</span><span class="dot dot3">.</span>';
-    document.getElementById("tag_message").innerHTML = "Deleting" + dots;
-    if ($('#tag_box').css("visibility") != "visible") {
-        $('#tag_box').slideDown(250,function(){
-            $('#tag_box').css({"visibility":"visible",display:'none'}).fadeIn(250);
-        });
     }
 
     formdata = $('#deleteTagForm').serialize();
@@ -144,6 +130,12 @@ function submit_delete_tag_form() {
                 $("#tag_message").attr("class", "alert alert-warning");
             }
             $("#deleteInput").val("");
+
+            if ($('#tag_box').css("visibility") != "visible") {
+                $('#tag_box').slideDown(250,function(){
+                    $('#tag_box').css({"visibility":"visible",display:'none'}).fadeIn(250);
+                });
+            }
 
             // sets fadeout timer
             tag_message_timer = setTimeout(function() {
