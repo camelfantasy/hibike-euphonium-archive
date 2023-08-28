@@ -147,7 +147,7 @@
     var autocomplete_active_name = "autocomplete-active";
     // end tag suggestions
 </script>
-<script type="text/javascript" src="{{ url_for('static', filename='/scripts/autocomplete.js', _scheme='https') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='/scripts/autocomplete.js') }}"></script>
 <script>
     // part of tag suggestions
     // extract server response
@@ -160,8 +160,8 @@
 
     var user_level = `{{ current_user.level }}`;
 </script>
-<script type="text/javascript" src="{{ url_for('static', filename='/scripts/resize_description.js', _scheme='https') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='/scripts/folder.js', _scheme='https') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='/scripts/resize_description.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='/scripts/folder.js') }}"></script>
 {% endif %}
 <script>
     // part of dynamic loader
@@ -179,5 +179,5 @@
     favorites_json.forEach(x => favorites.push(x.file_id));
     {% endif %}
 </script>
-<script type="text/javascript" src="{{ url_for('static', filename='/scripts/image_loader.js', _scheme='https') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='/scripts/image_loader.js') }}"></script>
 {% endblock %}
