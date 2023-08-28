@@ -202,6 +202,6 @@
 <script>
     tags_dict = JSON.parse(`{{ tags_dict|tojson }}`);
 </script>
-<script type="text/javascript" src="{{ url_for('static', filename='/scripts/tags.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='/scripts/tags.js', _scheme='https') }}"></script>
 {% endif %}
 {% endblock %}
