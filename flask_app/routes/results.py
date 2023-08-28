@@ -24,7 +24,7 @@ def process_files_display(files):
 
 	# loads first 10 rows (40 images), stores any remaining files to be loaded dynamically
 	initial_results = results_matrix[:10]
-	remaining_results = list(map(lambda x: list(map(lambda y: y.file_id, x)),results_matrix[10:]))
+	remaining_results = list(map(lambda x: list(map(lambda y: [y.file_id, y.name], x)),results_matrix[10:]))
 
 	return initial_results, remaining_results
 

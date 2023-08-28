@@ -21,9 +21,13 @@
     {% if image %}
     <div class="col-11 col-lg-9">
         <div class="page-item" align="center">
+            {% if '.mp4' in image.name %}
+            <iframe src="{{ 'https://drive.google.com/file/d/' + image.file_id + '/preview' }}" allow="autoplay" style="width:100%; height:100%"></iframe>
+            {% else %}
             <a href="{{ 'https://drive.google.com/uc?id=' + image.file_id }}">
                 <img src="https://drive.google.com/thumbnail?id={{ image.file_id }}&sz=w1200" style="max-width:100%; max-height:100%">
             </a>
+            {% endif %}
         </div>
         <div style="margin-top:8px">
             <a href="{{ 'https://docs.google.com/uc?export=download&id=' + image.file_id }}" class="tag-link-gray" style="font-size:14px" download>Download original</a>

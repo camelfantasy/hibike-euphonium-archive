@@ -23,7 +23,10 @@ function loadItems() {
         new_section.forEach(function(new_row) {
             let template_clone = template_row.content.cloneNode(true);
             var innerhtml = "";
-            new_row.forEach(function(file_id) {
+            new_row.forEach(function(file_info) {
+                file_id = file_info[0]
+                file_name = file_info[1]
+
                 var href = "/file/" + file_id;
                 var src = 'https://drive.google.com/thumbnail?id=' + file_id;
                 
@@ -32,8 +35,12 @@ function loadItems() {
                                         <img src="` + src + `" style="max-width:100%; max-height:100%" id="image">
                                     </a>`;
                 
+                if (file_name.includes(".mp4")) {
+                    innerhtml += `<i class="bi bi-film" style="color:gray; position:absolute; bottom:5%; right:5%; font-size:20px;"></i>`;
+                }
+
                 if (user_authenticated) {
-                    innerhtml += `<form style="color:gold; position:absolute; top:5%; left:5%; margin-bottom:0px; font-size:20px;" id="starForm_` + file_id + `" onclick="star('` + file_id + `')">`
+                    innerhtml += `<form style="color:gold; position:absolute; top:5%; left:5%; margin-bottom:0px; font-size:20px;" id="starForm_` + file_id + `" onclick="star('` + file_id + `')">`;
                     innerhtml += starform_csrf_token_field;
                     innerhtml += favorites.indexOf(file_id) == -1 ? `<i class="bi bi-star"` : `<i class="bi bi-star-fill"`;
                     innerhtml += ` id="star_` + file_id + `"></i>`;

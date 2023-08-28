@@ -237,7 +237,7 @@ def getfiles(config):
 						ret_folders.append(Folder(folder_id=afile.get('id'), parent_id=current_folder,
 							name=afile.get('name'), description=None))
 					ids.append(afile.get('id'))
-				elif 'image' in afile.get('mimeType'):
+				elif 'image' in afile.get('mimeType') or 'video' in afile.get('mimeType'):
 					if afile.get('id') in file_dict:
 						info = file_dict[afile.get('id')]
 						ret_files.append(File(id=info[2], file_id=afile.get('id'), folder_id=current_folder,

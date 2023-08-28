@@ -111,6 +111,9 @@
                     <a href="{{ url_for('results.file', file_id=item.file_id) }}" target="_blank">
                         <img src="{{ 'https://drive.google.com/thumbnail?id=' + item.file_id }}" style="max-width:100%; max-height:100%">
                     </a>
+                    {% if ".mp4" in item.name %}
+                    <i class="bi bi-film" style="color:gray; position:absolute; bottom:5%; right:5%; font-size:20px;"></i>
+                    {% endif %}
                     {% if current_user.is_authenticated %}
                     <form style="color:gold; position:absolute; top:5%; left:5%; margin-bottom:0px; font-size:20px;" id="{{ 'starForm_' + item.file_id}}" onclick="star('{{ item.file_id }}')">
                         {{ submitform.csrf_token }}
