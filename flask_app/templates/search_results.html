@@ -57,5 +57,5 @@
     favorites_json.forEach(x => favorites.push(x.file_id));
     {% endif %}
 </script>
-<script type="text/javascript" src="{{ url_for('static', filename='/scripts/image_loader.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='scripts/image_loader.js', _scheme='https', _external=True) }}"></script>
 {% endblock %}

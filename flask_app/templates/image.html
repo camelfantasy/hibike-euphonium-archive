@@ -142,7 +142,7 @@
     var autocomplete_active_name = "autocomplete-active";
     // end tag suggestions
 </script>
-<script type="text/javascript" src="{{ url_for('static', filename='/scripts/autocomplete.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='scripts/autocomplete.js', _scheme='https', _external=True) }}"></script>
 <script>
     // part of tag suggestions
     // extract server response
@@ -157,7 +157,7 @@
     var user_level = `{{ current_user.level }}`;
     // end ajax functions
 </script>
-<script type="text/javascript" src="{{ url_for('static', filename='/scripts/resize_description.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='/scripts/image.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='scripts/resize_description.js', _scheme='https', _external=True) }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='scripts/image.js', _scheme='https', _external=True) }}"></script>
 {% endif %}
 {% endblock %}
