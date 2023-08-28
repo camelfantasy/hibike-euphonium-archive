@@ -85,7 +85,7 @@ def create_app(test_config=None):
     hashing.init_app(app)
 
     csp = {
-        'default-src': ['\'self\'','stackpath.bootstrapcdn.com','code.jquery.com',
+        'default-src': ['\'self\'','hibike-euphonium-archive.onrender.com','stackpath.bootstrapcdn.com','code.jquery.com',
             'cdn.jsdelivr.net','cdnjs.cloudflare.com','drive.google.com','*.googleusercontent.com',
             'ajax.googleapis.com','www.google-analytics.com','www.googletagmanager.com','\'unsafe-inline\''],
         'img-src': ['\'self\' data: *'],
