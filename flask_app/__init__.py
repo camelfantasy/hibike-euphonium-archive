@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
-from flask_talisman import Talisman
+# from flask_talisman import Talisman
 from flask_mongoengine import MongoEngine
 from flask_pymongo import PyMongo
 from flask_hashing import Hashing
@@ -84,14 +84,14 @@ def create_app(test_config=None):
     print("Initializing hashing")
     hashing.init_app(app)
 
-    csp = {
-        'default-src': ['\'self\'','stackpath.bootstrapcdn.com','code.jquery.com',
-            'cdn.jsdelivr.net','cdnjs.cloudflare.com','drive.google.com','*.googleusercontent.com',
-            'ajax.googleapis.com','www.google-analytics.com','www.googletagmanager.com','\'unsafe-inline\''],
-        'img-src': ['\'self\' data: *']
-    }
-    print("Initializing Talisman")
-    Talisman(app, content_security_policy=csp)
+    # csp = {
+    #     'default-src': ['\'self\'','stackpath.bootstrapcdn.com','code.jquery.com',
+    #         'cdn.jsdelivr.net','cdnjs.cloudflare.com','drive.google.com','*.googleusercontent.com',
+    #         'ajax.googleapis.com','www.google-analytics.com','www.googletagmanager.com','\'unsafe-inline\''],
+    #     'img-src': ['\'self\' data: *']
+    # }
+    # print("Initializing Talisman")
+    # Talisman(app, content_security_policy=csp)
 
     print("Registering blueprints")
     app.register_blueprint(results)
