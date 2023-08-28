@@ -89,6 +89,7 @@ def create_app(test_config=None):
             'cdn.jsdelivr.net','cdnjs.cloudflare.com','drive.google.com','*.googleusercontent.com',
             'ajax.googleapis.com','www.google-analytics.com','www.googletagmanager.com','\'unsafe-inline\''],
         'img-src': ['\'self\' data: *'],
+        'script-src': ['\'self\'']
     }
     print("Initializing Talisman")
     Talisman(app, content_security_policy=csp)
