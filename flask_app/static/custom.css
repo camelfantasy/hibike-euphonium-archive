@@ -3,6 +3,10 @@ body {
     background: linear-gradient(to right, #d3f4f8bf 0%,#ffebf9bf 100%);
 }
 
+p {
+    margin-bottom: 0;
+}
+
 pre {
     font-size: inherit;
     color: inherit;
@@ -247,6 +251,38 @@ pre {
     color:white
 }
 
+#switch-lang:focus {
+    outline: none;
+}
+
+.note-circle {
+    visibility: visible;
+}
+
+.note-circle:hover .note-text {
+    visibility: visible;
+}
+
+.note-text {
+    margin-top: 2px;
+    visibility: hidden;
+    background-color: lemonchiffon;
+    color: black;
+    text-align: center;
+    border-radius: 4px;
+    border: 1px solid rgb(206, 212, 218);
+    padding: 4px;
+    position: absolute;
+    z-index: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: auto;
+}
+
+
+
+
+
 @keyframes visibility1 {
     0% {
         opacity: 0;
@@ -306,6 +342,40 @@ pre {
     }
     100% {
         opacity: 0;
+    }
+}
+
+
+
+
+
+@media (min-width: 0px) {
+    .note-circle {
+        font-size: 4px;
+    }
+}
+
+@media (min-width: 270px) {
+    .note-circle {
+        font-size: 6px;
+    }
+}
+
+@media (min-width: 540px) {
+    .note-circle {
+        font-size: 8px;
+    }
+}
+
+@media (min-width: 766px) {
+    .note-circle {
+        font-size: 12px;
+    }
+}
+
+@media (min-width: 992px) {
+    .note-circle {
+        font-size: 16px;
     }
 }
 

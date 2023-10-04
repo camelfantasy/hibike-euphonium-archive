@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, url_for, redirect, flash, request,
 from flask_login import current_user
 
 from ..forms import SearchForm, AddTagForm, ModifyTagForm, DeleteTagForm, UpdateDescriptionForm, SubmitForm
-from ..models import User, Tag, File, Folder, Metadata
+from ..models import User, Tag, File, Folder, Metadata, Annotation
 
 from mongoengine.queryset.visitor import Q
 import re
@@ -179,6 +179,7 @@ def file(file_id):
 		
 	return render_template("image.html", title=title, searchform=SearchForm(),
 		addtagform=AddTagForm(), deletetagform=DeleteTagForm(), submitform=SubmitForm(),
+		addannotationform=AddAnnotationForm(),
 		updatedescriptionform=updatedescriptionform, image=image, folder=folder, prev=prev_id,
 		next=next_id, tags=suggestion_tags,starred=starred, searchtags=getSearchTags(), metadata=metadata)
 
@@ -292,7 +293,7 @@ def add_file_tag():
 	addtagform = AddTagForm()
 	image = File.objects(file_id=addtagform.file_id.data).first() if addtagform.file_id is not None else None
 	
-	if addtagform.validate_on_submit() and current_user.is_authenticated and image:
+	if addtagform.validate_on_submit() and current_user.is_authenticated and current_user.level <= 2 and image:
 		tag = addtagform.tag.data.strip()
 
 		# checks for empty tag
@@ -337,7 +338,7 @@ def delete_file_tag():
 	image = File.objects(file_id=deletetagform.file_id.data).first() \
 		if deletetagform.file_id is not None else None
 
-	if deletetagform.validate_on_submit() and current_user.is_authenticated and image:
+	if deletetagform.validate_on_submit() and current_user.is_authenticated and current_user.level <= 2 and image:
 		regex = re.compile("^" + deletetagform.tag.data + "$", re.IGNORECASE)
 		tag = Tag.objects(tag=regex).first()
 
@@ -358,7 +359,7 @@ def update_file_description():
 	image = File.objects(file_id=updatedescriptionform.file_id.data).first() \
 		if updatedescriptionform.file_id is not None else None
 
-	if updatedescriptionform.validate_on_submit() and current_user.is_authenticated and image:
+	if updatedescriptionform.validate_on_submit() and current_user.is_authenticated and current_user.level <= 2 and image:
 		description = updatedescriptionform.description.data.strip()
 		image.description = None if description == "" else description
 		image.save()
@@ -379,7 +380,7 @@ def add_folder_tag():
 		folder_id = current_app.config['ROOT_ID']
 	folder = Folder.objects(folder_id=folder_id).first()
 
-	if addtagform.validate_on_submit() and current_user.is_authenticated and folder:
+	if addtagform.validate_on_submit() and current_user.is_authenticated and current_user.level <= 2 and folder:
 		files = File.objects(folder_id=folder.folder_id)
 		tag = addtagform.tag.data.strip()
 		existing_tag = None
@@ -433,7 +434,7 @@ def delete_folder_tag():
 		folder_id = current_app.config['ROOT_ID']
 	folder = Folder.objects(folder_id=folder_id).first()
 	
-	if deletetagform.validate_on_submit() and current_user.is_authenticated and folder:
+	if deletetagform.validate_on_submit() and current_user.is_authenticated and current_user.level <= 2 and folder:
 		files = File.objects(folder_id=folder.folder_id)
 		tag = deletetagform.tag.data
 		regex = re.compile("^" + tag + "$", re.IGNORECASE)
@@ -464,7 +465,7 @@ def update_folder_description():
 		folder_id = current_app.config['ROOT_ID']
 	folder = Folder.objects(folder_id=folder_id).first()
 
-	if updatedescriptionform.validate_on_submit() and current_user.is_authenticated and folder:
+	if updatedescriptionform.validate_on_submit() and current_user.is_authenticated and current_user.level <= 2 and folder:
 		description = updatedescriptionform.description.data.strip()
 		folder.description = None if description == "" else description
 		folder.save()
@@ -488,6 +489,37 @@ def star(id):
 			return "0", 200
 	
 	return render_template("404.html", title="404", searchform=SearchForm(), searchtags=getSearchTags())
+
+@results.route("/add_annotation", methods=["POST"])
+def add_annotation():
+	success = -1
+	message = ""
+	annotation_id = ""
+
+	form = AddAnnotationForm()
+	image = File.objects(file_id=form.file_id.data).first() if form.file_id is not None else None
+	
+	if form.validate_on_submit() and current_user.is_authenticated and current_user.level <= 2 and image:
+		text = form.text.data.strip()
+		left = form.left.data
+		top = form.top.data
+
+		if text and left and top:
+			new_annotation = Annotation(text=text, left=left, top=top)
+			new_annotation.save()
+			image.annotations.append(new_annotation)
+			image.save()
+
+			annotation_id = str(new_annotation.id)
+			message = "Annotation added."
+			success = 0
+		else:
+			message = "Fields cannot be empty."
+			success = 1
+		
+		image.save()
+	
+	return {'success':success, 'message':message, 'annotation_id':annotation_id}, 200
 
 # advanced search functions below
 

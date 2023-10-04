@@ -5,7 +5,7 @@
         <div class="col-lg-4 page-item" align="center" id="confirm-box">
             <div id="confirm-text" style="font-weight:bold"></div>
             <br>
-            <div class="row">
+            <div class="row" id="add-tag-display" style="display:none">
                 <div class="col-5">
                     <label class="btn btn-logout" style="margin:0px; width:100%" onclick="cancel()">Cancel</label>
                 </div>
@@ -13,6 +13,28 @@
                 <div class="col-5">
                     <label class="btn btn-submit" style="margin:0px; width:100%" onclick="submit_add_tag_form(true)">Add</label>
                 </div>
+            </div>
+            <div id="add-annotation-display">
+                <form method="POST" action="" style="margin:0px;" id="addannotationform">
+                    {{ addannotationform.csrf_token }}
+                    <div class="row">
+                        <div class="col">
+                            {{ addannotationform.text(class="form-control mb-3", style="resize:none; font-size:14px", id="annotation_form_text") }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-5">
+                            <label class="btn btn-logout" style="margin:0px; width:100%" onclick="cancel()">Cancel</label>
+                        </div>
+                        <div class="col-2"></div>
+                        <div class="col-5">
+                            <button type="button" class="form-control btn-submit" onclick="submit_add_annotation_form()">Save</button>
+                        </div>
+                    </div>
+                    {{ addannotationform.file_id(value="", hidden=true, id="annotation_form_file_id") }}
+                    {{ addannotationform.left(value="", hidden=true, id="annotation_form_left") }}
+                    {{ addannotationform.top(value="", hidden=true, id="annotation_form_top") }}
+                </form>
             </div>
         </div>
     </div>
@@ -24,9 +46,19 @@
             {% if '.mp4' in image.name %}
             <iframe src="{{ 'https://drive.google.com/file/d/' + image.file_id + '/preview' }}" allow="autoplay" style="width:100%; height:100%"></iframe>
             {% else %}
-            <a href="{{ 'https://drive.google.com/uc?id=' + image.file_id }}">
-                <img src="https://drive.google.com/thumbnail?id={{ image.file_id }}&sz=w1200" style="max-width:100%; max-height:100%">
-            </a>
+            <div style="position: relative;" id="click-layer">
+                <a href="{{ 'https://drive.google.com/uc?id=' + image.file_id }}" id="image-link">
+                    <img src="https://drive.google.com/thumbnail?id={{ image.file_id }}&sz=w1200" style="max-width:100%; max-height:100%;">
+                    {% for note in image.annotations %}
+                    <div class="note-circle" style="position:absolute; left:{{ note.left }}%; top:{{ note.top }}%; z-index: 1" id="{{ note.id }}">
+                        <i class="bi bi-circle-fill" style="opacity:50%; color:gold"></i>
+                        <div style="position:absolute"> <!-- max-width -->
+                            <div class="note-text" style="position:relative">{{ note.text }}</div> <!-- overflow:hidden; white-space:nowrap; text-overflow: ellipsis -->
+                        </div>
+                    </div>
+                    {% endfor %}
+                </a>
+            </div>
             {% endif %}
         </div>
         <div style="margin-top:8px">
@@ -74,7 +106,7 @@
                         <a href="{{ url_for('results.search_results', query=tag.tag) }}" class="tag-link">{{ tag.tag }}</a>
                     </label>
                     <label class="col-1" style="margin:0px; padding:0px; display:flex; align-items:center; direction:rtl;">
-                        {% if current_user.is_authenticated %}
+                        {% if current_user.is_authenticated and current_user.level <= 2 %}
                         <form method="POST" action="" style="margin:0px" id="{{ 'deleteTagForm_' + tag.tag | replace(' ', '_') }}">
                             {{ deletetagform.csrf_token }}
                             {{ deletetagform.tag(value=tag.tag, hidden=true) }}
@@ -89,7 +121,7 @@
                 <div id="tag-label">No tags.</div>
                 {% endif %}
             </div>
-            {% if current_user.is_authenticated %}
+            {% if current_user.is_authenticated and current_user.level <= 2 %}
             <div>
                 <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete" id="addTagForm">
                     {{ addtagform.csrf_token }}
@@ -105,7 +137,7 @@
         </div>
         <br>
         <div class="page-item" style="font-size:14px">
-            {% if current_user.is_authenticated %}
+            {% if current_user.is_authenticated and current_user.level <= 2 %}
             <div><b>Notes:</b></div>
             <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete" id="updateDescriptionForm">
                 {{ updatedescriptionform.csrf_token }}
@@ -122,6 +154,19 @@
             {% endif %}
             {% endif %}
         </div>
+        <div id="description_box" class="mt-4" style="display:none; visibility:hidden">
+            <div id="description_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%"></div>
+        </div>
+        <br>
+        {% if current_user.is_authenticated and current_user.level <= 2 %}
+        <div class="page-item" style="font-size:14px">
+            <div style="text-align:center"><b>Annotations</b></div>
+            <div class="autocomplete" style="margin-top:8px; width:100%; text-align:center">
+                <i class="bi bi-plus-circle" onclick="open_click_layer()" style="color:MediumSeaGreen; cursor: pointer; font-size: 20px; margin-right: 8px"></i>
+                <i class="bi bi-x-circle" style="color:#c82333; cursor: pointer; font-size: 20px;"></i>
+            </div>
+        </div>
+        {% endif %}
         <div id="description_box" class="mt-4" style="display:none; visibility:hidden">
             <div id="description_message" style="text-align:center; padding: 6px 12px 6px 12px; margin:0px; width:100%"></div>
         </div>
@@ -159,6 +204,7 @@
     var deletetagform_file_id_field = `{{ deletetagform.file_id(hidden='true', value=image.file_id) }}`;
     var deletetagform_csrf_token_field = `{{ deletetagform.csrf_token }}`;
     var user_level = `{{ current_user.level }}`;
+    var image_id = `{{ image.file_id }}`;
     // end ajax functions
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='scripts/resize_description.js', _scheme='https', _external=True) }}"></script>

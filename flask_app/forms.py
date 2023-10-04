@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, SelectField, TextAreaField
+from wtforms import StringField, SubmitField, PasswordField, SelectField, TextAreaField, IntegerField
 from wtforms.validators import InputRequired, Length, EqualTo
 
 categories = [("Characters", "Characters"), ("Media", "Media"), ("Other", "Other")]
@@ -69,3 +69,10 @@ class UpdateDescriptionForm(FlaskForm):
 
 class SubmitForm(FlaskForm):
     submit_btn = SubmitField("Submit")
+
+class AddAnnotationForm(FlaskForm):
+    text = TextAreaField("Text", validators=[InputRequired()])
+    left = IntegerField("Left", validators=[InputRequired()])
+    top = IntegerField("Top", validators=[InputRequired()])
+    file_id = StringField("File ID")
+    submit_btn = SubmitField("Save")

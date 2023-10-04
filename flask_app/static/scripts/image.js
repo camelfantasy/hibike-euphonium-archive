@@ -6,8 +6,11 @@ background = document.getElementById('confirm-background');
 box = document.getElementById('confirm-box');
 row = document.getElementById('confirm-row');
 confirm_text = document.getElementById('confirm-text');
+add_tag_display = document.getElementById('add-tag-display');
+add_annotation_display = document.getElementById('add-annotation-display');
 
 function confirm_add(tag) {
+    add_tag_display.style.display = '';
     background.style.display = 'block';
     box.style.display = 'block';
     confirm_text.innerHTML = "Add new tag '" + tag + "'?";
@@ -16,6 +19,12 @@ function confirm_add(tag) {
 function cancel() {
     background.style.display = 'none';
     box.style.display = 'none';
+    add_tag_display.style.display = 'none';
+    add_annotation_display.style.display = 'none';
+
+    document.getElementById("image-link").style.pointerEvents = "auto";
+    click_enabled = false;
+    document.getElementById("temp-note-circle").remove();
 }
 
 // also allow closing popup by clicking outside of it
@@ -234,3 +243,87 @@ function star(id) {
         }
     });
 }
+
+
+
+var click_enabled = false;
+
+function get_note_circle_size() {
+    widths = [[992, 16], [776, 12], [540, 8], [270, 6], [0, 4]];
+    w = screen.width;
+    return widths.find((e) => w >= e[0])[1]
+    // widths.forEach(function(tuple) {
+    //     if (w >= tuple[0]) {
+    //         console.log(0);
+    //         return tuple[1];
+    //     }
+    // })
+}
+
+function open_click_layer() {
+    document.getElementById("image-link").style.pointerEvents = "none";
+    document.getElementById("click-layer").style.filter = "brightness(50%)";
+    click_enabled = true;
+}
+
+document.getElementById("click-layer").onclick = function(e) {
+    if (!click_enabled) {
+        return;
+    }
+
+    // var sheet = document.styleSheets.item.find((e) => e.href.includes("custom.css"))
+    // var rule = sheet.cssRules.find((e) => e.selectorText == "note-circle")
+    // var font_size = parseInt($('.note-circle').css( "font-size").slice(0, -2));
+    // var font_size = parseInt($('.note-circle').css( "font-size").slice(0, -2));
+    var font_size = get_note_circle_size();
+    var rect = e.target.getBoundingClientRect();
+    var x = Math.round((e.clientX - rect.left - font_size / 2) / rect.width * 100);
+    var y = Math.round((e.clientY - rect.top - font_size / 2) / rect.height * 100);
+
+    document.getElementById("click-layer").style.filter = "brightness(100%)";
+    document.getElementById("image-link").innerHTML += `
+        <div class="note-circle" id="temp-note-circle" style="position:absolute; left:` + x + `%; top:` + y + `%; z-index: 1">
+            <i class="bi bi-circle-fill" style="opacity:50%; color:red"></i>
+            <div class="note-text"></div>
+        </div>
+    `
+    document.getElementById("click-layer").style.filter = "brightness(100%)";
+
+    add_annotation_display.style.display = '';
+    background.style.display = 'block';
+    box.style.display = 'block';
+    confirm_text.innerHTML = "Text";
+
+    document.getElementById('annotation_form_file_id').value = image_id;
+    document.getElementById('annotation_form_left').value = x;
+    document.getElementById('annotation_form_top').value = y;
+}
+
+function submit_add_annotation_form() {
+    $.ajax({
+        type: "POST",
+        url: "/add_annotation",
+        data: $('#addannotationform').serialize(),
+        success: function(result) {
+            if (result.success == "0") {
+                var note_circle = document.getElementById("temp-note-circle");
+                note_circle.getElementsByTagName('i')[0].style.color = "gold";
+                note_circle.getElementsByTagName('div')[0].innerHTML = document.getElementById('annotation_form_text').value;
+                note_circle.id = result.annotation_id
+            } else if (result.success == "1") {
+                document.getElementById("temp-note-circle").remove();
+            }
+
+            document.getElementById('annotation_form_text').value = "";
+            cancel()
+        }
+    });
+}
+
+// disable saving if text is empty
+// multi-add mode?
+// switch to show/hide annotations
+
+// move notes above a tag
+// add delete function
+// add edit function

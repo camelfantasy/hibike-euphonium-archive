@@ -53,7 +53,7 @@
             {% endif %}
         </div>
         <br>
-        {% if current_user.is_authenticated %}
+        {% if current_user.is_authenticated and current_user.level <= 2 %}
         <div class="page-item" style="word-wrap: break-word; font-size:14px">
             <div>
                 <form method="POST" action="" style="margin:0px; width:100%; max-height:100%" class="autocomplete" id="addTagForm">
@@ -78,7 +78,7 @@
         <br>
         {% endif %}
         <div class="page-item" style="font-size:14px">
-            {% if current_user.is_authenticated %}
+            {% if current_user.is_authenticated and current_user.level <= 2 %}
             <div><b>Notes:</b></div>
             <form method="POST" action="" style="margin:0px; width:100%" class="autocomplete" id="updateDescriptionForm">
                 {{ updatedescriptionform.csrf_token }}

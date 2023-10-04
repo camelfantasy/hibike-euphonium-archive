@@ -6,6 +6,11 @@ from . import db, login_manager
 def load_user(username):
     return User.objects(username=username).first()
 
+class Annotation(db.Document):
+    left = db.IntField(required=True)
+    top = db.IntField(required=True)
+    text = db.StringField(required=True)
+
 class Tag(db.Document):
     tag = db.StringField(required=True, unique=True)
     category = db.StringField(required=True)
@@ -19,6 +24,7 @@ class File(db.Document):
     name = db.StringField(required=True)
     tags = db.ListField(db.ReferenceField(Tag, required=True))
     description = db.StringField()
+    annotations = db.ListField(db.ReferenceField(Annotation))
 
     def dictToObject(file):
         tags = [Tag.dictToObject(x) for x in file['tags']]
