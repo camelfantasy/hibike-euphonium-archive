@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, url_for, redirect, flash, request, current_app
 from flask_login import current_user
 
-from ..forms import SearchForm, AddTagForm, ModifyTagForm, DeleteTagForm, UpdateDescriptionForm, SubmitForm
+from ..forms import SearchForm, AddTagForm, ModifyTagForm, DeleteTagForm, UpdateDescriptionForm, SubmitForm, AddAnnotationForm
 from ..models import User, Tag, File, Folder, Metadata, Annotation
 
 from mongoengine.queryset.visitor import Q
